@@ -7,15 +7,24 @@ import { UsersRepository } from './features/users/infrastructure/users.repositor
 import { UsersService } from './features/users/application/users.service';
 import { UsersQueryRepository } from './features/users/infrastructure/users.query-repository';
 import * as process from 'node:process';
+import { BlogsRepository } from './features/blogs/infrastructure/blogs.repository';
+import { BlogsQueryRepository } from './features/blogs/infrastructure/blogs.query-repository';
+import { BlogsService } from './features/blogs/application/blogs.service';
+import { BlogsController } from './features/blogs/api/blogs.controller';
 
 config();
 
 const usersProviders: Provider[
-
   ] = [
   UsersRepository,
   UsersService,
   UsersQueryRepository
+]
+
+const blogsProviders: Provider[] = [
+  BlogsRepository,
+  BlogsQueryRepository,
+  BlogsService
 ]
 
 @Module({
@@ -24,9 +33,10 @@ const usersProviders: Provider[
     MongooseModule.forRoot(process.env.MONGO_URL),
     MongooseModule.forFeature([{name: User.name, schema: UserSchema}])
   ],
-  controllers: [UsersController],
+  controllers: [UsersController, BlogsController],
   providers: [
-    ...usersProviders
+    ...usersProviders,
+    ...blogsProviders
   ],
 })
 export class AppModule {}

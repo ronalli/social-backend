@@ -1,6 +1,6 @@
 import {Injectable} from '@nestjs/common';
 import { UsersRepository } from '../infrastructure/users.repository';
-import { IUserInputModel } from '../api/models/all.types';
+import { UserCreateModel } from '../api/models/input/create-user.input.model';
 
 
 @Injectable()
@@ -8,7 +8,7 @@ export class UsersService {
   constructor(private usersRepository: UsersRepository) {
   }
 
-  async createUser(data: IUserInputModel) {
+  async createUser(data: UserCreateModel) {
     return await this.usersRepository.createUser(data);
   }
 

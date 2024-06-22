@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Delete, Get, Inject, Param, Post, Query, Req, Res } from '@nestjs/common';
-import { SortDirection } from 'mongodb';
 import { UsersService } from '../application/users.service';
 import { UsersQueryRepository } from '../infrastructure/users.query-repository';
 import { HTTP_STATUSES } from '../../../settings/http.status';
-import { IUserCreateModel, IUserQueryType } from './models/all.types';
+import { IUserQueryType } from './models/all.types';
+import { UserCreateModel } from './models/input/create-user.input.model';
 
 @ApiTags('Users')
 @Controller('/api/users')
@@ -26,7 +26,7 @@ export class UsersController {
   }
 
   @Post()
-  async createUser(@Body() createModel: IUserCreateModel,  @Req() req: Request, @Res() res: Response) {
+  async createUser(@Body() createModel: UserCreateModel,  @Req() req: Request, @Res() res: Response) {
     const result = await this.usersService.createUser(createModel);
     if (result.data) {
       res.status(HTTP_STATUSES[result.status]).send(result.data);
@@ -38,7 +38,7 @@ export class UsersController {
 
   @Delete(':id')
   async deleteUser(@Param() id: string, @Req() req: Request, @Res() res: Response) {
-    
+
     const result = await this.usersService.deleteUser(id)
 
     if (result.errorMessage) {

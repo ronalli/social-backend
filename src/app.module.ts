@@ -3,7 +3,6 @@ import { UsersController } from './features/users/api/users.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import {config} from 'dotenv';
 
-
 import { User, UserSchema } from './features/users/domain/user.entity';
 import { UsersRepository } from './features/users/infrastructure/users.repository';
 import { UsersService } from './features/users/application/users.service';
@@ -27,6 +26,10 @@ import { Blog, BlogSchema } from './features/blogs/domain/blog.entity';
 import { Comment, CommentSchema } from './features/comments/domain/comment.entity';
 import { Post, PostSchema } from './features/posts/domain/post.entity';
 import { Like, LikeSchema } from './features/likes/domain/like.entity';
+
+import { ConfigModule } from '@nestjs/config';
+import { DeleteAllCollectionsController } from './features/test/api/delete.all.collections.controller';
+import { DeleteService } from './features/test/application/delete.service';
 
 config();
 
@@ -58,6 +61,9 @@ const commentsProviders: Provider[] = [
 @Module({
 
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     MongooseModule.forRoot(process.env.MONGO_URL + `${process.env.DB_NAME}`),
     MongooseModule.forFeature([{name: User.name, schema: UserSchema}]),
     MongooseModule.forFeature([{name: Blog.name, schema: BlogSchema}]),
@@ -66,12 +72,13 @@ const commentsProviders: Provider[] = [
     MongooseModule.forFeature([{name: Like.name, schema: LikeSchema}]),
 
   ],
-  controllers: [UsersController, BlogsController, CommentsController, PostsController],
+  controllers: [UsersController, BlogsController, CommentsController, PostsController, DeleteAllCollectionsController],
   providers: [
     ...usersProviders,
     ...blogsProviders,
     ...postsProviders,
-    ...commentsProviders
+    ...commentsProviders,
+    DeleteService
   ],
 })
 export class AppModule {}

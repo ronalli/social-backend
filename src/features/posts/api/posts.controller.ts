@@ -3,23 +3,15 @@ import { ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res } from '@nestjs/common';
 import { HTTP_STATUSES } from '../../../settings/http.status';
 import { PostCreateModel } from './models/input/create-post.input.model';
-import { SortDirection } from 'mongodb';
-import { IMainQueryType } from '../../../common/create.default.values';
 import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
 import { serviceInfo } from '../../../common/service.info';
 import { CommentsService } from '../../comments/application/comments.service';
+import { QueryParamsDto } from '../../../common/query-params.dto';
 
-export interface IPostQueryType {
-  pageNumber?: number,
-  pageSize?: number,
-  sortBy?: string,
-  sortDirection?: SortDirection,
-  searchNameTerm?: string
-}
 
 @ApiTags('Posts')
-@Controller('/api/posts')
+@Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService, private readonly commentsService: CommentsService, private readonly postsQueryRepository: PostsQueryRepository) {
   }
@@ -56,7 +48,7 @@ export class PostsController {
   }
 
   @Get()
-  async getPosts(@Query() query: IPostQueryType, @Req() req: Request, @Res() res: Response) {
+  async getPosts(@Query() query: QueryParamsDto, @Req() req: Request, @Res() res: Response) {
     const token = req.headers.authorization?.split(' ')[1];
 
     const currentUser = await serviceInfo.getIdUserByToken(token);
@@ -107,7 +99,7 @@ export class PostsController {
   // }
 
   @Get(':postId/comments')
-  async getAllCommentsForPost(@Param('postId') postId: string, @Query() query: IMainQueryType, @Req() req: Request, @Res() res: Response) {
+  async getAllCommentsForPost(@Param('postId') postId: string, @Query() query: QueryParamsDto, @Req() req: Request, @Res() res: Response) {
 
     const token = req.cookies?.refreshToken || '';
 

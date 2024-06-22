@@ -3,7 +3,7 @@ import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-rep
 import { ResultCode } from '../../../settings/http.status';
 import { CommentsRepository } from '../infrastructure/comments.repository';
 import { CommentCreateModel } from '../api/models/input/create-comment.model';
-import { IMainQueryType } from '../../../common/create.default.values';
+import { QueryParamsDto } from '../../../common/query-params.dto';
 
 @Injectable()
 export class CommentsService {
@@ -51,7 +51,7 @@ export class CommentsService {
     return this.commentsRepository.addComment(data);
   }
 
-  async findAllComments(postId: string, queryParams: IMainQueryType, currentUser: string | null) {
+  async findAllComments(postId: string, queryParams: QueryParamsDto, currentUser: string | null) {
 
     const result = await this.postsQueryRepository.getPostById(postId);
 

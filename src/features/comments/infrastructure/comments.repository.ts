@@ -4,10 +4,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Comment, CommentModelType } from '../domain/comment.entity';
 import { ResultCode } from '../../../settings/http.status';
 import { mappingComments } from '../../../common/mapping.comments';
-import { createDefaultValuesQueryParams, IMainQueryType } from '../../../common/create.default.values';
+import { createDefaultValuesQueryParams } from '../../../common/create.default.values';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query-repository';
 import { CommentCreateModel } from '../api/models/input/create-comment.model';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
+import { QueryParamsDto } from '../../../common/query-params.dto';
 
 export interface ILikesInfoViewModel {
   likesCount: number;
@@ -138,7 +139,7 @@ export class CommentsRepository {
     return this.CommentModel.findOne({ _id: new ObjectId(id) });
   }
 
-  async getCommentsForSpecialPost(postId: string, queryParams: IMainQueryType, currentUser: string | null) {
+  async getCommentsForSpecialPost(postId: string, queryParams: QueryParamsDto, currentUser: string | null) {
     const query = createDefaultValuesQueryParams(queryParams);
 
     console.log(query);

@@ -8,7 +8,7 @@ import { IUserQueryType } from './models/all.types';
 import { UserCreateModel } from './models/input/create-user.input.model';
 
 @ApiTags('Users')
-@Controller('/api/users')
+@Controller('users')
 export class UsersController {
   constructor(
     @Inject(UsersService) private readonly usersService: UsersService,

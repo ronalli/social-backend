@@ -10,7 +10,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
 
 @ApiTags('Comments')
-@Controller('/api/comments')
+@Controller('comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService, private readonly commentsQueryRepository: CommentsQueryRepository, @InjectModel(Like.name) private LikeModel: LikeModelType) {
   }

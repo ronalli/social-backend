@@ -2,18 +2,18 @@ import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../domain/post.entity';
-import { IPostQueryType } from '../api/posts.controller';
 import { ResultCode } from '../../../settings/http.status';
 import { createDefaultValues } from '../../../common/create.default.values';
 import { mappingPosts } from '../../../common/mapping.posts';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
+import { QueryParamsDto } from '../../../common/query-params.dto';
 
 @Injectable()
 export class PostsQueryRepository {
   constructor(@InjectModel(Post.name) private PostModel: PostModelType, @InjectModel(Like.name) private LikeModel: LikeModelType) {
   }
 
-  async getPosts(queryParams: IPostQueryType, currentUser: string | null) {
+  async getPosts(queryParams: QueryParamsDto, currentUser: string | null) {
     const query = createDefaultValues(queryParams);
     try {
       const allPosts = await this.PostModel.find()

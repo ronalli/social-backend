@@ -1,22 +1,7 @@
 import {SortDirection} from "mongodb";
+import { QueryParamsDto } from './query-params.dto';
 
-export interface IMainQueryType {
-  pageNumber?: number,
-  pageSize?: number,
-  sortBy?: string,
-  sortDirection?: SortDirection,
-}
-
-export interface IQueryType {
-  pageNumber?: number,
-  pageSize?: number,
-  sortBy?: string,
-  sortDirection?: SortDirection,
-  searchNameTerm?: string
-}
-
-
-export const createDefaultValues = (query: IQueryType) => {
+export const createDefaultValues = (query: QueryParamsDto) => {
   return {
     pageNumber: query.pageNumber ? +query.pageNumber : 1,
     pageSize: query.pageSize !== undefined ? +query.pageSize : 10,
@@ -26,7 +11,7 @@ export const createDefaultValues = (query: IQueryType) => {
   }
 }
 
-export const createDefaultValuesQueryParams = (query: IMainQueryType) => {
+export const createDefaultValuesQueryParams = (query: QueryParamsDto) => {
   return {
     pageNumber: query.pageNumber ? +query.pageNumber : 1,
     pageSize: query.pageSize !== undefined ? +query.pageSize : 10,

@@ -3,23 +3,15 @@ import { HTTP_STATUSES } from '../../../settings/http.status';
 import { ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res } from '@nestjs/common';
 import { BlogCreateModel } from './models/input/create-blog.input.model';
-import { SortDirection } from 'mongodb';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
 import { BlogsService } from '../application/blogs.service';
 import { PostsService } from '../../posts/application/posts.service';
 import { serviceInfo } from '../../../common/service.info';
 import { PostCreateModel } from '../../posts/api/models/input/create-post.input.model';
-
-export interface IBlogQueryType {
-  pageNumber?: number,
-  pageSize?: number,
-  sortBy?: string,
-  sortDirection?: SortDirection,
-  searchNameTerm?: string
-}
+import { QueryParamsDto } from '../../../common/query-params.dto';
 
 @ApiTags('Blogs')
-@Controller('/api/blogs')
+@Controller('blogs')
 export class BlogsController {
   constructor(private readonly blogsService: BlogsService, private readonly  blogsQueryRepository: BlogsQueryRepository,private readonly  postsService: PostsService) {
   }
@@ -47,7 +39,7 @@ export class BlogsController {
   }
 
   @Get()
-  async getBlogs(@Query() query: IBlogQueryType,@Req() req: Request, @Res() res: Response) {
+  async getBlogs(@Query() query: QueryParamsDto, @Req() req: Request, @Res() res: Response) {
     const result = await this.blogsQueryRepository.getAllBlogs(query);
 
     if (result.data) {
@@ -84,7 +76,7 @@ export class BlogsController {
   }
 
   @Get(':blogId/posts')
-  async getAllPostsForBlog(@Param('blogId') blogId: string, @Query() query: IBlogQueryType,  @Req() req: Request, @Res() res: Response) {
+  async getAllPostsForBlog(@Param('blogId') blogId: string, @Query() query: QueryParamsDto,  @Req() req: Request, @Res() res: Response) {
     const header = req.headers.authorization?.split(' ')[1];
     const currentUser = await serviceInfo.getIdUserByToken(header)
 

@@ -2,13 +2,13 @@ import {ObjectId} from "mongodb";
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogModelType } from '../domain/blog.entity';
 import { mappingBlogs } from '../../../common/mapping.blogs';
-import { IBlogQueryType } from '../api/models/all.types';
 import { ResultCode } from '../../../settings/http.status';
 import { createDefaultValues } from '../../../common/create.default.values';
 import { Injectable } from '@nestjs/common';
 import { Post, PostModelType } from '../../posts/domain/post.entity';
 import { mappingPosts } from '../../../common/mapping.posts';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
+import { QueryParamsDto } from '../../../common/query-params.dto';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -16,7 +16,7 @@ export class BlogsQueryRepository {
   constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType, @InjectModel(Post.name) private PostModel: PostModelType, @InjectModel(Like.name) private LikeModel: LikeModelType ) {
   }
 
-  async getAndSortPostsSpecialBlog(blogId: string, queryParams: IBlogQueryType, currentUser: string | null) {
+  async getAndSortPostsSpecialBlog(blogId: string, queryParams: QueryParamsDto, currentUser: string | null) {
     const query = createDefaultValues(queryParams);
 
     const search = query.searchNameTerm ?
@@ -52,7 +52,7 @@ export class BlogsQueryRepository {
       return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
     }
   }
-  async getAllBlogs(queryParams: IBlogQueryType){
+  async getAllBlogs(queryParams: QueryParamsDto){
     const query = createDefaultValues(queryParams);
 
     const search = query.searchNameTerm ?

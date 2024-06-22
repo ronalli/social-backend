@@ -6,18 +6,20 @@ import { CommentsService } from '../application/comments.service';
 import { serviceInfo } from '../../../common/service.info';
 import { HTTP_STATUSES } from '../../../settings/http.status';
 import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
+import { InjectModel } from '@nestjs/mongoose';
+import { Like, LikeModelType } from '../../likes/domain/like.entity';
 
 @ApiTags('Comments')
 @Controller('/api/comments')
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService, private readonly commentsQueryRepository: CommentsQueryRepository) {
+  constructor(private readonly commentsService: CommentsService, private readonly commentsQueryRepository: CommentsQueryRepository, @InjectModel(Like.name) private LikeModel: LikeModelType) {
   }
 
   @Get('commentId')
   async getComment(@Param() commentId: string,  @Req() req: Request, @Res() res: Response) {
     const token = req.cookies.refreshToken || ''
 
-    const currentStatus = await serviceInfo.initializeStatusLike(token, commentId)
+    const currentStatus = await serviceInfo.initializeStatusLike(token, commentId, this.LikeModel)
 
     const result = await this.commentsQueryRepository.getComment(commentId, currentStatus)
 

@@ -1,67 +1,63 @@
-import {ObjectId} from "mongodb";
+import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment, CommentModelType } from '../domain/comment.entity';
 import { ResultCode } from '../../../settings/http.status';
 import { mappingComments } from '../../../common/mapping.comments';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
-
-export interface ILikesInfoViewModel {
-  likesCount: number
-  dislikesCount: number
-  myStatus: string
-}
+import { LikeInfoOutputModel } from '../../likes/api/models/like.info.output.model';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(@InjectModel(Comment.name) private CommentModel: CommentModelType,
               @InjectModel(Like.name) private LikeModel: LikeModelType) {
   }
+
   async getComment(id: string, status: string) {
     try {
-      const currentComment = await this.CommentModel.findOne({_id: new ObjectId(id)})
+      const currentComment = await this.CommentModel.findOne({ _id: new ObjectId(id) });
 
       if (currentComment) {
 
-        const likesInfo: ILikesInfoViewModel = {
+        const likesInfo: LikeInfoOutputModel = {
           likesCount: currentComment.likesCount,
           dislikesCount: currentComment.dislikesCount,
-          myStatus: status
-        }
+          myStatus: status,
+        };
 
         return {
           status: ResultCode.Success,
-          data: mappingComments.formatCommentForView(currentComment, likesInfo)
-        }
+          data: mappingComments.formatCommentForView(currentComment, likesInfo),
+        };
 
       }
-      return {errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null}
+      return { errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null };
 
     } catch (e) {
-      return {errorMessage: 'Error BD', status: ResultCode.InternalServerError, data: null}
+      return { errorMessage: 'Error BD', status: ResultCode.InternalServerError, data: null };
     }
   }
 
   async getCommentById(id: string) {
     try {
-      const findComment = await this.CommentModel.findOne({_id: new ObjectId(id)});
+      const findComment = await this.CommentModel.findOne({ _id: new ObjectId(id) });
 
       if (findComment) {
         return {
           status: ResultCode.Success,
-          data: mappingComments.formatDataCommentForView(findComment)
-        }
+          data: mappingComments.formatDataCommentForView(findComment),
+        };
       }
-      return {errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null}
+      return { errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null };
     } catch (e) {
-      return {errorMessage: 'Error BD', status: ResultCode.InternalServerError, data: null}
+      return { errorMessage: 'Error BD', status: ResultCode.InternalServerError, data: null };
     }
   }
 
   async getCurrentLike(parentId: string, userId: string) {
     const response = await this.LikeModel.findOne(({
-      $and: [{userId: userId}, {parentId: parentId}]
-    }))
+      $and: [{ userId: userId }, { parentId: parentId }],
+    }));
 
     if (response) {
       return response;

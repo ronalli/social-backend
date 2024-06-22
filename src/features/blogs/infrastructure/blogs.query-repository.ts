@@ -8,11 +8,12 @@ import { createDefaultValues } from '../../../common/create.default.values';
 import { Injectable } from '@nestjs/common';
 import { Post, PostModelType } from '../../posts/domain/post.entity';
 import { mappingPosts } from '../../../common/mapping.posts';
+import { Like, LikeModelType } from '../../likes/domain/like.entity';
 
 @Injectable()
 export class BlogsQueryRepository {
 
-  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType,@InjectModel(Post.name) private PostModel: PostModelType ) {
+  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType, @InjectModel(Post.name) private PostModel: PostModelType, @InjectModel(Like.name) private LikeModel: LikeModelType ) {
   }
 
   async getAndSortPostsSpecialBlog(blogId: string, queryParams: IBlogQueryType, currentUser: string | null) {
@@ -43,7 +44,7 @@ export class BlogsQueryRepository {
           page: query.pageNumber,
           pageSize: query.pageSize,
           totalCount,
-          items: await mappingPosts.formatingAllPostForView(allPosts, currentUser)
+          items: await mappingPosts.formatingAllPostForView(allPosts, currentUser, this.LikeModel)
         }
       }
 

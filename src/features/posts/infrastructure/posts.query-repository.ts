@@ -6,10 +6,11 @@ import { IPostQueryType } from '../api/posts.controller';
 import { ResultCode } from '../../../settings/http.status';
 import { createDefaultValues } from '../../../common/create.default.values';
 import { mappingPosts } from '../../../common/mapping.posts';
+import { Like, LikeModelType } from '../../likes/domain/like.entity';
 
 @Injectable()
 export class PostsQueryRepository {
-  constructor(@InjectModel(Post.name) private PostModel: PostModelType) {
+  constructor(@InjectModel(Post.name) private PostModel: PostModelType, @InjectModel(Like.name) private LikeModel: LikeModelType) {
   }
 
   async getPosts(queryParams: IPostQueryType, currentUser: string | null) {
@@ -29,7 +30,7 @@ export class PostsQueryRepository {
           page: query.pageNumber,
           pageSize: query.pageSize,
           totalCount,
-          items: await mappingPosts.formatingAllPostForView(allPosts, currentUser),
+          items: await mappingPosts.formatingAllPostForView(allPosts, currentUser, this.LikeModel),
         },
       };
 

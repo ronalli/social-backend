@@ -52,6 +52,7 @@ export class CommentsService {
   }
 
   async findAllComments(postId: string, queryParams: IMainQueryType, currentUser: string | null) {
+
     const result = await this.postsQueryRepository.getPostById(postId);
 
     if (result.data) {

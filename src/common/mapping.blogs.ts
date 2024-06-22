@@ -1,8 +1,8 @@
 import { BlogDocument } from '../features/blogs/domain/blog.entity';
-import { IBlogViewModel } from '../features/blogs/api/models/all.types';
+import { BlogOutputModel } from '../features/blogs/api/models/output/blog.output.model';
 
 export const mappingBlogs = {
-  formatingDataForOutputBlog(input: BlogDocument): IBlogViewModel {
+  formatingDataForOutputBlog(input: BlogDocument): BlogOutputModel {
     return {
       id: String(input._id),
       name: input.name,

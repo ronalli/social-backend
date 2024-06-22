@@ -31,7 +31,7 @@ export class UsersRepository {
 
     try {
       const user = new this.UserModel({
-        // _id: new Types.ObjectId(),
+        _id: new Types.ObjectId(),
         email: data.email,
         login: data.login,
         hash,

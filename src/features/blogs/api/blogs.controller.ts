@@ -8,6 +8,7 @@ import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
 import { BlogsService } from '../application/blogs.service';
 import { PostsService } from '../../posts/application/posts.service';
 import { serviceInfo } from '../../../common/service.info';
+import { PostCreateModel } from '../../posts/api/models/input/create-post.input.model';
 
 export interface IBlogQueryType {
   pageNumber?: number,
@@ -16,7 +17,6 @@ export interface IBlogQueryType {
   sortDirection?: SortDirection,
   searchNameTerm?: string
 }
-
 
 @ApiTags('Blogs')
 @Controller('/api/blogs')
@@ -36,7 +36,7 @@ export class BlogsController {
   }
 
   @Get(':blogId')
-  async getBlog(@Param() blogId: string, @Req() req: Request, @Res() res: Response) {
+  async getBlog(@Param('blogId') blogId: string, @Req() req: Request, @Res() res: Response) {
     const result = await this.blogsQueryRepository.findBlogById(blogId);
     if (result.data) {
       res.status(HTTP_STATUSES[result.status]).send(result.data)
@@ -60,7 +60,8 @@ export class BlogsController {
   }
 
   @Put(':blogId')
-  async updateBlog(@Param() blogId: string, @Body() data: BlogCreateModel, @Req() req: Request, @Res() res: Response) {
+  async update(@Param('blogId') blogId: string, @Body() data: BlogCreateModel, @Req() req: Request, @Res() res: Response) {
+
     const result = await this.blogsService.updateBlog(blogId, data)
     if (result.errorMessage) {
       res.status(HTTP_STATUSES[result.status]).send({error: result.errorMessage, data: result.data})
@@ -71,7 +72,8 @@ export class BlogsController {
   }
 
   @Delete(':blogId')
-  async deleteBlog(@Param() blogId: string, @Req() req: Request, @Res() res: Response) {
+  async delete(@Param('blogId') blogId: string, @Req() req: Request, @Res() res: Response) {
+
     const result = await this.blogsService.deleteBlog(blogId);
     if (result.errorMessage) {
       res.status(HTTP_STATUSES[result.status]).send({error: result.errorMessage, data: result.data})
@@ -81,18 +83,15 @@ export class BlogsController {
     return
   }
 
-  @Get(':id/posts')
-  async getAllPostsForBlog(@Req() req: Request, @Res() res: Response) {
-    const {blogId} = req.params;
-    const queryParams: IBlogQueryType = req.query;
-
+  @Get(':blogId/posts')
+  async getAllPostsForBlog(@Param('blogId') blogId: string, @Query() query: IBlogQueryType,  @Req() req: Request, @Res() res: Response) {
     const header = req.headers.authorization?.split(' ')[1];
     const currentUser = await serviceInfo.getIdUserByToken(header)
 
     const result = await this.blogsQueryRepository.findBlogById(blogId);
 
     if (result.data) {
-      const foundPosts= await this.blogsQueryRepository.getAndSortPostsSpecialBlog(blogId, queryParams, currentUser)
+      const foundPosts= await this.blogsQueryRepository.getAndSortPostsSpecialBlog(blogId, query, currentUser)
       res.status(HTTP_STATUSES[foundPosts.status]).send(foundPosts.data)
       return
     }
@@ -101,10 +100,8 @@ export class BlogsController {
     return
   }
 
-  async createPostForSpecialBlog(@Req() req: Request, @Res() res: Response) {
-    const inputDataPost = req.body;
-    const {blogId} = req.params;
-
+  @Post(':blogId/posts')
+  async createPostForSpecialBlog(@Param('blogId') blogId: string, @Body() data: PostCreateModel,  @Req() req: Request, @Res() res: Response) {
     const token = req.headers.authorization?.split(' ')[1] || "unknown";
     const currentUser = await serviceInfo.getIdUserByToken(token)
 
@@ -117,7 +114,7 @@ export class BlogsController {
 
     const post = {
       blogId,
-      ...inputDataPost
+      ...data
     }
 
     const createdPost = await this.postsService.createPost(post, currentUser);

@@ -5,21 +5,23 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogModelType } from '../domain/blog.entity';
 import { mappingBlogs } from '../../../common/mapping.blogs';
 import { ResultCode } from '../../../settings/http.status';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class BlogsRepository {
   constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {
   }
 
-  async create(blog: BlogCreateModel){
-    const blogData = {
-      ...blog,
-      createdAt: new Date().toISOString(),
-      isMembership: false
-    }
+  async create(data: BlogCreateModel){
     try {
 
-      const blog = new this.BlogModel(blogData);
+      const blog = new this.BlogModel({
+        ...data,
+        _id: new Types.ObjectId(),
+        createdAt: new Date().toISOString(),
+        isMembership: false
+      });
+
       const response = await blog.save();
 
       const foundBlog = await this.BlogModel.findOne({_id: response._id})

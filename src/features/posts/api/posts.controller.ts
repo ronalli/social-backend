@@ -18,7 +18,6 @@ export interface IPostQueryType {
   searchNameTerm?: string
 }
 
-
 @ApiTags('Posts')
 @Controller('/api/posts')
 export class PostsController {
@@ -26,7 +25,6 @@ export class PostsController {
   }
 
   @Post()
-
   async createPost(@Body() createModel: PostCreateModel, @Req() req: Request, @Res() res: Response) {
     const token = req.headers.authorization?.split(' ')[1] || 'unknown';
     const currentUser = await serviceInfo.getIdUserByToken(token);
@@ -109,9 +107,9 @@ export class PostsController {
   // }
 
   @Get(':postId/comments')
-  async getAllCommentsForPost(@Param() postId: string, @Query() query: IMainQueryType, @Req() req: Request, @Res() res: Response) {
+  async getAllCommentsForPost(@Param('postId') postId: string, @Query() query: IMainQueryType, @Req() req: Request, @Res() res: Response) {
 
-    const token = req.cookies.refreshToken || '';
+    const token = req.cookies?.refreshToken || '';
 
     const currentUser = await serviceInfo.getIdUserByToken(token);
 

@@ -141,6 +141,8 @@ export class CommentsRepository {
   async getCommentsForSpecialPost(postId: string, queryParams: IMainQueryType, currentUser: string | null) {
     const query = createDefaultValuesQueryParams(queryParams);
 
+    console.log(query);
+
     try {
       const filter = { postId: postId };
       const comments = await this.CommentModel.find(filter)
@@ -157,7 +159,7 @@ export class CommentsRepository {
           pageSize: query.pageSize,
           page: query.pageNumber,
           totalCount,
-          items: await mappingComments.formatDataAllCommentsForView(comments, currentUser),
+          items: await mappingComments.formatDataAllCommentsForView(comments, currentUser, this.LikeModel),
         },
 
       };

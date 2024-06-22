@@ -8,6 +8,7 @@ import { IMainQueryType } from '../../../common/create.default.values';
 import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
 import { serviceInfo } from '../../../common/service.info';
+import { CommentsService } from '../../comments/application/comments.service';
 
 export interface IPostQueryType {
   pageNumber?: number,
@@ -94,18 +95,18 @@ export class PostsController {
 
   ///!!! any
 
-  @Post(':postId/comments')
-  async createCommentForSpecialPost(@Param() postId: string, @Body() content: any, @Req() req: Request, @Res() res: Response) {
-    const userId = req.userId!;
-    const result = await this.commentsService.create({ postId, userId, content });
-
-    if (result.data) {
-      res.status(HTTP_STATUSES[result.status]).send(result.data);
-      return;
-    }
-    res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage, data: result.data });
-    return;
-  }
+  // @Post(':postId/comments')
+  // async createCommentForSpecialPost(@Param() postId: string, @Body() content: any, @Req() req: Request, @Res() res: Response) {
+  //   const userId = req.userId!;
+  //   const result = await this.commentsService.create({ postId, userId, content });
+  //
+  //   if (result.data) {
+  //     res.status(HTTP_STATUSES[result.status]).send(result.data);
+  //     return;
+  //   }
+  //   res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage, data: result.data });
+  //   return;
+  // }
 
   @Get(':postId/comments')
   async getAllCommentsForPost(@Param() postId: string, @Query() query: IMainQueryType, @Req() req: Request, @Res() res: Response) {

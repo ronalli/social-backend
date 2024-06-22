@@ -1,16 +1,15 @@
-import {IPostDBType, IPostViewModel} from "../../posts/types/posts-types";
-import {IPostTypeDB} from "../../posts/domain/post.entity";
-import {LikeDocument, LikeModel} from "../../comments/domain/like.entity";
-import {ILikeTypeDB} from "../../types/like.status-type";
+import { PostDocument } from '../features/posts/domain/post.entity';
+import { PostOutputModel } from '../features/posts/api/models/output/post.output.model';
+import { LikeDocument, LikeModelType } from '../features/likes/domain/like.entity';
 
 export const mappingPosts = {
-  async formatingAllPostForView(posts: IPostTypeDB[], user: string | null) {
+  async formatingAllPostForView(posts: PostDocument[], user: string | null, LikeModel: LikeModelType) {
 
-    const result: IPostViewModel[] = [];
+    const result: PostOutputModel[] = [];
 
     for(const post of posts) {
 
-      const viewPost = await mappingPosts.formatingDataForOutputPost(post, user)
+      const viewPost = await mappingPosts.formatingDataForOutputPost(post, user, LikeModel)
 
       result.push(viewPost);
     }
@@ -18,7 +17,7 @@ export const mappingPosts = {
     return result;
   },
 
-  async formatingDataForOutputPost(post: IPostTypeDB, user: string | null): Promise<IPostViewModel> {
+  async formatingDataForOutputPost(post: PostDocument, user: string | null, LikeModel: LikeModelType): Promise<PostOutputModel> {
     const currentStatus = await LikeModel.findOne({
       $and: [{parentId: post._id}, {userId: user}]
     })

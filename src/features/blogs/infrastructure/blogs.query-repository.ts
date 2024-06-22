@@ -1,6 +1,4 @@
 import {ObjectId} from "mongodb";
-import {PostModel} from "../posts/domain/post.entity";
-import {mappingPosts} from "../common/utils/mappingPosts";
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogModelType } from '../domain/blog.entity';
 import { mappingBlogs } from '../../../common/mapping.blogs';
@@ -8,11 +6,13 @@ import { IBlogQueryType } from '../api/models/all.types';
 import { ResultCode } from '../../../settings/http.status';
 import { createDefaultValues } from '../../../common/create.default.values';
 import { Injectable } from '@nestjs/common';
+import { Post, PostModelType } from '../../posts/domain/post.entity';
+import { mappingPosts } from '../../../common/mapping.posts';
 
 @Injectable()
 export class BlogsQueryRepository {
 
-  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {
+  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType,@InjectModel(Post.name) private PostModel: PostModelType ) {
   }
 
   async getAndSortPostsSpecialBlog(blogId: string, queryParams: IBlogQueryType, currentUser: string | null) {
@@ -27,14 +27,14 @@ export class BlogsQueryRepository {
     }
 
     try {
-      const allPosts = await PostModel
+      const allPosts = await this.PostModel
         .find(filter)
         .sort({[query.sortBy]: query.sortDirection})
         .skip((query.pageNumber - 1) * query.pageSize)
         .limit(query.pageSize)
 
 
-      const totalCount = await PostModel.countDocuments(filter);
+      const totalCount = await this.PostModel.countDocuments(filter);
 
       return {
         status: ResultCode.Success,

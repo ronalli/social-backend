@@ -6,6 +6,8 @@ import { BlogCreateModel } from './models/input/create-blog.input.model';
 import { SortDirection } from 'mongodb';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
 import { BlogsService } from '../application/blogs.service';
+import { PostsService } from '../../posts/application/posts.service';
+import { serviceInfo } from '../../../common/service.info';
 
 export interface IBlogQueryType {
   pageNumber?: number,

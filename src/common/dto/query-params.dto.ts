@@ -6,18 +6,18 @@ export class QueryParamsDto {
 
   @IsOptional()
   @IsString()
-  searchNameTerm?: string;
+  searchNameTerm?: string = null;
 
   @IsOptional()
-  sortDirection?: SortDirection;
+  sortDirection?: SortDirection = 'desc';
 
   @IsOptional()
-  sortBy?: string;
+  sortBy?: string = 'createdAt';
 
   @IsOptional()
-  pageSize?: number;
+  pageSize?: number = 10;
 
   @IsOptional()
-  pageNumber?: number;
+  pageNumber?: number = 1;
 
 }

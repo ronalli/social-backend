@@ -1,7 +1,9 @@
-import { BlogDocument } from '../features/blogs/domain/blog.entity';
-import { BlogOutputModel } from '../features/blogs/api/models/output/blog.output.model';
+import { BlogDocument } from '../../domain/blog.entity';
+import { BlogOutputModel } from '../../api/models/output/blog.output.model';
+import { Injectable } from '@nestjs/common';
 
-export const mappingBlogs = {
+@Injectable()
+export class MappingBlogsService {
   formatingDataForOutputBlog(input: BlogDocument): BlogOutputModel {
     return {
       id: String(input._id),

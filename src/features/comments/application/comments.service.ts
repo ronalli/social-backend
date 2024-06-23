@@ -3,7 +3,7 @@ import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-rep
 import { ResultCode } from '../../../settings/http.status';
 import { CommentsRepository } from '../infrastructure/comments.repository';
 import { CommentCreateModel } from '../api/models/input/create-comment.model';
-import { QueryParamsDto } from '../../../common/query-params.dto';
+import { QueryParamsDto } from '../../../common/dto/query-params.dto';
 
 @Injectable()
 export class CommentsService {

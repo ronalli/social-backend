@@ -3,14 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment, CommentModelType } from '../domain/comment.entity';
 import { ResultCode } from '../../../settings/http.status';
-import { mappingComments } from '../../../common/mapping.comments';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
 import { LikeInfoOutputModel } from '../../likes/api/models/like.info.output.model';
+import { MappingsCommentsService } from '../application/mappings/mapping.comments';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(@InjectModel(Comment.name) private CommentModel: CommentModelType,
-              @InjectModel(Like.name) private LikeModel: LikeModelType) {
+              @InjectModel(Like.name) private LikeModel: LikeModelType, private readonly mappingsCommentsService: MappingsCommentsService) {
   }
 
   async getComment(id: string, status: string) {
@@ -27,7 +27,7 @@ export class CommentsQueryRepository {
 
         return {
           status: ResultCode.Success,
-          data: mappingComments.formatCommentForView(currentComment, likesInfo),
+          data: this.mappingsCommentsService.formatCommentForView(currentComment, likesInfo),
         };
 
       }
@@ -45,7 +45,7 @@ export class CommentsQueryRepository {
       if (findComment) {
         return {
           status: ResultCode.Success,
-          data: mappingComments.formatDataCommentForView(findComment),
+          data: this.mappingsCommentsService.formatDataCommentForView(findComment),
         };
       }
       return { errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null };

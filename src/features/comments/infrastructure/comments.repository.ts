@@ -3,12 +3,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment, CommentModelType } from '../domain/comment.entity';
 import { ResultCode } from '../../../settings/http.status';
-import { mappingComments } from '../../../common/mapping.comments';
-import { createDefaultValuesQueryParams } from '../../../common/create.default.values';
+
 import { UsersQueryRepository } from '../../users/infrastructure/users.query-repository';
 import { CommentCreateModel } from '../api/models/input/create-comment.model';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
-import { QueryParamsDto } from '../../../common/query-params.dto';
+import { QueryParamsDto } from '../../../common/dto/query-params.dto';
+import { QueryParamsService } from '../../../common/utils/create.default.values';
+import { MappingsCommentsService } from '../application/mappings/mapping.comments';
 
 export interface ILikesInfoViewModel {
   likesCount: number;
@@ -19,7 +20,7 @@ export interface ILikesInfoViewModel {
 @Injectable()
 export class CommentsRepository {
   constructor(@InjectModel(Comment.name) private CommentModel: CommentModelType,
-              @InjectModel(Like.name) private LikeModel: LikeModelType, private readonly usersQueryRepository: UsersQueryRepository) {
+              @InjectModel(Like.name) private LikeModel: LikeModelType, private readonly usersQueryRepository: UsersQueryRepository, private readonly queryParamsService: QueryParamsService, private readonly mappingsCommentsService: MappingsCommentsService) {
   }
 
   async updateComment(id: string, contentUpdate: string) {
@@ -71,7 +72,7 @@ export class CommentsRepository {
       };
 
       if (comment) {
-        const res = mappingComments.formatCommentForView(comment, likesInfo);
+        const res = this.mappingsCommentsService.formatCommentForView(comment, likesInfo);
         return { status: ResultCode.Created, data: res };
       }
       return { errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null };
@@ -140,7 +141,7 @@ export class CommentsRepository {
   }
 
   async getCommentsForSpecialPost(postId: string, queryParams: QueryParamsDto, currentUser: string | null) {
-    const query = createDefaultValuesQueryParams(queryParams);
+    const query = this.queryParamsService.createDefaultValuesQueryParams(queryParams);
 
     console.log(query);
 
@@ -160,7 +161,7 @@ export class CommentsRepository {
           pageSize: query.pageSize,
           page: query.pageNumber,
           totalCount,
-          items: await mappingComments.formatDataAllCommentsForView(comments, currentUser, this.LikeModel),
+          items: await this.mappingsCommentsService.formatDataAllCommentsForView(comments, currentUser, this.LikeModel),
         },
 
       };

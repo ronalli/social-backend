@@ -3,11 +3,11 @@ import { ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Delete, Get, Param, Post, Query, Req, Res, Put } from '@nestjs/common';
 
 import { CommentsService } from '../application/comments.service';
-import { serviceInfo } from '../../../common/service.info';
 import { HTTP_STATUSES } from '../../../settings/http.status';
 import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
+import { serviceInfoLike } from '../../../common/services/initialization.status.like';
 
 @ApiTags('Comments')
 @Controller('comments')
@@ -19,7 +19,7 @@ export class CommentsController {
   async getComment(@Param() commentId: string,  @Req() req: Request, @Res() res: Response) {
     const token = req.cookies.refreshToken || ''
 
-    const currentStatus = await serviceInfo.initializeStatusLike(token, commentId, this.LikeModel)
+    const currentStatus = await serviceInfoLike.initializeStatusLike(token, commentId, this.LikeModel)
 
     const result = await this.commentsQueryRepository.getComment(commentId, currentStatus)
 

@@ -5,14 +5,14 @@ import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query-rep
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../domain/post.entity';
 import { PostCreateModel } from '../api/models/input/create-post.input.model';
-import { mappingPosts } from '../../../common/mapping.posts';
 import { ResultCode } from '../../../settings/http.status';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
 import { Types } from 'mongoose';
+import { MappingsPostsService } from '../application/mappings/mapping.posts';
 
 @Injectable()
 export class PostsRepository {
-  constructor(@InjectModel(Post.name) private PostModel: PostModelType, @InjectModel(Like.name) private LikeModel: LikeModelType, private readonly blogsQueryRepository: BlogsQueryRepository, private readonly postsQueryRepository: PostsQueryRepository) {
+  constructor(@InjectModel(Post.name) private PostModel: PostModelType, @InjectModel(Like.name) private LikeModel: LikeModelType, private readonly blogsQueryRepository: BlogsQueryRepository, private readonly postsQueryRepository: PostsQueryRepository, private readonly mappingsPostsService: MappingsPostsService) {
   }
 
   async create(postData: PostCreateModel, currentUser: string) {
@@ -35,7 +35,7 @@ export class PostsRepository {
         if (foundPost) {
           return {
             status: ResultCode.Created,
-            data: await mappingPosts.formatingDataForOutputPost(foundPost, currentUser, this.LikeModel)
+            data: await this.mappingsPostsService.formatingDataForOutputPost(foundPost, currentUser, this.LikeModel)
           }
         }
         return {errorMessage: 'Something went wrong', status: ResultCode.BadRequest, data: null}
@@ -153,7 +153,7 @@ export class PostsRepository {
       if (foundPost) {
         return {
           status: ResultCode.Success,
-          data: await mappingPosts.formatingDataForOutputPost(foundPost, currentUser, this.LikeModel)
+          data: await this.mappingsPostsService.formatingDataForOutputPost(foundPost, currentUser, this.LikeModel)
         }
       }
       return {errorMessage: 'Not found post', status: ResultCode.NotFound, data: null}

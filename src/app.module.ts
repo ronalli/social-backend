@@ -30,6 +30,10 @@ import { Like, LikeSchema } from './features/likes/domain/like.entity';
 import { ConfigModule } from '@nestjs/config';
 import { DeleteAllCollectionsController } from './features/test/api/delete.all.collections.controller';
 import { DeleteService } from './features/test/application/delete.service';
+import { QueryParamsService } from './common/utils/create.default.values';
+import { MappingBlogsService } from './features/blogs/application/mappings/mapping.blogs';
+import { MappingsCommentsService } from './features/comments/application/mappings/mapping.comments';
+import { MappingsPostsService } from './features/posts/application/mappings/mapping.posts';
 
 config();
 
@@ -58,6 +62,12 @@ const commentsProviders: Provider[] = [
   CommentsQueryRepository
 ]
 
+const mappingsProviders: Provider[] = [
+  MappingBlogsService,
+  MappingsCommentsService,
+  MappingsPostsService
+]
+
 @Module({
 
   imports: [
@@ -78,7 +88,10 @@ const commentsProviders: Provider[] = [
     ...blogsProviders,
     ...postsProviders,
     ...commentsProviders,
-    DeleteService
+    ...mappingsProviders,
+    DeleteService,
+    QueryParamsService,
+
   ],
 })
 export class AppModule {}

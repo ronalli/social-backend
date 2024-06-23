@@ -6,9 +6,9 @@ import { BlogCreateModel } from './models/input/create-blog.input.model';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
 import { BlogsService } from '../application/blogs.service';
 import { PostsService } from '../../posts/application/posts.service';
-import { serviceInfo } from '../../../common/service.info';
 import { PostCreateModel } from '../../posts/api/models/input/create-post.input.model';
-import { QueryParamsDto } from '../../../common/query-params.dto';
+import { QueryParamsDto } from '../../../common/dto/query-params.dto';
+import { serviceInfoLike } from '../../../common/services/initialization.status.like';
 
 @ApiTags('Blogs')
 @Controller('blogs')
@@ -78,7 +78,7 @@ export class BlogsController {
   @Get(':blogId/posts')
   async getAllPostsForBlog(@Param('blogId') blogId: string, @Query() query: QueryParamsDto,  @Req() req: Request, @Res() res: Response) {
     const header = req.headers.authorization?.split(' ')[1];
-    const currentUser = await serviceInfo.getIdUserByToken(header)
+    const currentUser = await serviceInfoLike.getIdUserByToken(header)
 
     const result = await this.blogsQueryRepository.findBlogById(blogId);
 
@@ -95,7 +95,7 @@ export class BlogsController {
   @Post(':blogId/posts')
   async createPostForSpecialBlog(@Param('blogId') blogId: string, @Body() data: PostCreateModel,  @Req() req: Request, @Res() res: Response) {
     const token = req.headers.authorization?.split(' ')[1] || "unknown";
-    const currentUser = await serviceInfo.getIdUserByToken(token)
+    const currentUser = await serviceInfoLike.getIdUserByToken(token)
 
     const result = await this.blogsQueryRepository.findBlogById(blogId);
 

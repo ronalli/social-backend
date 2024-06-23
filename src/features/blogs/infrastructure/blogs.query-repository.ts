@@ -1,38 +1,38 @@
-import {ObjectId} from "mongodb";
+import { ObjectId } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogModelType } from '../domain/blog.entity';
-import { mappingBlogs } from '../../../common/mapping.blogs';
+import { MappingBlogsService } from '../application/mappings/mapping.blogs';
 import { ResultCode } from '../../../settings/http.status';
-import { createDefaultValues } from '../../../common/create.default.values';
 import { Injectable } from '@nestjs/common';
 import { Post, PostModelType } from '../../posts/domain/post.entity';
-import { mappingPosts } from '../../../common/mapping.posts';
+import { MappingsPostsService } from '../../posts/application/mappings/mapping.posts';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
-import { QueryParamsDto } from '../../../common/query-params.dto';
+import { BlogQueryDto } from '../api/dto/blog-query.dto';
+import { QueryParamsService } from '../../../common/utils/create.default.values';
 
 @Injectable()
 export class BlogsQueryRepository {
 
-  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType, @InjectModel(Post.name) private PostModel: PostModelType, @InjectModel(Like.name) private LikeModel: LikeModelType ) {
+  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType, @InjectModel(Post.name) private PostModel: PostModelType, @InjectModel(Like.name) private LikeModel: LikeModelType, private readonly queryParamsService: QueryParamsService, private readonly mappingsBlogsService: MappingBlogsService, private readonly mappingsPostsService: MappingsPostsService) {
   }
 
-  async getAndSortPostsSpecialBlog(blogId: string, queryParams: QueryParamsDto, currentUser: string | null) {
-    const query = createDefaultValues(queryParams);
+  async getAndSortPostsSpecialBlog(blogId: string, queryParams: BlogQueryDto, currentUser: string | null) {
+    const query = this.queryParamsService.createDefaultValues(queryParams);
 
     const search = query.searchNameTerm ?
-      {title: {$regex: query.searchNameTerm, $options: "i"}} : {}
+      { title: { $regex: query.searchNameTerm, $options: 'i' } } : {};
 
     const filter = {
       blogId,
-      ...search
-    }
+      ...search,
+    };
 
     try {
       const allPosts = await this.PostModel
         .find(filter)
-        .sort({[query.sortBy]: query.sortDirection})
+        .sort({ [query.sortBy]: query.sortDirection })
         .skip((query.pageNumber - 1) * query.pageSize)
-        .limit(query.pageSize)
+        .limit(query.pageSize);
 
 
       const totalCount = await this.PostModel.countDocuments(filter);
@@ -44,31 +44,32 @@ export class BlogsQueryRepository {
           page: query.pageNumber,
           pageSize: query.pageSize,
           totalCount,
-          items: await mappingPosts.formatingAllPostForView(allPosts, currentUser, this.LikeModel)
-        }
-      }
+          items: await this.mappingsPostsService.formatingAllPostForView(allPosts, currentUser, this.LikeModel),
+        },
+      };
 
     } catch (e) {
-      return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
+      return { errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null };
     }
   }
-  async getAllBlogs(queryParams: QueryParamsDto){
-    const query = createDefaultValues(queryParams);
+
+  async getAllBlogs(queryParams: BlogQueryDto) {
+    const query = this.queryParamsService.createDefaultValues(queryParams);
 
     const search = query.searchNameTerm ?
-      {name: {$regex: `${query.searchNameTerm}`, $options: "i"}} : {}
+      { name: { $regex: `${query.searchNameTerm}`, $options: 'i' } } : {};
 
     const filter = {
-      ...search
-    }
+      ...search,
+    };
 
     try {
 
       const allBlogs = await this.BlogModel
         .find(filter)
-        .sort({[query.sortBy]: query.sortDirection})
+        .sort({ [query.sortBy]: query.sortDirection })
         .skip((query.pageNumber - 1) * query.pageSize)
-        .limit(query.pageSize)
+        .limit(query.pageSize);
 
 
       const totalCount = await this.BlogModel.countDocuments(filter);
@@ -80,26 +81,27 @@ export class BlogsQueryRepository {
           page: query.pageNumber,
           pageSize: query.pageSize,
           totalCount,
-          items: allBlogs.map(x => mappingBlogs.formatingDataForOutputBlog(x))
-        }
-      }
+          items: allBlogs.map(x => this.mappingsBlogsService.formatingDataForOutputBlog(x)),
+        },
+      };
     } catch (e) {
-      return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
+      return { errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null };
     }
   }
-  async findBlogById(blogId: string){
+
+  async findBlogById(blogId: string) {
     try {
-      const foundBlog = await this.BlogModel.findOne({_id: new ObjectId(blogId)});
+      const foundBlog = await this.BlogModel.findOne({ _id: new ObjectId(blogId) });
       if (foundBlog) {
 
         return {
           status: ResultCode.Success,
-          data: mappingBlogs.formatingDataForOutputBlog(foundBlog)
-        }
+          data: this.mappingsBlogsService.formatingDataForOutputBlog(foundBlog),
+        };
       }
-      return {errorMessage: 'Not found blog', status: ResultCode.NotFound, data: null}
+      return { errorMessage: 'Not found blog', status: ResultCode.NotFound, data: null };
     } catch (e) {
-      return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
+      return { errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null };
     }
 
   }

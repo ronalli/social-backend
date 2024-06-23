@@ -3,13 +3,13 @@ import { Injectable } from '@nestjs/common';
 import { BlogCreateModel } from '../api/models/input/create-blog.input.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogModelType } from '../domain/blog.entity';
-import { mappingBlogs } from '../../../common/mapping.blogs';
 import { ResultCode } from '../../../settings/http.status';
 import { Types } from 'mongoose';
+import { MappingBlogsService } from '../application/mappings/mapping.blogs';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {
+  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType, private readonly mappingsBlogsService: MappingBlogsService) {
   }
 
   async create(data: BlogCreateModel){
@@ -28,7 +28,7 @@ export class BlogsRepository {
       if (foundBlog) {
         return {
           status: ResultCode.Created,
-          data: mappingBlogs.formatingDataForOutputBlog(foundBlog)
+          data: this.mappingsBlogsService.formatingDataForOutputBlog(foundBlog)
         }
       }
       return {errorMessage: 'Not found blog', status: ResultCode.NotFound, data: null}

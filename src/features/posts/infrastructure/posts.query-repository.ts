@@ -3,18 +3,18 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../domain/post.entity';
 import { ResultCode } from '../../../settings/http.status';
-import { createDefaultValues } from '../../../common/create.default.values';
-import { mappingPosts } from '../../../common/mapping.posts';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
-import { QueryParamsDto } from '../../../common/query-params.dto';
+import { PostQueryDto } from '../api/dto/post-query.dto';
+import { QueryParamsService } from '../../../common/utils/create.default.values';
+import { MappingsPostsService } from '../application/mappings/mapping.posts';
 
 @Injectable()
 export class PostsQueryRepository {
-  constructor(@InjectModel(Post.name) private PostModel: PostModelType, @InjectModel(Like.name) private LikeModel: LikeModelType) {
+  constructor(@InjectModel(Post.name) private PostModel: PostModelType, @InjectModel(Like.name) private LikeModel: LikeModelType, private readonly queryParamsService: QueryParamsService, private readonly mappingsPostsService: MappingsPostsService) {
   }
 
-  async getPosts(queryParams: QueryParamsDto, currentUser: string | null) {
-    const query = createDefaultValues(queryParams);
+  async getPosts(queryParams: PostQueryDto, currentUser: string | null) {
+    const query = this.queryParamsService.createDefaultValues(queryParams);
     try {
       const allPosts = await this.PostModel.find()
         .sort({ [query.sortBy]: query.sortDirection })
@@ -30,7 +30,7 @@ export class PostsQueryRepository {
           page: query.pageNumber,
           pageSize: query.pageSize,
           totalCount,
-          items: await mappingPosts.formatingAllPostForView(allPosts, currentUser, this.LikeModel),
+          items: await this.mappingsPostsService.formatingAllPostForView(allPosts, currentUser, this.LikeModel),
         },
       };
 

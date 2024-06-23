@@ -5,9 +5,9 @@ import { HTTP_STATUSES } from '../../../settings/http.status';
 import { PostCreateModel } from './models/input/create-post.input.model';
 import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
-import { serviceInfo } from '../../../common/service.info';
 import { CommentsService } from '../../comments/application/comments.service';
-import { QueryParamsDto } from '../../../common/query-params.dto';
+import { QueryParamsDto } from '../../../common/dto/query-params.dto';
+import { serviceInfoLike } from '../../../common/services/initialization.status.like';
 
 
 @ApiTags('Posts')
@@ -19,7 +19,7 @@ export class PostsController {
   @Post()
   async createPost(@Body() createModel: PostCreateModel, @Req() req: Request, @Res() res: Response) {
     const token = req.headers.authorization?.split(' ')[1] || 'unknown';
-    const currentUser = await serviceInfo.getIdUserByToken(token);
+    const currentUser = await serviceInfoLike.getIdUserByToken(token);
 
     const result = await this.postsService.createPost(createModel, currentUser);
 
@@ -35,7 +35,7 @@ export class PostsController {
   async getPost(@Param() id: string, @Req() req: Request, @Res() res: Response) {
     const token = req.headers.authorization?.split(' ')[1];
 
-    const currentUser = await serviceInfo.getIdUserByToken(token);
+    const currentUser = await serviceInfoLike.getIdUserByToken(token);
 
     const result = await this.postsService.getPost(id, currentUser);
 
@@ -51,7 +51,7 @@ export class PostsController {
   async getPosts(@Query() query: QueryParamsDto, @Req() req: Request, @Res() res: Response) {
     const token = req.headers.authorization?.split(' ')[1];
 
-    const currentUser = await serviceInfo.getIdUserByToken(token);
+    const currentUser = await serviceInfoLike.getIdUserByToken(token);
 
     const result = await this.postsQueryRepository.getPosts(query, currentUser);
 
@@ -103,7 +103,7 @@ export class PostsController {
 
     const token = req.cookies?.refreshToken || '';
 
-    const currentUser = await serviceInfo.getIdUserByToken(token);
+    const currentUser = await serviceInfoLike.getIdUserByToken(token);
 
     const result = await this.commentsService.findAllComments(postId, query, currentUser);
 

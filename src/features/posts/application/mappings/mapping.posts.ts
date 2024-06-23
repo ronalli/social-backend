@@ -1,21 +1,23 @@
-import { PostDocument } from '../features/posts/domain/post.entity';
-import { PostOutputModel } from '../features/posts/api/models/output/post.output.model';
-import { LikeDocument, LikeModelType } from '../features/likes/domain/like.entity';
+import { PostDocument } from '../../domain/post.entity';
+import { PostOutputModel } from '../../api/models/output/post.output.model';
+import { LikeDocument, LikeModelType } from '../../../likes/domain/like.entity';
+import { Injectable } from '@nestjs/common';
 
-export const mappingPosts = {
+@Injectable()
+export class MappingsPostsService {
   async formatingAllPostForView(posts: PostDocument[], user: string | null, LikeModel: LikeModelType) {
 
     const result: PostOutputModel[] = [];
 
     for(const post of posts) {
 
-      const viewPost = await mappingPosts.formatingDataForOutputPost(post, user, LikeModel)
+      const viewPost = await this.formatingDataForOutputPost(post, user, LikeModel)
 
       result.push(viewPost);
     }
 
     return result;
-  },
+  }
 
   async formatingDataForOutputPost(post: PostDocument, user: string | null, LikeModel: LikeModelType): Promise<PostOutputModel> {
     const currentStatus = await LikeModel.findOne({
@@ -32,7 +34,7 @@ export const mappingPosts = {
       likesCount: post.likesCount,
       dislikesCount: post.dislikesCount,
       myStatus: currentStatus?.status ? currentStatus.status : 'None',
-      newestLikes: mappingPosts.formatViewNewestLikes(lastLikes)
+      newestLikes: this.formatViewNewestLikes(lastLikes)
     }
 
     return {
@@ -46,7 +48,7 @@ export const mappingPosts = {
       extendedLikesInfo: likesInfo
     };
 
-  },
+  }
 
   formatViewNewestLikes(data: LikeDocument[]) {
     return data.map(d=> {

@@ -6,7 +6,7 @@ import { PostCreateModel } from './models/input/create-post.input.model';
 import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
 import { CommentsService } from '../../comments/application/comments.service';
-import { QueryParamsDto } from '../../../common/dto/query-params.dto';
+import { QueryParamsDto } from '../../../common/models/query-params.dto';
 import { serviceInfoLike } from '../../../common/services/initialization.status.like';
 
 

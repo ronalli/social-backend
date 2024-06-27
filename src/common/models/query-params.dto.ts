@@ -1,7 +1,6 @@
 import { SortDirection } from 'mongodb';
 import { IsOptional, IsString } from 'class-validator';
 
-
 export class QueryParamsDto {
 
   @IsOptional()

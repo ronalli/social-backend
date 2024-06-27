@@ -7,7 +7,7 @@ import { ResultCode } from '../../../settings/http.status';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query-repository';
 import { CommentCreateModel } from '../api/models/input/create-comment.model';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
-import { QueryParamsDto } from '../../../common/dto/query-params.dto';
+import { QueryParamsDto } from '../../../common/models/query-params.dto';
 import { QueryParamsService } from '../../../common/utils/create.default.values';
 import { MappingsCommentsService } from '../application/mappings/mapping.comments';
 

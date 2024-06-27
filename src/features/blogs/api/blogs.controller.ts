@@ -7,13 +7,13 @@ import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
 import { BlogsService } from '../application/blogs.service';
 import { PostsService } from '../../posts/application/posts.service';
 import { PostCreateModel } from '../../posts/api/models/input/create-post.input.model';
-import { QueryParamsDto } from '../../../common/dto/query-params.dto';
+import { QueryParamsDto } from '../../../common/models/query-params.dto';
 import { serviceInfoLike } from '../../../common/services/initialization.status.like';
 
 @ApiTags('Blogs')
 @Controller('blogs')
 export class BlogsController {
-  constructor(private readonly blogsService: BlogsService, private readonly  blogsQueryRepository: BlogsQueryRepository,private readonly  postsService: PostsService) {
+  constructor(private readonly blogsService: BlogsService, private readonly  blogsQueryRepository: BlogsQueryRepository, private readonly  postsService: PostsService) {
   }
 
   @Post()

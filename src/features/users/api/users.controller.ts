@@ -4,8 +4,8 @@ import { Body, Controller, Delete, Get, Inject, Param, Post, Query, Req, Res } f
 import { UsersService } from '../application/users.service';
 import { UsersQueryRepository } from '../infrastructure/users.query-repository';
 import { HTTP_STATUSES } from '../../../settings/http.status';
-import { IUserQueryType } from './models/all.types';
 import { UserCreateModel } from './models/input/create-user.input.model';
+import { UserQueryDto } from './models/user-query.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -16,7 +16,7 @@ export class UsersController {
   }
 
   @Get('')
-  async getAllUsers(@Query() query: IUserQueryType, @Req() req: Request, @Res({passthrough: true}) res: Response, ) {
+  async getAllUsers(@Query() query: UserQueryDto, @Req() req: Request, @Res({passthrough: true}) res: Response, ) {
     const result = await this.usersQueryRepository.getUsers(query);
     if (result.data) {
       res.status(HTTP_STATUSES[result.status]).json(result.data)

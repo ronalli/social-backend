@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../domain/post.entity';
 import { ResultCode } from '../../../settings/http.status';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
-import { PostQueryDto } from '../api/dto/post-query.dto';
+import { PostQueryDto } from '../api/models/post-query.dto';
 import { QueryParamsService } from '../../../common/utils/create.default.values';
 import { MappingsPostsService } from '../application/mappings/mapping.posts';
 

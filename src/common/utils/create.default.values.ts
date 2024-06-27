@@ -1,5 +1,5 @@
 import { SortDirection } from 'mongodb';
-import { QueryParamsDto } from '../dto/query-params.dto';
+import { QueryParamsDto } from '../models/query-params.dto';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

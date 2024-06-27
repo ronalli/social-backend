@@ -34,6 +34,9 @@ import { QueryParamsService } from './common/utils/create.default.values';
 import { MappingBlogsService } from './features/blogs/application/mappings/mapping.blogs';
 import { MappingsCommentsService } from './features/comments/application/mappings/mapping.comments';
 import { MappingsPostsService } from './features/posts/application/mappings/mapping.posts';
+import { MappingsUsersService } from './features/users/application/mappings/mappings.users';
+import { MapingErrorsService } from './common/utils/mappings.errors.service';
+import { MappingsRequestHeadersService } from './common/utils/mappings.request.headers';
 
 config();
 
@@ -91,6 +94,9 @@ const mappingsProviders: Provider[] = [
     ...mappingsProviders,
     DeleteService,
     QueryParamsService,
+    MappingsUsersService,
+    MapingErrorsService,
+    MappingsRequestHeadersService
 
   ],
 })

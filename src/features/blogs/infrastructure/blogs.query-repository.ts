@@ -7,7 +7,7 @@ import { Injectable } from '@nestjs/common';
 import { Post, PostModelType } from '../../posts/domain/post.entity';
 import { MappingsPostsService } from '../../posts/application/mappings/mapping.posts';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
-import { BlogQueryDto } from '../api/dto/blog-query.dto';
+import { BlogQueryDto } from '../api/models/blog-query.dto';
 import { QueryParamsService } from '../../../common/utils/create.default.values';
 
 @Injectable()

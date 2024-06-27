@@ -34,10 +34,6 @@ export class User {
 
   @Prop({type: EmailConfirmationSchema})
   emailConfirmation: EmailConfirmation
-
-  getLogin() {
-    return this.login;
-  }
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

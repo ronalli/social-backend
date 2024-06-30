@@ -4,7 +4,7 @@ import { AuthService } from '../../features/auth/application/auth.service';
 import { ResultCode } from '../../settings/http.status';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AuthJwtGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {
   }
 

@@ -10,7 +10,7 @@ import { SetNewPasswordModel } from './models/input/set-new-password.model';
 import { MappingsUsersService } from '../../users/application/mappings/mappings.users';
 import { MapingErrorsService } from '../../../common/utils/mappings.errors.service';
 import { MappingsRequestHeadersService } from '../../../common/utils/mappings.request.headers';
-import { AuthGuard } from '../../../common/guards/auth.guard';
+import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -95,7 +95,7 @@ export class AuthController {
     return;
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthJwtGuard)
   @Get('me')
   async me(@Req() req: Request, @Res() res: Response) {
     const userId = req['userId'];

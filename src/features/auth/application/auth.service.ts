@@ -357,9 +357,9 @@ export class AuthService {
     return await this.authRepository.findByEmail(login);
   }
 
-
   async checkAccessToken(authHeader: string) {
     const token = authHeader.split(' ');
+
     if (token[0] !== 'Bearer') {
       return {
         status: ResultCode.Unauthorized,
@@ -372,6 +372,7 @@ export class AuthService {
     }
 
     const id = await jwtService.getUserIdByToken(token[1]);
+
     if (!id) {
       return {
         data: null,

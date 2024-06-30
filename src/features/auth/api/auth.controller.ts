@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
 import { UsersService } from '../../users/application/users.service';
 import { HTTP_STATUSES } from '../../../settings/http.status';
@@ -10,6 +10,7 @@ import { SetNewPasswordModel } from './models/input/set-new-password.model';
 import { MappingsUsersService } from '../../users/application/mappings/mappings.users';
 import { MapingErrorsService } from '../../../common/utils/mappings.errors.service';
 import { MappingsRequestHeadersService } from '../../../common/utils/mappings.request.headers';
+import { AuthGuard } from '../../../common/guards/auth.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -94,10 +95,10 @@ export class AuthController {
     return;
   }
 
+  @UseGuards(AuthGuard)
   @Get('me')
   async me(@Req() req: Request, @Res() res: Response) {
-    // const userId = req.userId!;
-    const userId = '1112';
+    const userId = req['userId'];
     if (userId !== null) {
       const result = await this.usersService.findUser(userId);
       if (result.data) {

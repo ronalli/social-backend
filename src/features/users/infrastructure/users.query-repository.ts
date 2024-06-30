@@ -1,17 +1,17 @@
 import {ObjectId, SortDirection} from "mongodb";
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserModelType } from '../domain/user.entity';
+import { User, UserDocument, UserModelType } from '../domain/user.entity';
 import { ResultCode } from '../../../settings/http.status';
-import { IUserDBType, IUserQueryType, IUserViewModel } from '../api/models/all.types';
-
+import { UserQueryDto } from '../api/models/user-query.dto';
+import { UserOutputModel } from '../api/models/output/user.output.model';
 
 @Injectable()
 export class UsersQueryRepository {
   constructor(@InjectModel(User.name) private UserModel: UserModelType) {
   }
 
-  async getUsers(queryParams: IUserQueryType) {
+  async getUsers(queryParams: UserQueryDto) {
     const query = this._createDefaultValues(queryParams);
 
     let search: {};
@@ -104,7 +104,7 @@ export class UsersQueryRepository {
     }
   }
 
-  _maping(users: IUserDBType[]): IUserViewModel[] {
+  _maping(users: UserDocument[]): UserOutputModel[] {
     return users.map(u => ({
       id: String(u._id),
       createdAt: u.createdAt,
@@ -113,7 +113,7 @@ export class UsersQueryRepository {
     }))
   }
 
-  _createDefaultValues(query: IUserQueryType) {
+  _createDefaultValues(query: UserQueryDto) {
     return {
       pageNumber: query.pageNumber ? +query.pageNumber : 1,
       pageSize: query.pageSize !== undefined ? +query.pageSize : 10,

@@ -47,8 +47,10 @@ export class AuthRepository {
   }
 
   async findByEmail(email: string){
+
     try {
       const user = await this.UserModel.findOne({email: email})
+
       if (user) return {
         status: ResultCode.Success,
         data: user

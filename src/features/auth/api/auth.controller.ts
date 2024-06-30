@@ -17,12 +17,14 @@ export class AuthController {
   constructor(private readonly authService: AuthService, private readonly usersService: UsersService, private readonly mappingsUsersService: MappingsUsersService, private readonly mapingErrorsService: MapingErrorsService, private readonly mappingsRequestHeadersService: MappingsRequestHeadersService) {
   }
 
-  @Post()
+  @Post('login')
   async login(@Body() loginModel: LoginInputModel, @Req() req: Request, @Res() res: Response) {
 
-    const dataSession = this.mappingsRequestHeadersService.getHeadersForCreateSession(req);
+    // const dataSession = this.mappingsRequestHeadersService.getHeadersForCreateSession(req);
+    //
+    // const result = await this.authService.login(loginModel, dataSession);
+    const result = await this.authService.login(loginModel);
 
-    const result = await this.authService.login(loginModel, dataSession);
     if (result.data) {
 
       res.cookie('refreshToken', result.data.refreshToken, { httpOnly: true, secure: true });
@@ -33,7 +35,66 @@ export class AuthController {
     return;
   }
 
-  @Get()
+  @Post('password-recovery')
+  async passwordRecovery(@Body() email: string, @Req() req: Request, @Res() res: Response) {
+    await this.authService.recoveryCode(email);
+
+    res.status(HTTP_STATUSES.NotContent).send({});
+    return;
+  }
+
+  @Post('new-password')
+  async setNewPassword(@Body() query: SetNewPasswordModel, @Req() req: Request, @Res() res: Response) {
+    const { newPassword, recoveryCode } = query;
+
+    const response = await this.authService.checkValidRecoveryCode(recoveryCode);
+
+    if (!response.data) {
+      res.status(HTTP_STATUSES[response.status]).send({ 'errorsMessages': response.errorsMessages });
+      return;
+    }
+    await this.authService.updatePassword(newPassword, response.data);
+
+    res.status(HTTP_STATUSES.NotContent).send({});
+    return;
+  }
+
+  @Post('registration-confirmation')
+  async confirmationEmail(@Body('code') code: string, @Req() req: Request, @Res() res: Response) {
+    const result = await this.authService.confirmEmail(code);
+    if (result.errorMessage) {
+      res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
+      return;
+    }
+    res.status(HTTP_STATUSES[result.status]).send({});
+    return
+  }
+
+  @Post('registration')
+  async registration(@Body() registerModel: UserCreateModel, @Req() req: Request, @Res() res: Response) {
+    const result = await this.authService.registration(registerModel);
+    if (result.errorMessage) {
+      res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
+      return;
+    }
+    res.status(HTTP_STATUSES[result.status]).send({});
+    return;
+  }
+
+  @Post('registration-email-resending')
+  async resendConfirmationCode(@Body('email') email: string, @Req() req: Request, @Res() res: Response) {
+
+    const result = await this.authService.resendCode(email);
+
+    if (result.errorMessage) {
+      res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
+      return;
+    }
+    res.status(HTTP_STATUSES[result.status]).send({});
+    return;
+  }
+
+  @Get('me')
   async me(@Req() req: Request, @Res() res: Response) {
     // const userId = req.userId!;
     const userId = '1112';
@@ -48,40 +109,6 @@ export class AuthController {
       return;
     }
     res.status(HTTP_STATUSES.BadRequest).send({ errorMessage: 'Something went wrong', data: null });
-    return;
-  }
-
-  @Post()
-  async registration(@Body() registerModel: UserCreateModel, @Req() req: Request, @Res() res: Response) {
-    const result = await this.authService.registration(registerModel);
-    if (result.errorMessage) {
-      res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
-      return;
-    }
-    res.status(HTTP_STATUSES[result.status]).send({});
-    return;
-  }
-
-  @Post()
-  async confirmationEmail(@Body() code: string, @Req() req: Request, @Res() res: Response) {
-    const result = await this.authService.confirmEmail(code);
-    if (result.errorMessage) {
-      res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
-      return;
-    }
-    res.status(HTTP_STATUSES[result.status]).send({});
-    return;
-  }
-
-  @Post()
-  async resendConfirmationCode(@Body() email: string, @Req() req: Request, @Res() res: Response) {
-    const result = await this.authService.resendCode(email);
-
-    if (result.errorMessage) {
-      res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
-      return;
-    }
-    res.status(HTTP_STATUSES[result.status]).send({});
     return;
   }
 
@@ -116,28 +143,4 @@ export class AuthController {
   //   res.status(HTTP_STATUSES[response.status]).send(response.errorMessage);
   //   return;
   // }
-
-  @Post()
-  async passwordRecovery(@Body() email: string, @Req() req: Request, @Res() res: Response) {
-    await this.authService.recoveryCode(email);
-
-    res.status(HTTP_STATUSES.NotContent).send({});
-    return;
-  }
-
-  @Post()
-  async setNewPassword(@Body() query: SetNewPasswordModel, @Req() req: Request, @Res() res: Response) {
-    const { newPassword, recoveryCode } = query;
-
-    const response = await this.authService.checkValidRecoveryCode(recoveryCode);
-
-    if (!response.data) {
-      res.status(HTTP_STATUSES[response.status]).send({ 'errorsMessages': response.errorsMessages });
-      return;
-    }
-    await this.authService.updatePassword(newPassword, response.data);
-
-    res.status(HTTP_STATUSES.NotContent).send({});
-    return;
-  }
 }

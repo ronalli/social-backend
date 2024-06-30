@@ -37,6 +37,12 @@ import { MappingsPostsService } from './features/posts/application/mappings/mapp
 import { MappingsUsersService } from './features/users/application/mappings/mappings.users';
 import { MapingErrorsService } from './common/utils/mappings.errors.service';
 import { MappingsRequestHeadersService } from './common/utils/mappings.request.headers';
+import { RecoveryCode, RecoveryCodeSchema } from './features/auth/domain/recoveryCode.entity';
+import { NodemailerService } from './common/services/nodemailer.service';
+import { AuthService } from './features/auth/application/auth.service';
+import { AuthRepository } from './features/auth/infrastructure/auth.repository';
+import { AuthQueryRepository } from './features/auth/infrastructure/auth-query.repository';
+import { AuthController } from './features/auth/api/auth.controller';
 
 config();
 
@@ -65,6 +71,12 @@ const commentsProviders: Provider[] = [
   CommentsQueryRepository
 ]
 
+const authProviders: Provider[] = [
+  AuthService,
+  AuthRepository,
+  AuthQueryRepository
+]
+
 const mappingsProviders: Provider[] = [
   MappingBlogsService,
   MappingsCommentsService,
@@ -83,20 +95,23 @@ const mappingsProviders: Provider[] = [
     MongooseModule.forFeature([{name: Comment.name, schema: CommentSchema}]),
     MongooseModule.forFeature([{name: Post.name, schema: PostSchema}]),
     MongooseModule.forFeature([{name: Like.name, schema: LikeSchema}]),
+    MongooseModule.forFeature([{name: RecoveryCode.name, schema: RecoveryCodeSchema}]),
 
   ],
-  controllers: [UsersController, BlogsController, CommentsController, PostsController, DeleteAllCollectionsController],
+  controllers: [UsersController, BlogsController, CommentsController, PostsController, DeleteAllCollectionsController, AuthController],
   providers: [
     ...usersProviders,
     ...blogsProviders,
     ...postsProviders,
     ...commentsProviders,
+    ...authProviders,
     ...mappingsProviders,
     DeleteService,
     QueryParamsService,
     MappingsUsersService,
     MapingErrorsService,
-    MappingsRequestHeadersService
+    MappingsRequestHeadersService,
+    NodemailerService
 
   ],
 })

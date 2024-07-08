@@ -1,9 +1,8 @@
 import {ObjectId} from "mongodb";
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException} from '@nestjs/common';
 import {UsersQueryRepository} from './users.query-repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument, UserModelType } from '../domain/user.entity';
-import { ResultCode } from '../../../settings/http.status';
 import { bcryptService } from '../../../common/services/password-hash.service';
 import { UserCreateModel } from '../api/models/input/create-user.input.model';
 import { Types } from 'mongoose';
@@ -18,13 +17,8 @@ export class UsersRepository {
 
     const response = await this.usersQueryRepository.doesExistByLoginOrEmail(data.login, data.email)
 
-    if (response.status === ResultCode.BadRequest) {
-
-      return {
-        errorMessage: 'User founded',
-        status: ResultCode.BadRequest,
-        data: null
-      }
+    if (!response) {
+      throw new BadRequestException();
     }
 
     const hash = await bcryptService.generateHash(data.password);
@@ -45,55 +39,26 @@ export class UsersRepository {
 
       const response = await user.save();
       const result = await this.findUserById(String(response._id))
-
-      if (result.data) {
-        const outViewModelUser = this._maping(result.data);
-        return {
-          status: ResultCode.Created,
-          data: outViewModelUser,
-        }
+      if (result) {
+        return this._maping(result);
       }
-      return {errorMessage: 'Error created user', status: ResultCode.NotFound, data: null}
     } catch (e) {
-      console.log(e);
-
-      return {errorMessage: 'Error DB', status: ResultCode.InternalServerError}
+      throw new InternalServerErrorException(e)
     }
   }
 
   async findUserById(id: string) {
     try {
-      const foundUser = await this.UserModel.findOne({_id: new ObjectId(id)})
-      if (foundUser) {
-        return {
-          status: ResultCode.Success,
-          data: foundUser
-        }
-      }
-      return {errorMessage: "Not found user", status: ResultCode.NotFound}
-
+     return await this.UserModel.findOne({_id: new ObjectId(id)})
     } catch (e) {
-      return {errorMessage: 'Errors BD', status: ResultCode.InternalServerError, data: null}
+      throw new InternalServerErrorException(e)
     }
   }
-
   async deleteUser(id: string) {
     try {
-      const foundUser = await this.UserModel.findOne({_id: new ObjectId(id)});
-      if (!foundUser) {
-        return {
-          errorMessage: 'Not found user',
-          status: ResultCode.NotFound,
-          data: null
-        }
-      }
-      await this.UserModel.deleteOne({_id: new ObjectId(id)});
-      return {
-        status: ResultCode.NotContent,
-        data: null
-      }
+      return await this.UserModel.findOneAndDelete({_id: new ObjectId(id)});
     } catch (e) {
-      return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
+      throw new InternalServerErrorException(e)
     }
   }
 

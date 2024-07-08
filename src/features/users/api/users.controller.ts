@@ -30,12 +30,10 @@ export class UsersController {
   @Post()
   async createUser(@Body() createModel: UserCreateModel,  @Req() req: Request, @Res() res: Response) {
     const result = await this.usersService.createUser(createModel);
-    if (result.data) {
-      res.status(HTTP_STATUSES[result.status]).send(result.data);
-      return
-    }
-    res.status(HTTP_STATUSES[result.status]).send({errorMessage: result.errorMessage, data: result.data})
-    return
+    // if (result.data) {
+    //   res.status(HTTP_STATUSES[result.status]).send(result.data);
+    //   return
+    // }
   }
 
   @UseGuards(BasicAuthGuard)
@@ -44,11 +42,11 @@ export class UsersController {
 
     const result = await this.usersService.deleteUser(id)
 
-    if (result.errorMessage) {
-      res.status(HTTP_STATUSES[result.status]).send({errorMessage: result.errorMessage, data: result.data})
-      return
-    }
-    res.status(HTTP_STATUSES[result.status]).send({})
-    return
+    // if (result.errorMessage) {
+    //   res.status(HTTP_STATUSES[result.status]).send({errorMessage: result.errorMessage, data: result.data})
+    //   return
+    // }
+    // res.status(HTTP_STATUSES[result.status]).send({})
+    // return
   }
 }

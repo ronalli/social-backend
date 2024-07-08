@@ -1,5 +1,5 @@
 import {ObjectId, SortDirection} from "mongodb";
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument, UserModelType } from '../domain/user.entity';
 import { ResultCode } from '../../../settings/http.status';
@@ -57,12 +57,7 @@ export class UsersQueryRepository {
 
   async findUserById(id: string) {
     try {
-      const foundUser = await this.UserModel.findOne({_id: new ObjectId(id)})
-      if (foundUser) {
-        return {status: ResultCode.Success, data: foundUser};
-      }
-      return {errorMessage: 'Not found user', status: ResultCode.NotFound, data: null}
-
+      return await this.UserModel.findOne({_id: new ObjectId(id)})
     } catch (e) {
       throw new InternalServerErrorException(e)
     }
@@ -70,21 +65,11 @@ export class UsersQueryRepository {
 
   async doesExistByLoginOrEmail(login: string, email: string) {
     try {
-
-      const filter = {
+      const user = await this.UserModel.findOne({
         $or: [{login: login}, {email: email}]
-      }
-      const user = await this.UserModel.findOne(filter);
+      });
 
-      if (user) {
-        return {
-          message: 'User founded',
-          status: ResultCode.BadRequest,
-          field: user.login === login ? 'login' : 'email'
-        }
-      } else {
-        return {status: ResultCode.Success, data: null}
-      }
+      return !user;
     } catch (e) {
       throw new InternalServerErrorException(e)
     }

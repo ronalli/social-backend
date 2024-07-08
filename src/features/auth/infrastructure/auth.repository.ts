@@ -31,16 +31,8 @@ export class AuthRepository {
       const user = new this.UserModel(data);
       const response = await user.save();
 
-      const result = await this.usersRepository.findUserById(String(response._id))
+      return await this.usersRepository.findUserById(String(response._id))
 
-      if (result.data) {
-
-        return {
-          status: ResultCode.Created,
-          data: result.data,
-        }
-      }
-      return {errorMessage: 'Error created user', status: ResultCode.NotFound, data: null}
     } catch (e) {
       return {errorMessage: 'Error DB', status: ResultCode.InternalServerError}
     }

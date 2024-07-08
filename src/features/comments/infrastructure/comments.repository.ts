@@ -57,7 +57,7 @@ export class CommentsRepository {
         createdAt: new Date().toISOString(),
         commentatorInfo: {
           userId: data.userId,
-          userLogin: result.data!.login,
+          userLogin: result.login,
         },
         likesCount: 0,
         dislikesCount: 0,

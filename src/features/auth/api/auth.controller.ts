@@ -74,11 +74,7 @@ export class AuthController {
   @Post('registration')
   async registration(@Body() registerModel: UserCreateModel, @Req() req: Request, @Res() res: Response) {
     const result = await this.authService.registration(registerModel);
-    if (result.errorMessage) {
-      res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
-      return;
-    }
-    res.status(HTTP_STATUSES[result.status]).send({});
+    res.status(HTTP_STATUSES.NotContent).send({});
     return;
   }
 
@@ -101,16 +97,12 @@ export class AuthController {
     const userId = req['userId'];
     if (userId !== null) {
       const result = await this.usersService.findUser(userId);
-      if (result.data) {
-        const outputResult = this.mappingsUsersService.formatViewModel(result.data);
-        res.status(HTTP_STATUSES[result.status]).send(outputResult);
+      if (result) {
+        const outputResult = this.mappingsUsersService.formatViewModel(result);
+        res.status(HTTP_STATUSES.Success).send(outputResult);
         return;
       }
-      res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage, data: result.data });
-      return;
     }
-    res.status(HTTP_STATUSES.BadRequest).send({ errorMessage: 'Something went wrong', data: null });
-    return;
   }
 
   // @Post()

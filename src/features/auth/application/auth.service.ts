@@ -2,7 +2,7 @@ import { add } from 'date-fns';
 import { randomUUID } from 'node:crypto';
 import { ResultCode } from '../../../settings/http.status';
 import { AuthRepository } from '../infrastructure/auth.repository';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query-repository';
 import { AuthQueryRepository } from '../infrastructure/auth-query.repository';
@@ -67,14 +67,8 @@ export class AuthService {
     const { login, email, password } = data;
     const result = await this.usersQueryRepository.doesExistByLoginOrEmail(login, email);
 
-    if (result.message) {
-      return {
-        status: result.status,
-        errorMessage: {
-          message: result.message,
-          field: result.field,
-        },
-      };
+    if (!result) {
+      throw new BadRequestException([{message: 'User founded', field: 'login/email'}, ]);
     }
 
     const hash = await bcryptService.generateHash(password);
@@ -102,9 +96,7 @@ export class AuthService {
     //     });
     // }
 
-    return {
-      status: ResultCode.NotContent,
-    };
+    return true;
 
   }
 

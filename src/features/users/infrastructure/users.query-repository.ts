@@ -1,5 +1,5 @@
 import {ObjectId, SortDirection} from "mongodb";
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument, UserModelType } from '../domain/user.entity';
 import { ResultCode } from '../../../settings/http.status';
@@ -42,7 +42,6 @@ export class UsersQueryRepository {
 
       const totalCount = await this.UserModel.countDocuments(filter);
       return {
-        status: ResultCode.Success,
         data: {
           pagesCount: Math.ceil(totalCount / query.pageSize),
           pageSize: query.pageSize,
@@ -52,7 +51,7 @@ export class UsersQueryRepository {
         }
       }
     } catch (e) {
-      return {errorMessage: 'Error BD', status: ResultCode.InternalServerError, data: null};
+      throw new InternalServerErrorException(e);
     }
   }
 
@@ -65,7 +64,7 @@ export class UsersQueryRepository {
       return {errorMessage: 'Not found user', status: ResultCode.NotFound, data: null}
 
     } catch (e) {
-      return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null};
+      throw new InternalServerErrorException(e)
     }
   }
 
@@ -87,7 +86,7 @@ export class UsersQueryRepository {
         return {status: ResultCode.Success, data: null}
       }
     } catch (e) {
-      return {message: 'Error DB', status: ResultCode.InternalServerError, field: 'DB'};
+      throw new InternalServerErrorException(e)
     }
   }
 
@@ -100,7 +99,7 @@ export class UsersQueryRepository {
       }
       return {message: 'User not found', status: ResultCode.BadRequest, field: 'code'}
     } catch (e) {
-      return {message: 'Error DB', status: ResultCode.InternalServerError, field: 'DB'}
+      throw new InternalServerErrorException(e)
     }
   }
 

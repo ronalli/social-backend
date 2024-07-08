@@ -21,10 +21,9 @@ export class UsersController {
   async getAllUsers(@Query() query: UserQueryDto, @Req() req: Request, @Res({passthrough: true}) res: Response, ) {
     const result = await this.usersQueryRepository.getUsers(query);
     if (result.data) {
-      res.status(HTTP_STATUSES[result.status]).json(result.data)
+      res.status(HTTP_STATUSES.Success).json(result.data)
       return
     }
-    res.status(HTTP_STATUSES[result.status]).send({errorMessage: result.errorMessage, data: result.data})
   }
 
   @UseGuards(BasicAuthGuard)

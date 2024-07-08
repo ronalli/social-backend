@@ -1,16 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { appSettings } from './settings/apply.app.setting';
 
-const API_PREFIX = '/api/';
+const API_PREFIX = 'api';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api');
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-  }));
+  app.setGlobalPrefix(API_PREFIX);
 
+  appSettings(app);
 
   await app.listen(3000);
 }

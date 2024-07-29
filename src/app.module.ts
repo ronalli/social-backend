@@ -43,6 +43,7 @@ import { AuthService } from './features/auth/application/auth.service';
 import { AuthRepository } from './features/auth/infrastructure/auth.repository';
 import { AuthQueryRepository } from './features/auth/infrastructure/auth-query.repository';
 import { AuthController } from './features/auth/api/auth.controller';
+import { appSettings } from './settings/app-settings';
 
 config();
 
@@ -86,10 +87,10 @@ const mappingsProviders: Provider[] = [
 @Module({
 
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    MongooseModule.forRoot(process.env.MONGO_URL + `${process.env.DB_NAME}`),
+    // ConfigModule.forRoot({
+    //   isGlobal: true,
+    // }),
+    MongooseModule.forRoot(appSettings.api.MONGO_CONNECTION_URI),
     MongooseModule.forFeature([{name: User.name, schema: UserSchema}]),
     MongooseModule.forFeature([{name: Blog.name, schema: BlogSchema}]),
     MongooseModule.forFeature([{name: Comment.name, schema: CommentSchema}]),

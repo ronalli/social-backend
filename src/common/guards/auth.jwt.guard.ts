@@ -1,5 +1,4 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { AuthService } from '../../features/auth/application/auth.service';
 import { ResultCode } from '../../settings/http.status';
 

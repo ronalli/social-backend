@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument, UserModelType } from '../domain/user.entity';
 import { ResultCode } from '../../../settings/http.status';
 import { UserQueryDto } from '../api/models/user-query.dto';
-import { UserOutputModel } from '../api/models/output/user.output.model';
+import { UserOutputModel, UserOutputModelMapper } from '../api/models/output/user.output.model';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -53,6 +53,14 @@ export class UsersQueryRepository {
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
+  }
+
+  async doesExistById(id: string): Promise<UserOutputModel | null> {
+    const findedUser = await this.UserModel.findOne({_id: new ObjectId(id)});
+    if (findedUser) {
+      return UserOutputModelMapper(findedUser);
+    }
+    return null;
   }
 
   async findUserById(id: string) {

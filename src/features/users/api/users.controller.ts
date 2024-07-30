@@ -7,6 +7,7 @@ import { HTTP_STATUSES } from '../../../settings/http.status';
 import { UserCreateModel } from './models/input/create-user.input.model';
 import { UserQueryDto } from './models/user-query.dto';
 import { BasicAuthGuard } from '../../../common/guards/auth.basic.guard';
+import { UserOutputModel } from './models/output/user.output.model';
 
 @ApiTags('Users')
 @Controller('users')
@@ -28,12 +29,10 @@ export class UsersController {
 
   @UseGuards(BasicAuthGuard)
   @Post()
-  async createUser(@Body() createModel: UserCreateModel,  @Req() req: Request, @Res() res: Response) {
-    const result = await this.usersService.createUser(createModel);
-    // if (result.data) {
-    //   res.status(HTTP_STATUSES[result.status]).send(result.data);
-    //   return
-    // }
+  async createUser(@Body() createModel: UserCreateModel) {
+    const createdUserId = await this.usersService.createUser(createModel);
+    const createdUser: UserOutputModel | null = await this.usersQueryRepository.doesExistById(createdUserId)
+    return createdUser;
   }
 
   @UseGuards(BasicAuthGuard)

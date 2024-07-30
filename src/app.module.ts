@@ -44,6 +44,8 @@ import { AuthRepository } from './features/auth/infrastructure/auth.repository';
 import { AuthQueryRepository } from './features/auth/infrastructure/auth-query.repository';
 import { AuthController } from './features/auth/api/auth.controller';
 import { appSettings } from './settings/app-settings';
+import { LoginIsExistConstraint } from './common/decorators/validate/login-is-exist.decorator';
+import { EmailIsExistConstraint } from './common/decorators/validate/email-is-exist.decorator';
 
 config();
 
@@ -87,9 +89,6 @@ const mappingsProviders: Provider[] = [
 @Module({
 
   imports: [
-    // ConfigModule.forRoot({
-    //   isGlobal: true,
-    // }),
     MongooseModule.forRoot(appSettings.api.MONGO_CONNECTION_URI),
     MongooseModule.forFeature([{name: User.name, schema: UserSchema}]),
     MongooseModule.forFeature([{name: Blog.name, schema: BlogSchema}]),
@@ -112,8 +111,9 @@ const mappingsProviders: Provider[] = [
     MappingsUsersService,
     MapingErrorsService,
     MappingsRequestHeadersService,
-    NodemailerService
-
+    NodemailerService,
+    LoginIsExistConstraint,
+    EmailIsExistConstraint,
   ],
 })
 export class AppModule {}

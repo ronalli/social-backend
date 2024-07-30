@@ -1,6 +1,18 @@
 import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Delete, Get, Inject, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get, HttpCode, HttpException, HttpStatus,
+  Inject, NotFoundException,
+  Param,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from '../application/users.service';
 import { UsersQueryRepository } from '../infrastructure/users.query-repository';
 import { HTTP_STATUSES } from '../../../settings/http.status';
@@ -37,15 +49,13 @@ export class UsersController {
 
   @UseGuards(BasicAuthGuard)
   @Delete(':id')
-  async deleteUser(@Param('id') id: string, @Req() req: Request, @Res() res: Response) {
+  @HttpCode(204)
+  async deleteUser(@Param('id') id: string) {
 
     const result = await this.usersService.deleteUser(id)
 
-    // if (result.errorMessage) {
-    //   res.status(HTTP_STATUSES[result.status]).send({errorMessage: result.errorMessage, data: result.data})
-    //   return
-    // }
-    // res.status(HTTP_STATUSES[result.status]).send({})
-    // return
+    if(!result) {
+      throw new NotFoundException(`User with id ${id} not found`)
+    }
   }
 }

@@ -26,9 +26,12 @@ export class UsersRepository {
       throw new InternalServerErrorException(e)
     }
   }
-  async deleteUser(id: string) {
+  async delete(id: string): Promise<boolean> {
     try {
-      return await this.UserModel.findOneAndDelete({_id: new ObjectId(id)});
+
+      const deletingResult = await this.UserModel.deleteOne({_id: new ObjectId(id)});
+
+      return !!deletingResult.deletedCount
     } catch (e) {
       throw new InternalServerErrorException(e)
     }

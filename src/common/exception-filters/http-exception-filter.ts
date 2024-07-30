@@ -41,5 +41,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (status === HttpStatus.UNAUTHORIZED) {
       response.status(status).json({})
     }
+
+    if (status === HttpStatus.NOT_FOUND) {
+      response.status(status).json({})
+    }
   }
 }

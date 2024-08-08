@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
 import { HTTP_STATUSES } from '../../../settings/http.status';
 import { ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Query, Req, Res } from '@nestjs/common';
 import { BlogCreateModel } from './models/input/create-blog.input.model';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
 import { BlogsService } from '../application/blogs.service';
@@ -13,11 +13,12 @@ import { serviceInfoLike } from '../../../common/services/initialization.status.
 @ApiTags('Blogs')
 @Controller('blogs')
 export class BlogsController {
-  constructor(private readonly blogsService: BlogsService, private readonly  blogsQueryRepository: BlogsQueryRepository, private readonly  postsService: PostsService) {
+  constructor(@Inject(BlogsService) private readonly blogsService: BlogsService, @Inject(BlogsQueryRepository) private readonly  blogsQueryRepository: BlogsQueryRepository, @Inject(PostsService) private readonly  postsService: PostsService) {
   }
 
   @Post()
   async createBlog(@Body() createModel: BlogCreateModel, @Req() req: Request, @Res() res: Response) {
+
     const result = await this.blogsService.createBlog(createModel);
     if (result.data) {
       res.status(HTTP_STATUSES[result.status]).send(result.data)

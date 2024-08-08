@@ -89,12 +89,12 @@ export class AuthService {
 
     await user.save();
 
-    // if (user) {
-    //   nodemailerService.sendEmail(email, user.emailConfirmation?.confirmationCode!, emailExamples.registrationEmail)
-    //     .catch(e => {
-    //       console.log(e);
-    //     });
-    // }
+    if (user) {
+      this.nodemailerService.sendEmail(email, user.emailConfirmation?.confirmationCode!, emailExamples.registrationEmail)
+        .catch(e => {
+          console.log(e);
+        });
+    }
 
     return true;
 

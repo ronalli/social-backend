@@ -33,6 +33,9 @@ export class BlogsRepository {
       }
       return {errorMessage: 'Not found blog', status: ResultCode.NotFound, data: null}
     } catch (e) {
+
+      console.log(e);
+
       return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
     }
   }

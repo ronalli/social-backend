@@ -18,6 +18,7 @@ export class PostsController {
 
   @Post()
   async createPost(@Body() createModel: PostCreateModel, @Req() req: Request, @Res() res: Response) {
+
     const token = req.headers.authorization?.split(' ')[1] || 'unknown';
     const currentUser = await serviceInfoLike.getIdUserByToken(token);
 

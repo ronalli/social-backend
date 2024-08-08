@@ -2,12 +2,12 @@ import { add } from 'date-fns';
 import { randomUUID } from 'node:crypto';
 import { ResultCode } from '../../../settings/http.status';
 import { AuthRepository } from '../infrastructure/auth.repository';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query-repository';
 import { AuthQueryRepository } from '../infrastructure/auth-query.repository';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserModelType } from '../../users/domain/user.entity';
+import { User, UserDocument, UserModelType } from '../../users/domain/user.entity';
 import { bcryptService } from '../../../common/services/password-hash.service';
 import { jwtService } from '../../../common/services/jwt.service';
 import { LoginInputModel } from '../api/models/input/login.input.model';
@@ -101,28 +101,36 @@ export class AuthService {
   }
 
   async confirmEmail(code: string) {
-    const result = await this.usersQueryRepository.findUserByCodeConfirmation(code);
+    const result= await this.usersQueryRepository.findUserByCodeConfirmation(code);
+
+    if(!result) {
+      throw new BadRequestException([{message: 'The code is incorrect', field: 'code'}]);
+    }
+
 
     if (result.data?.emailConfirmation?.isConfirmed) {
-      return {
-        status: ResultCode.Success,
-        errorMessage: {
-          message: 'Email already confirmed',
-          field: 'email',
-        },
-      };
+      return true;
+      // return {
+      //   status: ResultCode.Success,
+      //   errorMessage: {
+      //     message: 'Email already confirmed',
+      //     field: 'email',
+      //   },
+      // };
     }
 
     if (result.data?.emailConfirmation?.expirationDate && result.data.emailConfirmation.expirationDate < new Date()) {
-      return {
-        status: ResultCode.BadRequest,
-        errorMessage: {
-          message: 'The code is not valid',
-          field: 'email',
-        },
-      };
+
+      throw new  BadRequestException([{message: 'The code is not valid', field: 'email'}, ])
+      // return {
+      //   status: ResultCode.BadRequest,
+      //   errorMessage: {
+      //     message: 'The code is not valid',
+      //     field: 'email',
+      //   },
+      // };
     }
-    if (result.data) {
+    if (result) {
       try {
 
         const foundUser = await this.UserModel.findOne({ _id: result.data._id });
@@ -136,27 +144,28 @@ export class AuthService {
 
         await foundUser.save();
 
-        return {
-          status: ResultCode.NotContent,
-        };
+        return true;
+
       } catch (e) {
-        return {
-          status: ResultCode.InternalServerError,
-          errorMessage: {
-            field: 'DB',
-            message: 'Error DB',
-          },
-        };
+
+        throw new InternalServerErrorException(e);
+        // return {
+        //   status: ResultCode.InternalServerError,
+        //   errorMessage: {
+        //     field: 'DB',
+        //     message: 'Error DB',
+        //   },
+        // };
       }
     }
 
-    return {
-      status: result.status,
-      errorMessage: {
-        message: result.message,
-        field: result.field,
-      },
-    };
+    // return {
+    //   status: result.status,
+    //   errorMessage: {
+    //     message: result.message,
+    //     field: result.field,
+    //   },
+    // };
   }
 
   async resendCode(email: string) {
@@ -192,13 +201,15 @@ export class AuthService {
       };
     }
 
-    return {
-      status: result.status,
-      errorMessage: {
-        message: result.errorMessage || 'Something went wrong',
-        field: 'email',
-      },
-    };
+    // return {
+    //   status: result.status,
+    //   errorMessage: {
+    //     message: result.errorMessage || 'Something went wrong',
+    //     field: 'email',
+    //   },
+    // };
+
+    throw new BadRequestException();
   }
 
   // async logout(token: string) {

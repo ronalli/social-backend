@@ -15,7 +15,6 @@ import {
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
 import { UsersQueryRepository } from '../infrastructure/users.query-repository';
-import { HTTP_STATUSES } from '../../../settings/http.status';
 import { UserCreateModel } from './models/input/create-user.input.model';
 import { UserQueryDto } from './models/user-query.dto';
 import { BasicAuthGuard } from '../../../common/guards/auth.basic.guard';
@@ -33,10 +32,7 @@ export class UsersController {
   @Get('')
   async getAllUsers(@Query() query: UserQueryDto, @Req() req: Request, @Res({passthrough: true}) res: Response, ) {
     const result = await this.usersQueryRepository.getUsers(query);
-    if (result.data) {
-      res.status(HTTP_STATUSES.Success).json(result.data)
-      return
-    }
+      return result.data
   }
 
   @UseGuards(BasicAuthGuard)

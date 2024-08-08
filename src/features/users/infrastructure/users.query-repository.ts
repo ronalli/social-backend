@@ -1,5 +1,5 @@
 import {ObjectId, SortDirection} from "mongodb";
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument, UserModelType } from '../domain/user.entity';
 import { ResultCode } from '../../../settings/http.status';
@@ -88,9 +88,10 @@ export class UsersQueryRepository {
       const filter = {'emailConfirmation.confirmationCode': codeConfirmation}
       const user = await this.UserModel.findOne(filter);
       if (user) {
-        return {status: ResultCode.Success, data: user}
+        return {data: user}
       }
-      return {message: 'User not found', status: ResultCode.BadRequest, field: 'code'}
+      return false;
+
     } catch (e) {
       throw new InternalServerErrorException(e)
     }

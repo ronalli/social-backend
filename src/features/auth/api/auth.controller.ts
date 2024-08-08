@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
 import { UsersService } from '../../users/application/users.service';
 import { HTTP_STATUSES } from '../../../settings/http.status';
@@ -36,14 +36,14 @@ export class AuthController {
     return;
   }
 
+  @HttpCode(204)
   @Post('password-recovery')
   async passwordRecovery(@Body() email: string, @Req() req: Request, @Res() res: Response) {
     await this.authService.recoveryCode(email);
-
-    res.status(HTTP_STATUSES.NotContent).send({});
     return;
   }
 
+  @HttpCode(204)
   @Post('new-password')
   async setNewPassword(@Body() query: SetNewPasswordModel, @Req() req: Request, @Res() res: Response) {
     const { newPassword, recoveryCode } = query;
@@ -51,24 +51,26 @@ export class AuthController {
     const response = await this.authService.checkValidRecoveryCode(recoveryCode);
 
     if (!response.data) {
-      res.status(HTTP_STATUSES[response.status]).send({ 'errorsMessages': response.errorsMessages });
-      return;
+
+      throw new BadRequestException()
+      // res.status(HTTP_STATUSES[response.status]).send({ 'errorsMessages': response.errorsMessages });
+      // return;
     }
     await this.authService.updatePassword(newPassword, response.data);
 
-    res.status(HTTP_STATUSES.NotContent).send({});
+    // res.status(HTTP_STATUSES.NotContent).send({});
     return;
   }
 
+  @HttpCode(204)
   @Post('registration-confirmation')
   async confirmationEmail(@Body('code') code: string, @Req() req: Request, @Res() res: Response) {
-    const result = await this.authService.confirmEmail(code);
-    if (result.errorMessage) {
-      res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
-      return;
-    }
-    res.status(HTTP_STATUSES[result.status]).send({});
-    return
+    // if (result.errorMessage) {
+    //   res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
+    //   return;
+    // }
+    // res.status(HTTP_STATUSES[result.status]).send({});
+    return await this.authService.confirmEmail(code);
   }
 
   @Post('registration')
@@ -78,19 +80,23 @@ export class AuthController {
     return;
   }
 
+  @HttpCode(204)
   @Post('registration-email-resending')
   async resendConfirmationCode(@Body('email') email: string, @Req() req: Request, @Res() res: Response) {
 
     const result = await this.authService.resendCode(email);
 
+    console.log(result);
+
     if (result.errorMessage) {
-      res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
-      return;
+      throw new BadRequestException(this.mapingErrorsService.outputResponse(result.errorMessage));
+      // res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
+      // return;
     }
-    res.status(HTTP_STATUSES[result.status]).send({});
     return;
   }
 
+  @HttpCode(200)
   @UseGuards(AuthJwtGuard)
   @Get('me')
   async me(@Req() req: Request, @Res() res: Response) {
@@ -98,9 +104,7 @@ export class AuthController {
     if (userId !== null) {
       const result = await this.usersService.findUser(userId);
       if (result) {
-        const outputResult = this.mappingsUsersService.formatViewModel(result);
-        res.status(HTTP_STATUSES.Success).send(outputResult);
-        return;
+        return this.mappingsUsersService.formatViewModel(result);
       }
     }
   }

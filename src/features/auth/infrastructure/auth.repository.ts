@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserModelType } from '../../users/domain/user.entity';
@@ -13,16 +13,16 @@ export class AuthRepository {
   async findByLoginOrEmail(loginOrEmail: string) {
     try {
       const filter = {
-        $or: [{email: loginOrEmail}, {login: loginOrEmail}],
+        $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
       }
 
       const findUser = await this.UserModel.findOne(filter)
 
-      if (findUser) return {status: ResultCode.Success, data: findUser};
-      return {errorMessage: 'Not found login/email', status: ResultCode.Unauthorized, data: null}
+      if (findUser) return { status: ResultCode.Success, data: findUser };
+      return { errorMessage: 'Not found login/email', status: ResultCode.Unauthorized, data: null }
 
     } catch (e) {
-      return {errorMessage: 'Error DB', status: ResultCode.BadRequest, data: null};
+      return { errorMessage: 'Error DB', status: ResultCode.BadRequest, data: null };
     }
   }
 
@@ -34,29 +34,23 @@ export class AuthRepository {
       return await this.usersRepository.findUserById(String(response._id))
 
     } catch (e) {
-      return {errorMessage: 'Error DB', status: ResultCode.InternalServerError}
+      return { errorMessage: 'Error DB', status: ResultCode.InternalServerError }
     }
   }
 
-  async findByEmail(email: string){
+  async findByEmail(email: string) {
 
     try {
-      const user = await this.UserModel.findOne({email: email})
 
-      if (user) return {
-        status: ResultCode.Success,
-        data: user
-      };
-      return {
-        errorMessage: 'Error findByEmail',
-        status: ResultCode.BadRequest
-      }
-    } catch (e) {
-      return {
-        errorMessage: 'Error DB',
-        status: ResultCode.InternalServerError
-      }
+
+    return await this.UserModel.findOne({ email: email })
+
+
+    // throw new BadRequestException([{ message: 'Error findByEmail', filed: 'email' }])
+  } catch (e) {
+
+      throw new InternalServerErrorException([{message: 'Error BD', field: 'BD'}])
+
     }
   }
-
 }

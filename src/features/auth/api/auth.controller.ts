@@ -18,29 +18,26 @@ export class AuthController {
   constructor(private readonly authService: AuthService, private readonly usersService: UsersService, private readonly mappingsUsersService: MappingsUsersService, private readonly mapingErrorsService: MapingErrorsService, private readonly mappingsRequestHeadersService: MappingsRequestHeadersService) {
   }
 
+  @HttpCode(200)
   @Post('login')
   async login(@Body() loginModel: LoginInputModel, @Req() req: Request, @Res() res: Response) {
 
     // const dataSession = this.mappingsRequestHeadersService.getHeadersForCreateSession(req);
     //
-    // const result = await this.authService.login(loginModel, dataSession);
+
     const result = await this.authService.login(loginModel);
 
-    if (result.data) {
+    res.cookie('refreshToken', result.data.refreshToken, { httpOnly: true, secure: true });
 
-      res.cookie('refreshToken', result.data.refreshToken, { httpOnly: true, secure: true });
-      res.status(HTTP_STATUSES[result.status]).send({ 'accessToken': result.data.accessToken });
-      return;
-    }
-    res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage, data: result.data });
-    return;
+    res.json( {'accessToken': result.data.accessToken });
   }
 
   @HttpCode(204)
   @Post('password-recovery')
-  async passwordRecovery(@Body() email: string, @Req() req: Request, @Res() res: Response) {
+  async passwordRecovery(@Body('email') email: string,  @Req() req: Request, @Res() res: Response) {
+
     await this.authService.recoveryCode(email);
-    return;
+    res.json();
   }
 
   @HttpCode(204)
@@ -50,50 +47,28 @@ export class AuthController {
 
     const response = await this.authService.checkValidRecoveryCode(recoveryCode);
 
-    if (!response.data) {
-
-      throw new BadRequestException()
-      // res.status(HTTP_STATUSES[response.status]).send({ 'errorsMessages': response.errorsMessages });
-      // return;
-    }
     await this.authService.updatePassword(newPassword, response.data);
-
-    // res.status(HTTP_STATUSES.NotContent).send({});
     return;
   }
 
   @HttpCode(204)
   @Post('registration-confirmation')
   async confirmationEmail(@Body('code') code: string, @Req() req: Request, @Res() res: Response) {
-    // if (result.errorMessage) {
-    //   res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
-    //   return;
-    // }
-    // res.status(HTTP_STATUSES[result.status]).send({});
     return await this.authService.confirmEmail(code);
   }
 
+  @HttpCode(204)
   @Post('registration')
   async registration(@Body() registerModel: UserCreateModel, @Req() req: Request, @Res() res: Response) {
-    const result = await this.authService.registration(registerModel);
-    res.status(HTTP_STATUSES.NotContent).send({});
-    return;
+    await this.authService.registration(registerModel);
+    res.json();
   }
 
   @HttpCode(204)
   @Post('registration-email-resending')
   async resendConfirmationCode(@Body('email') email: string, @Req() req: Request, @Res() res: Response) {
-
-    const result = await this.authService.resendCode(email);
-
-    console.log(result);
-
-    if (result.errorMessage) {
-      throw new BadRequestException(this.mapingErrorsService.outputResponse(result.errorMessage));
-      // res.status(HTTP_STATUSES[result.status]).send(this.mapingErrorsService.outputResponse(result.errorMessage));
-      // return;
-    }
-    return;
+    await this.authService.resendCode(email);
+    res.json();
   }
 
   @HttpCode(200)
@@ -104,7 +79,7 @@ export class AuthController {
     if (userId !== null) {
       const result = await this.usersService.findUser(userId);
       if (result) {
-        return this.mappingsUsersService.formatViewModel(result);
+       res.json(this.mappingsUsersService.formatViewModel(result));
       }
     }
   }

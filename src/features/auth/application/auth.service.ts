@@ -2,7 +2,7 @@ import { add } from 'date-fns';
 import { randomUUID } from 'node:crypto';
 import { ResultCode } from '../../../settings/http.status';
 import { AuthRepository } from '../infrastructure/auth.repository';
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query-repository';
 import { AuthQueryRepository } from '../infrastructure/auth-query.repository';
@@ -53,14 +53,20 @@ export class AuthService {
 
         return { status: ResultCode.Success, data: { accessToken, refreshToken } };
       } else {
-        return {
-          status: ResultCode.Unauthorized,
-          errorMessage: 'Incorrect data entered',
-          data: null,
-        };
+
+        throw new UnauthorizedException();
+
+        // return {
+        //   status: ResultCode.Unauthorized,
+        //   errorMessage: 'Incorrect data entered',
+        //   data: null,
+        // };
       }
     }
-    return { status: result.status, errorMessage: result.errorMessage, data: null };
+
+    throw new BadRequestException([{message:"If the inputModel has incorrect values", filed: 'login or email'}])
+    //
+    // return { status: result.status, errorMessage: result.errorMessage, data: null };
   }
 
   async registration(data: UserCreateModel) {
@@ -97,7 +103,6 @@ export class AuthService {
     }
 
     return true;
-
   }
 
   async confirmEmail(code: string) {
@@ -171,21 +176,16 @@ export class AuthService {
   async resendCode(email: string) {
     const result = await this.checkUserCredential(email);
 
-    if (result.data?.emailConfirmation?.isConfirmed) {
-      return {
-        status: ResultCode.BadRequest,
-        errorMessage: {
-          message: 'Email already confirmed',
-          field: 'email',
-        },
-      };
+    if (result.emailConfirmation?.isConfirmed) {
+
+      throw  new BadRequestException([{message: 'Email already confirmed', field: 'email'}, ])
     }
 
-    if (result.data && !result.data.emailConfirmation?.isConfirmed) {
+    if (result && !result.emailConfirmation?.isConfirmed) {
       const code = randomUUID();
       const expirationDate = add(new Date().toISOString(), { hours: 0, minutes: 1 });
 
-      const user = await this.UserModel.findOne({ _id: result.data._id });
+      const user = await this.UserModel.findOne({ _id: result._id });
 
       if (user && user.emailConfirmation) {
         user.emailConfirmation.expirationDate = expirationDate;
@@ -196,20 +196,8 @@ export class AuthService {
 
       this.nodemailerService.sendEmail(email, code, emailExamples.registrationEmail).catch(e => console.log(e));
 
-      return {
-        status: ResultCode.NotContent,
-      };
+      return true;
     }
-
-    // return {
-    //   status: result.status,
-    //   errorMessage: {
-    //     message: result.errorMessage || 'Something went wrong',
-    //     field: 'email',
-    //   },
-    // };
-
-    throw new BadRequestException();
   }
 
   // async logout(token: string) {
@@ -308,25 +296,21 @@ export class AuthService {
   async recoveryCode(email: string) {
     const response = await this.authRepository.findByEmail(email);
 
-    if (!response.data) {
-      return {
-        status: ResultCode.NotContent,
-        data: null,
-      };
-    }
+    // console.log(response);
 
     const dataCode = await createRecoveryCode(email, '5m');
 
-    const newCode = new this.RecoveryCodeModel({ code: dataCode });
+
+
+    const newCode = new this.RecoveryCodeModel({ _id: new Types.ObjectId(), code: dataCode });
+
 
     await newCode.save();
 
+
     this.nodemailerService.sendEmail(email, dataCode, emailExamples.recoveryPasswordByAccount).catch((e: Error) => console.log(e));
 
-    return {
-      status: ResultCode.NotContent,
-      data: null,
-    };
+    return true;
   }
 
   async updatePassword(password: string, email: string) {
@@ -349,11 +333,7 @@ export class AuthService {
 
     if (response) return { status: ResultCode.Success, data: response };
 
-    return {
-      status: ResultCode.BadRequest, data: null, errorsMessages: [{
-        message: 'Incorrect', field: 'recoveryCode',
-      }],
-    };
+    throw new BadRequestException([{message: 'The code is incorrect', field: 'recoveryCode'}]);
   }
 
   async checkUserCredential(login: string) {

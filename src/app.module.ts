@@ -46,6 +46,8 @@ import { AuthController } from './features/auth/api/auth.controller';
 import { appSettings } from './settings/app-settings';
 import { LoginIsExistConstraint } from './common/decorators/validate/login-is-exist.decorator';
 import { EmailIsExistConstraint } from './common/decorators/validate/email-is-exist.decorator';
+import { CreateUserHandler } from './features/users/application/usecases/create-user.usecase';
+import { CqrsModule } from '@nestjs/cqrs';
 
 config();
 
@@ -86,9 +88,12 @@ const mappingsProviders: Provider[] = [
   MappingsPostsService
 ]
 
+const CommandHandlers = [CreateUserHandler];
+
 @Module({
 
   imports: [
+    CqrsModule,
     MongooseModule.forRoot(appSettings.api.MONGO_CONNECTION_URI),
     MongooseModule.forFeature([{name: User.name, schema: UserSchema}]),
     MongooseModule.forFeature([{name: Blog.name, schema: BlogSchema}]),
@@ -114,6 +119,7 @@ const mappingsProviders: Provider[] = [
     NodemailerService,
     LoginIsExistConstraint,
     EmailIsExistConstraint,
+    ...CommandHandlers,
   ],
 })
 export class AppModule {}

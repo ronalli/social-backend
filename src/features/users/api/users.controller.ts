@@ -4,7 +4,7 @@ import {
   Body,
   Controller,
   Delete,
-  Get, HttpCode, HttpException, HttpStatus,
+  Get, HttpCode,
   Inject, NotFoundException,
   Param,
   Post,
@@ -19,13 +19,15 @@ import { UserCreateModel } from './models/input/create-user.input.model';
 import { UserQueryDto } from './models/user-query.dto';
 import { BasicAuthGuard } from '../../../common/guards/auth.basic.guard';
 import { UserOutputModel } from './models/output/user.output.model';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from '../application/usecases/create-user.usecase';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(
     @Inject(UsersService) private readonly usersService: UsersService,
-    @Inject(UsersQueryRepository) private readonly usersQueryRepository: UsersQueryRepository) {
+    @Inject(UsersQueryRepository) private readonly usersQueryRepository: UsersQueryRepository, private readonly commandBus: CommandBus) {
   }
 
   @UseGuards(BasicAuthGuard)
@@ -38,7 +40,12 @@ export class UsersController {
   @UseGuards(BasicAuthGuard)
   @Post()
   async createUser(@Body() createModel: UserCreateModel) {
-    const createdUserId = await this.usersService.createUser(createModel);
+
+    const {login, password, email} = createModel;
+
+    // const createdUserId = await this.usersService.createUser(createModel);
+    const createdUserId = await this.commandBus.execute(new CreateUserCommand(login, password, email))
+
     const createdUser: UserOutputModel | null = await this.usersQueryRepository.doesExistById(createdUserId)
     return createdUser;
   }

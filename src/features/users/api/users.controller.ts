@@ -43,7 +43,6 @@ export class UsersController {
 
     const {login, password, email} = createModel;
 
-    // const createdUserId = await this.usersService.createUser(createModel);
     const createdUserId = await this.commandBus.execute(new CreateUserCommand(login, password, email))
 
     const createdUser: UserOutputModel | null = await this.usersQueryRepository.doesExistById(createdUserId)

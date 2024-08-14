@@ -18,12 +18,12 @@ export class PostsRepository {
   async create(postData: PostCreateModel, currentUser: string) {
     const findBlog = await this.blogsQueryRepository.findBlogById(postData.blogId);
 
-    if (findBlog.data) {
+    if (findBlog) {
 
       const post = new this.PostModel({
         ...postData,
         _id: new Types.ObjectId(),
-        blogName: findBlog.data.name,
+        blogName: findBlog.name,
         createdAt: new Date().toISOString(),
         dislikesCount: 0,
         likesCount: 0

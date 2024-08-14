@@ -3,12 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogModelType } from '../domain/blog.entity';
 import { MappingBlogsService } from '../application/mappings/mapping.blogs';
 import { ResultCode } from '../../../settings/http.status';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Post, PostModelType } from '../../posts/domain/post.entity';
 import { MappingsPostsService } from '../../posts/application/mappings/mapping.posts';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
 import { BlogQueryDto } from '../api/models/blog-query.dto';
 import { QueryParamsService } from '../../../common/utils/create.default.values';
+import * as mongoose from 'mongoose';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -75,34 +76,34 @@ export class BlogsQueryRepository {
       const totalCount = await this.BlogModel.countDocuments(filter);
 
       return {
-        status: ResultCode.Success,
-        data: {
           pagesCount: Math.ceil(totalCount / query.pageSize),
           page: query.pageNumber,
           pageSize: query.pageSize,
           totalCount,
           items: allBlogs.map(x => this.mappingsBlogsService.formatingDataForOutputBlog(x)),
-        },
       };
     } catch (e) {
-      return { errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null };
+      throw new InternalServerErrorException([{message: 'Error DB', field: 'DB'}])
     }
   }
 
   async findBlogById(blogId: string) {
-    try {
-      const foundBlog = await this.BlogModel.findOne({ _id: new ObjectId(blogId) });
-      if (foundBlog) {
 
-        return {
-          status: ResultCode.Success,
-          data: this.mappingsBlogsService.formatingDataForOutputBlog(foundBlog),
-        };
-      }
-      return { errorMessage: 'Not found blog', status: ResultCode.NotFound, data: null };
-    } catch (e) {
-      return { errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null };
+    if(!mongoose.Types.ObjectId.isValid(blogId)) {
+      throw new BadRequestException([{message: 'Invalid ID format', field: 'Id'}])
     }
+    try {
 
+      const foundBlog = await this.BlogModel.findOne({ _id: new ObjectId(blogId) });
+
+      if (foundBlog)
+          return this.mappingsBlogsService.formatingDataForOutputBlog(foundBlog);
+
+      return false;
+
+    } catch (e) {
+
+      throw new InternalServerErrorException([{message: 'Error BD', field: 'db'}])
+    }
   }
 }

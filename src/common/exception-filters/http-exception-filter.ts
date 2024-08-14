@@ -45,5 +45,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (status === HttpStatus.NOT_FOUND) {
       response.status(status).json({})
     }
+
+    if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
+      response.status(status).json({})
+    }
   }
 }

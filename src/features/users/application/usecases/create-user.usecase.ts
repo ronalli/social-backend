@@ -21,7 +21,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
   constructor(private readonly usersQueryRepository: UsersQueryRepository, private readonly usersRepository: UsersRepository, @InjectModel(User.name) private UserModel: UserModelType) {
   }
 
-  async execute(command: CreateUserCommand): Promise<void> {
+  async execute(command: CreateUserCommand): Promise<string> {
 
     const {password, login, email} = command;
 

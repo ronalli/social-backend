@@ -2,7 +2,7 @@ import {ObjectId} from "mongodb";
 import { Injectable } from '@nestjs/common';
 import { BlogCreateModel } from '../api/models/input/create-blog.input.model';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogModelType } from '../domain/blog.entity';
+import { Blog, BlogDocument, BlogModelType } from '../domain/blog.entity';
 import { ResultCode } from '../../../settings/http.status';
 import { Types } from 'mongoose';
 import { MappingBlogsService } from '../application/mappings/mapping.blogs';
@@ -12,32 +12,37 @@ export class BlogsRepository {
   constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType, private readonly mappingsBlogsService: MappingBlogsService) {
   }
 
-  async create(data: BlogCreateModel){
-    try {
+  async create(blog: BlogDocument){
 
-      const blog = new this.BlogModel({
-        ...data,
-        _id: new Types.ObjectId(),
-        createdAt: new Date().toISOString(),
-        isMembership: false
-      });
+    const insertResult = await this.BlogModel.insertMany([blog])
 
-      const response = await blog.save();
+    return insertResult[0].id
 
-      const foundBlog = await this.BlogModel.findOne({_id: response._id})
-      if (foundBlog) {
-        return {
-          status: ResultCode.Created,
-          data: this.mappingsBlogsService.formatingDataForOutputBlog(foundBlog)
-        }
-      }
-      return {errorMessage: 'Not found blog', status: ResultCode.NotFound, data: null}
-    } catch (e) {
-
-      console.log(e);
-
-      return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
-    }
+    // try {
+    //
+    //   const blog = new this.BlogModel({
+    //     ...data,
+    //     _id: new Types.ObjectId(),
+    //     createdAt: new Date().toISOString(),
+    //     isMembership: false
+    //   });
+    //
+    //   const response = await blog.save();
+    //
+    //   const foundBlog = await this.BlogModel.findOne({_id: response._id})
+    //   if (foundBlog) {
+    //     return {
+    //       status: ResultCode.Created,
+    //       data: this.mappingsBlogsService.formatingDataForOutputBlog(foundBlog)
+    //     }
+    //   }
+    //   return {errorMessage: 'Not found blog', status: ResultCode.NotFound, data: null}
+    // } catch (e) {
+    //
+    //   console.log(e);
+    //
+    //   return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
+    // }
   }
   async update(blogId: string, inputUpdateDataBlog: BlogCreateModel){
     const {name, websiteUrl, description} = inputUpdateDataBlog

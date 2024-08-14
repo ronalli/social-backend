@@ -48,6 +48,7 @@ import { LoginIsExistConstraint } from './common/decorators/validate/login-is-ex
 import { EmailIsExistConstraint } from './common/decorators/validate/email-is-exist.decorator';
 import { CreateUserHandler } from './features/users/application/usecases/create-user.usecase';
 import { CqrsModule } from '@nestjs/cqrs';
+import { CreateBlogHandler } from './features/blogs/application/usecases/create-blog.usecase';
 
 config();
 
@@ -88,7 +89,8 @@ const mappingsProviders: Provider[] = [
   MappingsPostsService
 ]
 
-const CommandHandlers = [CreateUserHandler];
+const CommandHandlersUsers = [CreateUserHandler];
+const CommandHandlersBlogs = [CreateBlogHandler];
 
 @Module({
 
@@ -119,7 +121,8 @@ const CommandHandlers = [CreateUserHandler];
     NodemailerService,
     LoginIsExistConstraint,
     EmailIsExistConstraint,
-    ...CommandHandlers,
+    ...CommandHandlersUsers,
+    ...CommandHandlersBlogs,
   ],
 })
 export class AppModule {}

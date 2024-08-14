@@ -5,12 +5,10 @@ import { Blog, BlogModelType } from '../../domain/blog.entity';
 import { BlogsRepository } from '../../infrastructure/blogs.repository';
 
 export class CreateBlogCommand {
-
   constructor(
     public name: string,
     public description: string,
     public websiteUrl: string,
-
   ) {
   }
 }

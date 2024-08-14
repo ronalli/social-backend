@@ -49,6 +49,7 @@ import { EmailIsExistConstraint } from './common/decorators/validate/email-is-ex
 import { CreateUserHandler } from './features/users/application/usecases/create-user.usecase';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CreateBlogHandler } from './features/blogs/application/usecases/create-blog.usecase';
+import { UpdateBlogHandler } from './features/blogs/application/usecases/update-blog.usecase';
 
 config();
 
@@ -90,7 +91,7 @@ const mappingsProviders: Provider[] = [
 ]
 
 const CommandHandlersUsers = [CreateUserHandler];
-const CommandHandlersBlogs = [CreateBlogHandler];
+const CommandHandlersBlogs = [CreateBlogHandler, UpdateBlogHandler];
 
 @Module({
 

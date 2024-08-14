@@ -10,9 +10,9 @@ export class BlogsService {
   // async createBlog(blog: BlogCreateModel) {
   //   return await this.blogsRepository.create(blog)
   // }
-  async updateBlog(blogId: string, inputUpdateBlog: BlogCreateModel){
-    return await this.blogsRepository.update(blogId, inputUpdateBlog);
-  }
+  // async updateBlog(blogId: string, inputUpdateBlog: BlogCreateModel){
+  //   return await this.blogsRepository.update(blogId, inputUpdateBlog);
+  // }
   async deleteBlog(blogId: string){
     return await this.blogsRepository.delete(blogId);
   }

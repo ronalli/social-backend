@@ -5,7 +5,7 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
+  Get, HttpCode,
   Inject,
   NotFoundException,
   Param,
@@ -26,6 +26,7 @@ import { serviceInfoLike } from '../../../common/services/initialization.status.
 import { BasicAuthGuard } from '../../../common/guards/auth.basic.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateBlogCommand } from '../application/usecases/create-blog.usecase';
+import { UpdateBlogCommand, UpdateBlogHandler } from '../application/usecases/update-blog.usecase';
 
 @ApiTags('Blogs')
 @Controller('blogs')
@@ -61,15 +62,13 @@ export class BlogsController {
 
   @UseGuards(BasicAuthGuard)
   @Put(':blogId')
-  async update(@Param('blogId') blogId: string, @Body() data: BlogCreateModel, @Req() req: Request, @Res() res: Response) {
+  @HttpCode(204)
+  async update(@Param('blogId') blogId: string, @Body() updateBlog: BlogCreateModel) {
 
-    const result = await this.blogsService.updateBlog(blogId, data)
-    if (result.errorMessage) {
-      res.status(HTTP_STATUSES[result.status]).send({error: result.errorMessage, data: result.data})
-      return
-    }
-    res.status(HTTP_STATUSES[result.status]).send(result.data)
-    return
+    const {name, websiteUrl, description} = updateBlog
+    await this.commandBus.execute(new UpdateBlogCommand(name, websiteUrl, description, blogId));
+
+    return;
   }
 
   @Delete(':blogId')

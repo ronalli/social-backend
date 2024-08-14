@@ -44,26 +44,26 @@ export class BlogsRepository {
     //   return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
     // }
   }
-  async update(blogId: string, inputUpdateDataBlog: BlogCreateModel){
-    const {name, websiteUrl, description} = inputUpdateDataBlog
-    try {
-      const findBlog = await this.BlogModel.findOne({_id: new ObjectId(blogId)});
-      if (findBlog) {
-
-        findBlog.name = name;
-        findBlog.description = description;
-        findBlog.websiteUrl = websiteUrl;
-
-        await findBlog.save();
-
-        return {status: ResultCode.NotContent, data: null}
-      } else {
-        return {errorMessage: 'Not found blog', status: ResultCode.NotFound, data: null}
-      }
-    } catch (e) {
-      return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
-    }
-  }
+  // async update(blogId: string, inputUpdateDataBlog: BlogCreateModel){
+  //   const {name, websiteUrl, description} = inputUpdateDataBlog
+  //   try {
+  //     const findBlog = await this.BlogModel.findOne({_id: new ObjectId(blogId)});
+  //     if (findBlog) {
+  //
+  //       findBlog.name = name;
+  //       findBlog.description = description;
+  //       findBlog.websiteUrl = websiteUrl;
+  //
+  //       await findBlog.save();
+  //
+  //       return {status: ResultCode.NotContent, data: null}
+  //     } else {
+  //       return {errorMessage: 'Not found blog', status: ResultCode.NotFound, data: null}
+  //     }
+  //   } catch (e) {
+  //     return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
+  //   }
+  // }
   async delete(blogId: string){
     try {
       const foundBlog = await this.BlogModel.findOne({_id: new ObjectId(blogId)});

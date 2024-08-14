@@ -7,9 +7,9 @@ export class PostsService {
   constructor(private readonly postsRepository: PostsRepository) {
   }
 
-  async createPost(post: PostCreateModel, currentUser: string) {
-    return await this.postsRepository.create(post, currentUser);
-  }
+  // async createPost(post: PostCreateModel, currentUser: string) {
+  //   return await this.postsRepository.create(post, currentUser);
+  // }
 
   async updatePost(id: string, post: PostCreateModel) {
     return await this.postsRepository.update(id, post);

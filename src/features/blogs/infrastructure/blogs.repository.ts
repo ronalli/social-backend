@@ -1,5 +1,5 @@
 import {ObjectId} from "mongodb";
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { BlogCreateModel } from '../api/models/input/create-blog.input.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogDocument, BlogModelType } from '../domain/blog.entity';
@@ -12,70 +12,25 @@ export class BlogsRepository {
   constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType, private readonly mappingsBlogsService: MappingBlogsService) {
   }
 
-  async create(blog: BlogDocument){
+  async create(blog: BlogDocument) {
 
     const insertResult = await this.BlogModel.insertMany([blog])
 
     return insertResult[0].id
-
-    // try {
-    //
-    //   const blog = new this.BlogModel({
-    //     ...data,
-    //     _id: new Types.ObjectId(),
-    //     createdAt: new Date().toISOString(),
-    //     isMembership: false
-    //   });
-    //
-    //   const response = await blog.save();
-    //
-    //   const foundBlog = await this.BlogModel.findOne({_id: response._id})
-    //   if (foundBlog) {
-    //     return {
-    //       status: ResultCode.Created,
-    //       data: this.mappingsBlogsService.formatingDataForOutputBlog(foundBlog)
-    //     }
-    //   }
-    //   return {errorMessage: 'Not found blog', status: ResultCode.NotFound, data: null}
-    // } catch (e) {
-    //
-    //   console.log(e);
-    //
-    //   return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
-    // }
   }
-  // async update(blogId: string, inputUpdateDataBlog: BlogCreateModel){
-  //   const {name, websiteUrl, description} = inputUpdateDataBlog
-  //   try {
-  //     const findBlog = await this.BlogModel.findOne({_id: new ObjectId(blogId)});
-  //     if (findBlog) {
-  //
-  //       findBlog.name = name;
-  //       findBlog.description = description;
-  //       findBlog.websiteUrl = websiteUrl;
-  //
-  //       await findBlog.save();
-  //
-  //       return {status: ResultCode.NotContent, data: null}
-  //     } else {
-  //       return {errorMessage: 'Not found blog', status: ResultCode.NotFound, data: null}
-  //     }
-  //   } catch (e) {
-  //     return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
-  //   }
-  // }
-  async delete(blogId: string){
-    try {
-      const foundBlog = await this.BlogModel.findOne({_id: new ObjectId(blogId)});
 
-      if (!foundBlog) {
-        return {errorMessage: 'Not found blog', status: ResultCode.NotFound, data: null}
-      } else {
-        await this.BlogModel.deleteOne({_id: new ObjectId(blogId)});
-        return {status: ResultCode.NotContent, data: null}
-      }
+
+  async delete(blogId: string) {
+
+    const foundBlog = await this.BlogModel.findOne({ _id: new ObjectId(blogId) });
+
+    if (!foundBlog) throw new NotFoundException([{ message: 'Not found blog', field: 'blogId' }]);
+
+    try {
+      await this.BlogModel.deleteOne({ _id: new ObjectId(blogId) });
+      return true;
     } catch (e) {
-      return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
+      throw new InternalServerErrorException(e);
     }
   }
 }

@@ -50,6 +50,7 @@ import { CreateUserHandler } from './features/users/application/usecases/create-
 import { CqrsModule } from '@nestjs/cqrs';
 import { CreateBlogHandler } from './features/blogs/application/usecases/create-blog.usecase';
 import { UpdateBlogHandler } from './features/blogs/application/usecases/update-blog.usecase';
+import { CreatePostHandler } from './features/posts/application/usecases/create-post.usecase';
 
 config();
 
@@ -93,6 +94,8 @@ const mappingsProviders: Provider[] = [
 const CommandHandlersUsers = [CreateUserHandler];
 const CommandHandlersBlogs = [CreateBlogHandler, UpdateBlogHandler];
 
+const CommandHandlersPosts = [CreatePostHandler]
+
 @Module({
 
   imports: [
@@ -124,6 +127,7 @@ const CommandHandlersBlogs = [CreateBlogHandler, UpdateBlogHandler];
     EmailIsExistConstraint,
     ...CommandHandlersUsers,
     ...CommandHandlersBlogs,
+    ...CommandHandlersPosts,
   ],
 })
 export class AppModule {}

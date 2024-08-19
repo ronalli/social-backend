@@ -90,20 +90,16 @@ export class PostsController {
 
     const result = await this.commandBus.execute(new UpdatePostCommand(id, content, blogId, shortDescription, title))
 
-    if(!result) throw new NotFoundException([{message: 'Not found', field: 'post id'}])
+    if(!result) throw new NotFoundException([{message: 'Not found post/blog', field: 'id'}])
 
     return result;
   }
 
   @UseGuards(BasicAuthGuard)
   @Delete(':id')
-  async deletePost(@Param() id: string, @Req() req: Request, @Res() res: Response) {
-    const result = await this.postsService.deletePost(id);
-    if (result.errorMessage) {
-      res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage, data: result.data });
-      return;
-    }
-    res.status(HTTP_STATUSES[result.status]).send({});
+  @HttpCode(204)
+  async deletePost(@Param('id', ValidateObjectIdPipe) id: string) {
+   return await this.postsService.deletePost(id);
   }
 
   ///!!! any

@@ -1,5 +1,5 @@
 import {ObjectId} from "mongodb";
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PostsQueryRepository } from './posts.query-repository';
 import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query-repository';
 import { InjectModel } from '@nestjs/mongoose';
@@ -56,9 +56,9 @@ export class PostsRepository {
 
     if (findDeletePost) {
       await this.PostModel.deleteOne({_id: new ObjectId(id)});
-      return {status: ResultCode.NotContent, data: null}
+      return true
     }
-    return {errorMessage: 'Not found post', status: ResultCode.NotFound, data: null}
+    throw new NotFoundException([{message: 'Not found post', field: 'id'}])
   }
 
   async getPost(id: string) {

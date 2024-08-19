@@ -30,8 +30,11 @@ export class UpdatePostHandler implements ICommandHandler<UpdatePostCommand> {
 
     try {
       const findPost = await this.PostModel.findOne({_id: new ObjectId(id)});
+      const findBlog = await this.blogsQueryRepository.findBlogById(blogId)
 
-      if (findPost) {
+      console.log(findBlog);
+
+      if (findPost && findBlog) {
 
         findPost.title = title;
         findPost.content = content;
@@ -46,7 +49,6 @@ export class UpdatePostHandler implements ICommandHandler<UpdatePostCommand> {
         return false;
       }
     } catch (e) {
-      console.log(e);
       throw new InternalServerErrorException(e)
     }
   }

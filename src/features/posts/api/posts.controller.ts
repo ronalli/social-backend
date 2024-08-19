@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -27,6 +28,8 @@ import { CommandBus } from '@nestjs/cqrs';
 import { CreatePostCommand } from '../application/usecases/create-post.usecase';
 import { UpdatePostCommand } from '../application/usecases/update-post.usecase';
 import { ValidateObjectIdPipe } from '../../../common/pipes/validateObjectIdPipe';
+import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
+import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
 
 
 @ApiTags('Posts')
@@ -74,11 +77,13 @@ export class PostsController {
 
     const result = await this.postsQueryRepository.getPosts(query, currentUser);
 
-    if (result.data) {
-      res.status(HTTP_STATUSES[result.status]).send(result.data);
-      return;
-    }
-    res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage });
+    res.status(200).send(result.data);
+
+    // if (result.data) {
+    //   res.status(HTTP_STATUSES[result.status]).send(result.data);
+    //   return;
+    // }
+    // res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage });
   }
 
   @UseGuards(BasicAuthGuard)
@@ -103,19 +108,17 @@ export class PostsController {
   }
 
   ///!!! any
+  @UseGuards(AuthJwtGuard)
+  @Post(':postId/comments')
+  async createCommentForSpecialPost(@Param('postId', ValidateObjectIdPipe) postId: string, @Body('content') content: string, @Req() req: Request, @Res() res: Response) {
+    const userId = req.userId!;
 
-  // @Post(':postId/comments')
-  // async createCommentForSpecialPost(@Param() postId: string, @Body() content: any, @Req() req: Request, @Res() res: Response) {
-  //   const userId = req.userId!;
-  //   const result = await this.commentsService.create({ postId, userId, content });
-  //
-  //   if (result.data) {
-  //     res.status(HTTP_STATUSES[result.status]).send(result.data);
-  //     return;
-  //   }
-  //   res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage, data: result.data });
-  //   return;
-  // }
+    const result = await this.commandBus.execute(new CreateCommentCommand(content, postId, userId))
+
+    if(!result) throw new BadRequestException([{message: 'Wrong', field: 'bad'}])
+
+    res.status(201).send(result);
+  }
 
   @Get(':postId/comments')
   async getAllCommentsForPost(@Param('postId') postId: string, @Query() query: QueryParamsDto, @Req() req: Request, @Res() res: Response) {
@@ -126,13 +129,13 @@ export class PostsController {
 
     const result = await this.commentsService.findAllComments(postId, query, currentUser);
 
-    if (result.data) {
-      res.status(HTTP_STATUSES[result.status]).send(result.data);
-      return;
-    }
-
-    res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage, data: result.data });
-    return;
+  //   if (result.data) {
+  //     res.status(HTTP_STATUSES[result.status]).send(result.data);
+  //     return;
+  //   }
+  //
+  //   res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage, data: result.data });
+  //   return;
   }
 }
 

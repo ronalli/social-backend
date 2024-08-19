@@ -52,6 +52,7 @@ import { CreateBlogHandler } from './features/blogs/application/usecases/create-
 import { UpdateBlogHandler } from './features/blogs/application/usecases/update-blog.usecase';
 import { CreatePostHandler } from './features/posts/application/usecases/create-post.usecase';
 import { UpdatePostHandler } from './features/posts/application/usecases/update-post.usecase';
+import { CreateCommentHandler } from './features/comments/application/usecases/create-comment.usecase';
 
 config();
 
@@ -97,6 +98,8 @@ const CommandHandlersBlogs = [CreateBlogHandler, UpdateBlogHandler];
 
 const CommandHandlersPosts = [CreatePostHandler,UpdatePostHandler]
 
+const CommandHandlersComments = [CreateCommentHandler];
+
 @Module({
 
   imports: [
@@ -129,6 +132,7 @@ const CommandHandlersPosts = [CreatePostHandler,UpdatePostHandler]
     ...CommandHandlersUsers,
     ...CommandHandlersBlogs,
     ...CommandHandlersPosts,
+    ...CommandHandlersComments,
   ],
 })
 export class AppModule {}

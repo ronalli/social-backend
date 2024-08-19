@@ -50,7 +50,7 @@ export class BlogsQueryRepository {
       };
 
     } catch (e) {
-      return { errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null };
+      throw new InternalServerErrorException(e)
     }
   }
 

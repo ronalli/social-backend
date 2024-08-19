@@ -45,9 +45,9 @@ export class CommentsService {
   async create(data: CommentCreateModel) {
     const {postId} = data;
     const findPost = await this.postsQueryRepository.getPostById(postId);
-    if (findPost.errorMessage) {
-      return findPost
-    }
+    // if (findPost.errorMessage) {
+    //   return findPost
+    // }
     return this.commentsRepository.addComment(data);
   }
 
@@ -55,9 +55,9 @@ export class CommentsService {
 
     const result = await this.postsQueryRepository.getPostById(postId);
 
-    if (result.data) {
-      return await this.commentsRepository.getCommentsForSpecialPost(postId, queryParams, currentUser)
-    }
+    // if (result.data) {
+    //   return await this.commentsRepository.getCommentsForSpecialPost(postId, queryParams, currentUser)
+    // }
     return result;
   }
 

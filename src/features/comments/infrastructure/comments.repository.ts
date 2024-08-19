@@ -48,37 +48,37 @@ export class CommentsRepository {
 
   async addComment(data: CommentCreateModel) {
 
-    const result = await this.usersQueryRepository.findUserById(data.userId);
-    try {
-      const newComment = new this.CommentModel({
-        // _id: new Types.ObjectId(),
-        postId: data.postId,
-        content: data.content,
-        createdAt: new Date().toISOString(),
-        commentatorInfo: {
-          userId: data.userId,
-          userLogin: result.login,
-        },
-        likesCount: 0,
-        dislikesCount: 0,
-      });
-      const response = await newComment.save();
-      const comment = await this.CommentModel.findOne({ _id: new ObjectId(response._id) });
-
-      const likesInfo: ILikesInfoViewModel = {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: 'None',
-      };
-
-      if (comment) {
-        const res = this.mappingsCommentsService.formatCommentForView(comment, likesInfo);
-        return { status: ResultCode.Created, data: res };
-      }
-      return { errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null };
-    } catch (e) {
-      return { errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null };
-    }
+    // const result = await this.usersQueryRepository.findUserById(data.userId);
+    // try {
+    //   const newComment = new this.CommentModel({
+    //     // _id: new Types.ObjectId(),
+    //     postId: data.postId,
+    //     content: data.content,
+    //     createdAt: new Date().toISOString(),
+    //     commentatorInfo: {
+    //       userId: data.userId,
+    //       userLogin: result.login,
+    //     },
+    //     likesCount: 0,
+    //     dislikesCount: 0,
+    //   });
+    //   const response = await newComment.save();
+    //   const comment = await this.CommentModel.findOne({ _id: new ObjectId(response._id) });
+    //
+    //   const likesInfo: ILikesInfoViewModel = {
+    //     likesCount: 0,
+    //     dislikesCount: 0,
+    //     myStatus: 'None',
+    //   };
+    //
+    //   if (comment) {
+    //     const res = this.mappingsCommentsService.formatCommentForView(comment, likesInfo);
+    //     return { status: ResultCode.Created, data: res };
+    //   }
+    //   return { errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null };
+    // } catch (e) {
+    //   return { errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null };
+    // }
   }
 
   // async addStatusLike(data: Omit<ILikeTypeDB, 'addedAt'>) {

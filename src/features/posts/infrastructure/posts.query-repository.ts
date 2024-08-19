@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../domain/post.entity';
 import { ResultCode } from '../../../settings/http.status';
@@ -35,7 +35,7 @@ export class PostsQueryRepository {
       };
 
     } catch (e) {
-      return { errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null };
+      throw new InternalServerErrorException(e)
     }
   }
 
@@ -43,14 +43,13 @@ export class PostsQueryRepository {
     try {
       const foundPost = await this.PostModel.findOne({ _id: new ObjectId(id) });
       if (foundPost) {
-        return {
-          status: ResultCode.Success,
-          data: foundPost,
-        };
+        return foundPost;
       }
-      return { errorMessage: 'Not found post', status: ResultCode.NotFound, data: null };
+      else {
+        return false;
+      }
     } catch (e) {
-      return { errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null };
+      throw new InternalServerErrorException(e)
     }
   }
 }

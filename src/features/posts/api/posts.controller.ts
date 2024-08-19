@@ -1,6 +1,20 @@
 import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { HTTP_STATUSES } from '../../../settings/http.status';
 import { PostCreateModel } from './models/input/create-post.input.model';
 import { PostsService } from '../application/posts.service';
@@ -11,6 +25,8 @@ import { serviceInfoLike } from '../../../common/services/initialization.status.
 import { BasicAuthGuard } from '../../../common/guards/auth.basic.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreatePostCommand } from '../application/usecases/create-post.usecase';
+import { UpdatePostCommand } from '../application/usecases/update-post.usecase';
+import { ValidateObjectIdPipe } from '../../../common/pipes/validateObjectIdPipe';
 
 
 @ApiTags('Posts')
@@ -67,14 +83,16 @@ export class PostsController {
 
   @UseGuards(BasicAuthGuard)
   @Put(':id')
-  async updatePost(@Param() id: string, @Body() data: PostCreateModel, @Req() req: Request, @Res() res: Response) {
-    const result = await this.postsService.updatePost(id, data);
-    if (result.errorMessage) {
-      res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage });
-      return;
-    }
-    res.status(HTTP_STATUSES[result.status]).send({});
-    return;
+  @HttpCode(204)
+  async updatePost(@Param('id', ValidateObjectIdPipe) id: string, @Body() updatePost: PostCreateModel) {
+
+    const {content, blogId, shortDescription, title, } = updatePost;
+
+    const result = await this.commandBus.execute(new UpdatePostCommand(id, content, blogId, shortDescription, title))
+
+    if(!result) throw new NotFoundException([{message: 'Not found', field: 'post id'}])
+
+    return result;
   }
 
   @UseGuards(BasicAuthGuard)

@@ -7,7 +7,6 @@ import { Post, PostDocument, PostModelType } from '../domain/post.entity';
 import { PostCreateModel } from '../api/models/input/create-post.input.model';
 import { ResultCode } from '../../../settings/http.status';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
-import { Types } from 'mongoose';
 import { MappingsPostsService } from '../application/mappings/mapping.posts';
 
 @Injectable()
@@ -25,62 +24,31 @@ export class PostsRepository {
 
     return await this.mappingsPostsService.formatingDataForOutputPost(foundedPost, currentUser, this.LikeModel);
 
-
-    // return insertResult[0].id
-
-    // const findBlog = await this.blogsQueryRepository.findBlogById(postData.blogId);
-    //
-    // if (findBlog) {
-    //
-    //   const post = new this.PostModel({
-    //     ...postData,
-    //     _id: new Types.ObjectId(),
-    //     blogName: findBlog.name,
-    //     createdAt: new Date().toISOString(),
-    //     dislikesCount: 0,
-    //     likesCount: 0
-    //   });
-    //   const response = await post.save();
-    //
-    //   try {
-    //     const foundPost = await this.PostModel.findOne({_id: response._id});
-    //     if (foundPost) {
-    //       return {
-    //         status: ResultCode.Created,
-    //         data: await this.mappingsPostsService.formatingDataForOutputPost(foundPost, currentUser, this.LikeModel)
-    //       }
-    //     }
-    //     return {errorMessage: 'Something went wrong', status: ResultCode.BadRequest, data: null}
-    //   } catch (e) {
-    //     return {errorMessage: 'Error BD', status: ResultCode.InternalServerError, data: null}
-    //   }
-    // }
-    // return {errorMessage: 'Not found blog', status: ResultCode.NotFound}
   }
 
-  async update(id: string, updatePost: PostCreateModel) {
-
-    const {content, blogId, shortDescription, title} = updatePost;
-
-    try {
-      const findPost = await this.PostModel.findOne({_id: new ObjectId(id)});
-      if (findPost) {
-
-        findPost.title = title;
-        findPost.content = content;
-        findPost.shortDescription = shortDescription;
-        findPost.blogId = blogId;
-
-        await findPost.save();
-
-        return {status: ResultCode.NotContent, data: null}
-      }
-      return {errorMessage: 'Not found post', status: ResultCode.NotFound, data: null}
-    } catch (e) {
-      return {errorMessage: 'Error BD', status: ResultCode.InternalServerError, data: null}
-    }
-
-  }
+  // async update(id: string, updatePost: PostCreateModel) {
+  //
+  //   const {content, blogId, shortDescription, title} = updatePost;
+  //
+  //   try {
+  //     const findPost = await this.PostModel.findOne({_id: new ObjectId(id)});
+  //     if (findPost) {
+  //
+  //       findPost.title = title;
+  //       findPost.content = content;
+  //       findPost.shortDescription = shortDescription;
+  //       findPost.blogId = blogId;
+  //
+  //       await findPost.save();
+  //
+  //       return {status: ResultCode.NotContent, data: null}
+  //     }
+  //     return {errorMessage: 'Not found post', status: ResultCode.NotFound, data: null}
+  //   } catch (e) {
+  //     return {errorMessage: 'Error BD', status: ResultCode.InternalServerError, data: null}
+  //   }
+  //
+  // }
 
   async delete(id: string) {
 

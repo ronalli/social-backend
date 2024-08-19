@@ -1,4 +1,4 @@
-import { IsString, Length } from 'class-validator';
+import { IsMongoId, IsString, Length } from 'class-validator';
 import { Trim } from '../../../../../common/decorators/transform/trim';
 
 export class PostCreateModel {
@@ -19,5 +19,6 @@ export class PostCreateModel {
 
   @IsString()
   @Trim()
+  @IsMongoId()
   blogId: string;
 }

@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../../domain/post.entity';
 import { Types } from 'mongoose';
 import { PostsRepository } from '../../infrastructure/posts.repository';
-import { ObjectId } from 'mongodb';
 
 export class CreatePostCommand {
   constructor(

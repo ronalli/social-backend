@@ -11,9 +11,9 @@ export class PostsService {
   //   return await this.postsRepository.create(post, currentUser);
   // }
 
-  async updatePost(id: string, post: PostCreateModel) {
-    return await this.postsRepository.update(id, post);
-  }
+  // async updatePost(id: string, post: PostCreateModel) {
+  //   return await this.postsRepository.update(id, post);
+  // }
 
   async getPost(id: string, currentUser: string) {
     return await this.postsRepository.findPostById(id, currentUser)

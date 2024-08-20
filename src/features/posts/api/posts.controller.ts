@@ -16,7 +16,6 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { HTTP_STATUSES } from '../../../settings/http.status';
 import { PostCreateModel } from './models/input/create-post.input.model';
 import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
@@ -61,12 +60,10 @@ export class PostsController {
 
     const result = await this.postsService.getPost(id, currentUser);
 
-    if (result.data) {
-      res.status(HTTP_STATUSES[result.status]).send(result.data);
-      return;
+    if (!result) {
+      throw new NotFoundException([{message: 'Not found post', field: 'postId'}])
     }
-    res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage });
-    return;
+    res.status(200).send(result)
   }
 
   @Get()
@@ -78,18 +75,12 @@ export class PostsController {
     const result = await this.postsQueryRepository.getPosts(query, currentUser);
 
     res.status(200).send(result.data);
-
-    // if (result.data) {
-    //   res.status(HTTP_STATUSES[result.status]).send(result.data);
-    //   return;
-    // }
-    // res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage });
   }
 
   @UseGuards(BasicAuthGuard)
   @Put(':id')
   @HttpCode(204)
-  async updatePost(@Param('id', ValidateObjectIdPipe) id: string, @Body() updatePost: PostCreateModel) {
+  async updatePost(@Param('id', ValidateObjectIdPipe) id: string, @Body() updatePost: PostCreateModel, @Req() req: Request, @Res() res: Response) {
 
     const {content, blogId, shortDescription, title, } = updatePost;
 
@@ -97,7 +88,7 @@ export class PostsController {
 
     if(!result) throw new NotFoundException([{message: 'Not found post/blog', field: 'id'}])
 
-    return result;
+   res.status(204).send(result);
   }
 
   @UseGuards(BasicAuthGuard)
@@ -107,7 +98,6 @@ export class PostsController {
    return await this.postsService.deletePost(id);
   }
 
-  ///!!! any
   @UseGuards(AuthJwtGuard)
   @Post(':postId/comments')
   async createCommentForSpecialPost(@Param('postId', ValidateObjectIdPipe) postId: string, @Body('content') content: string, @Req() req: Request, @Res() res: Response) {
@@ -121,7 +111,7 @@ export class PostsController {
   }
 
   @Get(':postId/comments')
-  async getAllCommentsForPost(@Param('postId') postId: string, @Query() query: QueryParamsDto, @Req() req: Request, @Res() res: Response) {
+  async getAllCommentsForPost(@Param('postId', ValidateObjectIdPipe) postId: string, @Query() query: QueryParamsDto, @Req() req: Request, @Res() res: Response) {
 
     const token = req.cookies?.refreshToken || '';
 
@@ -129,13 +119,7 @@ export class PostsController {
 
     const result = await this.commentsService.findAllComments(postId, query, currentUser);
 
-  //   if (result.data) {
-  //     res.status(HTTP_STATUSES[result.status]).send(result.data);
-  //     return;
-  //   }
-  //
-  //   res.status(HTTP_STATUSES[result.status]).send({ errorMessage: result.errorMessage, data: result.data });
-  //   return;
+    res.status(200).send(result);
   }
 }
 

@@ -300,8 +300,6 @@ export class AuthService {
 
     const dataCode = await createRecoveryCode(email, '5m');
 
-
-
     const newCode = new this.RecoveryCodeModel({ _id: new Types.ObjectId(), code: dataCode });
 
 

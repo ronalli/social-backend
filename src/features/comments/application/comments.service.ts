@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-repository';
 import { ResultCode } from '../../../settings/http.status';
 import { CommentsRepository } from '../infrastructure/comments.repository';
@@ -55,10 +55,11 @@ export class CommentsService {
 
     const result = await this.postsQueryRepository.getPostById(postId);
 
-    // if (result.data) {
-    //   return await this.commentsRepository.getCommentsForSpecialPost(postId, queryParams, currentUser)
-    // }
-    return result;
+    if (result) {
+      return await this.commentsRepository.getCommentsForSpecialPost(postId, queryParams, currentUser)
+    }
+
+    throw new NotFoundException([{message: 'If post for passed postId doesn\'t exist', field: 'postId'}])
   }
 
   // async updateLikeStatus(dataLike: Omit<ILikeTypeDB, 'addedAt'>) {

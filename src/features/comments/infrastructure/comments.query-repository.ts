@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment, CommentModelType } from '../domain/comment.entity';
 import { ResultCode } from '../../../settings/http.status';
@@ -24,17 +24,13 @@ export class CommentsQueryRepository {
           dislikesCount: currentComment.dislikesCount,
           myStatus: status,
         };
-
-        return {
-          status: ResultCode.Success,
-          data: this.mappingsCommentsService.formatCommentForView(currentComment, likesInfo),
-        };
-
+        return  this.mappingsCommentsService.formatCommentForView(currentComment, likesInfo);
       }
-      return { errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null };
+
+      return false;
 
     } catch (e) {
-      return { errorMessage: 'Error BD', status: ResultCode.InternalServerError, data: null };
+      throw new InternalServerErrorException(e)
     }
   }
 
@@ -50,7 +46,7 @@ export class CommentsQueryRepository {
       }
       return { errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null };
     } catch (e) {
-      return { errorMessage: 'Error BD', status: ResultCode.InternalServerError, data: null };
+      throw new InternalServerErrorException(e)
     }
   }
 

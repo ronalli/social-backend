@@ -1,5 +1,5 @@
 import {ObjectId} from "mongodb";
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PostsQueryRepository } from './posts.query-repository';
 import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query-repository';
 import { InjectModel } from '@nestjs/mongoose';
@@ -132,14 +132,11 @@ export class PostsRepository {
     try {
       const foundPost = await this.PostModel.findOne({_id: new ObjectId(id)});
       if (foundPost) {
-        return {
-          status: ResultCode.Success,
-          data: await this.mappingsPostsService.formatingDataForOutputPost(foundPost, currentUser, this.LikeModel)
-        }
+        return  await this.mappingsPostsService.formatingDataForOutputPost(foundPost, currentUser, this.LikeModel)
       }
-      return {errorMessage: 'Not found post', status: ResultCode.NotFound, data: null}
+      return false;
     } catch (e) {
-      return {errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null}
+      throw new InternalServerErrorException(e)
     }
   }
 }

@@ -27,7 +27,6 @@ import { Comment, CommentSchema } from './features/comments/domain/comment.entit
 import { Post, PostSchema } from './features/posts/domain/post.entity';
 import { Like, LikeSchema } from './features/likes/domain/like.entity';
 
-import { ConfigModule } from '@nestjs/config';
 import { DeleteAllCollectionsController } from './features/test/api/delete.all.collections.controller';
 import { DeleteService } from './features/test/application/delete.service';
 import { QueryParamsService } from './common/utils/create.default.values';
@@ -53,6 +52,7 @@ import { UpdateBlogHandler } from './features/blogs/application/usecases/update-
 import { CreatePostHandler } from './features/posts/application/usecases/create-post.usecase';
 import { UpdatePostHandler } from './features/posts/application/usecases/update-post.usecase';
 import { CreateCommentHandler } from './features/comments/application/usecases/create-comment.usecase';
+import { UpdateCommentHandler } from './features/comments/application/usecases/update-comment.usecase';
 
 config();
 
@@ -98,7 +98,7 @@ const CommandHandlersBlogs = [CreateBlogHandler, UpdateBlogHandler];
 
 const CommandHandlersPosts = [CreatePostHandler,UpdatePostHandler]
 
-const CommandHandlersComments = [CreateCommentHandler];
+const CommandHandlersComments = [CreateCommentHandler, UpdateCommentHandler];
 
 @Module({
 

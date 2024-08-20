@@ -23,10 +23,10 @@ export class CreateBlogHandler implements ICommandHandler<CreateBlogCommand> {
     const {name, description, websiteUrl} = command;
 
     const blog = new this.BlogModel({
+      _id: new Types.ObjectId(),
       name,
       description,
       websiteUrl,
-      _id: new Types.ObjectId(),
       createdAt: new Date().toISOString(),
       isMembership: false
     });

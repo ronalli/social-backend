@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment, CommentModelType } from '../domain/comment.entity';
 import { ResultCode } from '../../../settings/http.status';
@@ -29,11 +29,12 @@ export class CommentsRepository {
       if (findComment) {
         findComment.content = contentUpdate;
         await findComment.save();
-        return { status: ResultCode.NotContent, data: null };
+        return true;
       }
-      return { errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null };
+      return false;
+
     } catch (e) {
-      return { errorMessage: 'Error BD', status: ResultCode.InternalServerError, data: null };
+      throw new InternalServerErrorException(e)
     }
   }
 
@@ -42,7 +43,7 @@ export class CommentsRepository {
       await this.CommentModel.deleteOne({ _id: new ObjectId(id) });
       return { status: ResultCode.NotContent, data: null };
     } catch (e) {
-      return { errorMessage: 'Error DB', status: ResultCode.InternalServerError, data: null };
+      throw new InternalServerErrorException(e)
     }
   }
 
@@ -143,8 +144,6 @@ export class CommentsRepository {
   async getCommentsForSpecialPost(postId: string, queryParams: QueryParamsDto, currentUser: string | null) {
     const query = this.queryParamsService.createDefaultValuesQueryParams(queryParams);
 
-    console.log(query);
-
     try {
       const filter = { postId: postId };
       const comments = await this.CommentModel.find(filter)
@@ -155,7 +154,6 @@ export class CommentsRepository {
       const totalCount = await this.CommentModel.countDocuments(filter);
 
       return {
-        status: ResultCode.Success,
         data: {
           pagesCount: Math.ceil(totalCount / query.pageSize),
           pageSize: query.pageSize,
@@ -166,7 +164,7 @@ export class CommentsRepository {
 
       };
     } catch (e) {
-      return { errorMessage: 'Error BD', status: ResultCode.InternalServerError, data: null };
+      throw new InternalServerErrorException(e)
     }
   }
 

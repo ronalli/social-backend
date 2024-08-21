@@ -61,4 +61,10 @@ export class CommentsQueryRepository {
 
     return response;
   }
+
+  async getLikeById(likeId: string) {
+    return this.LikeModel.findOne({_id: new ObjectId(likeId)
+    });
+  }
+
 }

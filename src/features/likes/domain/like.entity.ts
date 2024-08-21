@@ -9,6 +9,9 @@ export enum LikeStatus {
 
 @Schema()
 export class Like {
+  @Prop({type: Types.ObjectId, auto: true})
+  _id: Types.ObjectId
+
   @Prop()
   addedAt: string;
 

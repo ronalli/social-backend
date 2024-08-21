@@ -4,52 +4,53 @@ import { ResultCode } from '../../../settings/http.status';
 import { CommentsRepository } from '../infrastructure/comments.repository';
 import { CommentCreateModel } from '../api/models/input/create-comment.model';
 import { QueryParamsDto } from '../../../common/models/query-params.dto';
+import { LikeStatus } from '../../likes/domain/like.entity';
 
 @Injectable()
 export class CommentsService {
   constructor(private readonly commentsRepository: CommentsRepository, private readonly  postsQueryRepository: PostsQueryRepository) {
   }
 
-  async update(id: string, content: string, userId: string) {
-
-    const result = await this.commentsRepository.getCommentById(id);
-    if (!result) {
-      return {errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null}
-    }
-    if (result && userId !== result.commentatorInfo.userId) {
-      return {
-        status: ResultCode.Forbidden,
-        errorMessage: 'Try edit the comment that is not your own',
-        data: null
-      }
-    }
-    return await this.commentsRepository.updateComment(id, content);
-  }
-
-  async delete(id: string, userId: string) {
-    const result = await this.commentsRepository.getCommentById(id);
-
-    if (!result) {
-      return {errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null}
-    }
-    if (result && userId !== result.commentatorInfo.userId) {
-      return {
-        status: ResultCode.Forbidden,
-        errorMessage: 'Try edit the comment that is not your own',
-        data: null
-      }
-    }
-    return await this.commentsRepository.deleteComment(id);
-  }
-
-  async create(data: CommentCreateModel) {
-    const {postId} = data;
-    const findPost = await this.postsQueryRepository.getPostById(postId);
-    // if (findPost.errorMessage) {
-    //   return findPost
-    // }
-    return this.commentsRepository.addComment(data);
-  }
+  // async update(id: string, content: string, userId: string) {
+  //
+  //   const result = await this.commentsRepository.getCommentById(id);
+  //   if (!result) {
+  //     return {errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null}
+  //   }
+  //   if (result && userId !== result.commentatorInfo.userId) {
+  //     return {
+  //       status: ResultCode.Forbidden,
+  //       errorMessage: 'Try edit the comment that is not your own',
+  //       data: null
+  //     }
+  //   }
+  //   return await this.commentsRepository.updateComment(id, content);
+  // }
+  //
+  // async delete(id: string, userId: string) {
+  //   const result = await this.commentsRepository.getCommentById(id);
+  //
+  //   if (!result) {
+  //     return {errorMessage: 'Not found comment', status: ResultCode.NotFound, data: null}
+  //   }
+  //   if (result && userId !== result.commentatorInfo.userId) {
+  //     return {
+  //       status: ResultCode.Forbidden,
+  //       errorMessage: 'Try edit the comment that is not your own',
+  //       data: null
+  //     }
+  //   }
+  //   return await this.commentsRepository.deleteComment(id);
+  // }
+  //
+  // async create(data: CommentCreateModel) {
+  //   const {postId} = data;
+  //   const findPost = await this.postsQueryRepository.getPostById(postId);
+  //   // if (findPost.errorMessage) {
+  //   //   return findPost
+  //   // }
+  //   return this.commentsRepository.addComment(data);
+  // }
 
   async findAllComments(postId: string, queryParams: QueryParamsDto, currentUser: string | null) {
 

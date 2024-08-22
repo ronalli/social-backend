@@ -7,6 +7,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>()
     const request = ctx.getRequest<Request>()
+
     const status = exception.getStatus();
 
     if (status === HttpStatus.BAD_REQUEST) {
@@ -38,6 +39,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     //   });
     // }
 
+
     if (status === HttpStatus.UNAUTHORIZED) {
       response.status(status).json({})
     }
@@ -49,5 +51,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
       response.status(status).json({})
     }
+
+    if (status === HttpStatus.FORBIDDEN) {
+      response.status(status).json({})
+    }
+
   }
 }

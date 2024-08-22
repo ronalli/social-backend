@@ -32,6 +32,7 @@ import { UpdateCommentCommand } from '../application/usecases/update-comment.use
 import { DeleteCommentCommand } from '../application/usecases/delete-comment.usecase';
 import { ValidateObjectIdPipe } from '../../../common/pipes/validateObjectIdPipe';
 import { UpdateLikeStatusCommand } from '../application/usecases/update-likeStatus.usecase';
+import { LikeStatusModel } from '../../likes/api/models/create-like.input.model';
 
 @ApiTags('Comments')
 @Controller('comments')
@@ -49,7 +50,7 @@ export class CommentsController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const token = req.headers.cookie.split('=')[1] || '';
+    const token = req.cookies['refreshToken'] || '';
 
     const currentStatus = await serviceInfoLike.initializeStatusLike(
       token,
@@ -111,10 +112,11 @@ export class CommentsController {
   @Put(':commentId/like-status')
   async updateLikeStatusForSpecialComment(
     @Param('commentId', ValidateObjectIdPipe) commentId: string,
-    @Body('likeStatus') likeStatus: LikeStatus,
+    @Body() status: LikeStatusModel,
     @Req() req: Request,
     @Res() res: Response,
   ) {
+
     const userId = req.userId!;
     const login = req.login!;
 
@@ -128,7 +130,7 @@ export class CommentsController {
     // };
 
     await this.commandBus.execute(
-      new UpdateLikeStatusCommand(commentId, userId, likeStatus, login),
+      new UpdateLikeStatusCommand(commentId, userId, status, login),
     );
 
     return res.status(204).send({});

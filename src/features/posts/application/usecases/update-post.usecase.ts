@@ -32,7 +32,7 @@ export class UpdatePostHandler implements ICommandHandler<UpdatePostCommand> {
       const findPost = await this.PostModel.findOne({_id: new ObjectId(id)});
       const findBlog = await this.blogsQueryRepository.findBlogById(blogId)
 
-      console.log(findBlog);
+      // console.log(findBlog);
 
       if (findPost && findBlog) {
 

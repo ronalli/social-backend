@@ -15,6 +15,7 @@ export class BlogCreateModel {
   @IsString()
   @Trim()
   @Matches(/^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/)
+  @Length(4, 100)
   websiteUrl: string;
 
 }

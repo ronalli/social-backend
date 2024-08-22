@@ -21,6 +21,7 @@ import {
 import { QueryParamsDto } from '../../../common/models/query-params.dto';
 import { QueryParamsService } from '../../../common/utils/create.default.values';
 import { MappingsCommentsService } from '../application/mappings/mapping.comments';
+import { UpdateLikeStatusCommand } from '../application/usecases/update-likeStatus.usecase';
 
 export interface ILikesInfoViewModel {
   likesCount: number;
@@ -106,7 +107,7 @@ export class CommentsRepository {
     }
   }
 
-  async updateStatusLike(like: any, comment: CommentDocument) {
+  async updateStatusLike(like: UpdateLikeStatusCommand, comment: CommentDocument) {
 
       const currentStatus = await this.LikeModel.findOne({
         $and: [{ userId: like.userId }, { parentId: like.parentId }],
@@ -118,7 +119,7 @@ export class CommentsRepository {
         ]);
       }
 
-      if(like.status === LikeStatus.None) {
+      if(like.status.likeStatus === LikeStatus.None) {
         await this.LikeModel.deleteOne({$and: [{ userId: like.userId }, { parentId: like.parentId }]})
 
         currentStatus.status === LikeStatus.Like ? comment.likesCount -=1 : comment.dislikesCount -= 1;
@@ -128,11 +129,11 @@ export class CommentsRepository {
         return true;
       }
 
-      if (currentStatus.status === like.status) {
+      if (currentStatus.status === like.status.likeStatus) {
         return true
       }
 
-      if (like.status === LikeStatus.Like) {
+      if (like.status.likeStatus === LikeStatus.Like) {
         comment.likesCount += 1;
         comment.dislikesCount -= 1;
       } else  {
@@ -140,7 +141,7 @@ export class CommentsRepository {
         comment.dislikesCount += 1;
       }
 
-      currentStatus.status = like.status;
+      currentStatus.status = like.status.likeStatus;
 
       await comment.save();
 

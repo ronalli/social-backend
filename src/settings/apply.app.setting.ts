@@ -9,7 +9,7 @@ const APP_PREFIX = '/api';
 export const applyAppSettings = (app: INestApplication) => {
   useContainer(app.select(AppModule), {fallbackOnErrors: true})
 
-  // setCookie(app);
+  setCookie(app);
 
   setAppPrefix(app)
 

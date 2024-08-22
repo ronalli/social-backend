@@ -1,5 +1,4 @@
 import {Request, Response} from "express";
-import { HTTP_STATUSES } from '../../../settings/http.status';
 import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
@@ -20,13 +19,15 @@ import { BlogCreateModel } from './models/input/create-blog.input.model';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
 import { BlogsService } from '../application/blogs.service';
 import { PostsService } from '../../posts/application/posts.service';
-import { PostCreateModel } from '../../posts/api/models/input/create-post.input.model';
 import { QueryParamsDto } from '../../../common/models/query-params.dto';
 import { serviceInfoLike } from '../../../common/services/initialization.status.like';
 import { BasicAuthGuard } from '../../../common/guards/auth.basic.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateBlogCommand } from '../application/usecases/create-blog.usecase';
-import { UpdateBlogCommand, UpdateBlogHandler } from '../application/usecases/update-blog.usecase';
+import { UpdateBlogCommand } from '../application/usecases/update-blog.usecase';
+import { ValidateObjectIdPipe } from '../../../common/pipes/validateObjectIdPipe';
+import { CreatePostCommand } from '../../posts/application/usecases/create-post.usecase';
+import { PostCreateModelQuery } from '../../posts/api/models/input/create-post.input.query.model';
 
 @ApiTags('Blogs')
 @Controller('blogs')
@@ -44,7 +45,7 @@ export class BlogsController {
   }
 
   @Get(':blogId')
-  async getBlog(@Param('blogId') blogId: string) {
+  async getBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
 
     const result = await this.blogsQueryRepository.findBlogById(blogId);
 
@@ -63,21 +64,28 @@ export class BlogsController {
   @UseGuards(BasicAuthGuard)
   @Put(':blogId')
   @HttpCode(204)
-  async update(@Param('blogId') blogId: string, @Body() updateBlog: BlogCreateModel): Promise<boolean> {
+  async update(@Param('blogId', ValidateObjectIdPipe) blogId: string, @Body() updateBlog: BlogCreateModel): Promise<boolean> {
 
-    const {name, websiteUrl, description} = updateBlog
-    return await this.commandBus.execute(new UpdateBlogCommand(name, websiteUrl, description, blogId));
+    const {name, description, websiteUrl, } = updateBlog
+
+    const result = await this.commandBus.execute(new UpdateBlogCommand(name, description, websiteUrl, blogId));
+
+    if(!result) throw new NotFoundException([{message: 'Not found blog', field: 'blogId'}])
+
+    return result;
   }
 
   @UseGuards(BasicAuthGuard)
   @Delete(':blogId')
   @HttpCode(204)
-  async delete(@Param('blogId') blogId: string): Promise<boolean> {
+  async delete(@Param('blogId', ValidateObjectIdPipe) blogId: string): Promise<boolean> {
     return await this.blogsService.deleteBlog(blogId);
   }
 
   @Get(':blogId/posts')
-  async getAllPostsForBlog(@Param('blogId') blogId: string, @Query() query: QueryParamsDto,  @Req() req: Request, @Res() res: Response) {
+  async getAllPostsForBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string, @Query() query: QueryParamsDto,  @Req() req: Request, @Res() res: Response) {
+
+
     const header = req.headers.authorization?.split(' ')[1];
     const currentUser = await serviceInfoLike.getIdUserByToken(header)
 
@@ -87,29 +95,27 @@ export class BlogsController {
       const foundPosts= await this.blogsQueryRepository.getAndSortPostsSpecialBlog(blogId, query, currentUser)
       return res.status(200).send(foundPosts.data)
     }
+
+    throw new NotFoundException([{message: 'If specified blog is not exists', field: 'blogId'}])
   }
 
-  // @UseGuards(BasicAuthGuard)
-  // @Post(':blogId/posts')
-  // async createPostForSpecialBlog(@Param('blogId') blogId: string, @Body() data: PostCreateModel,  @Req() req: Request, @Res() res: Response) {
-  //   const token = req.headers.authorization?.split(' ')[1] || "unknown";
-  //   const currentUser = await serviceInfoLike.getIdUserByToken(token)
-  //
-  //   const result = await this.blogsQueryRepository.findBlogById(blogId);
-  //
-  //   const post = {
-  //     blogId,
-  //     ...data
-  //   }
-  //
-  //   const createdPost = await this.postsService.createPost(post, currentUser);
-  //
-  //   if (createdPost.data) {
-  //     res.status(HTTP_STATUSES[createdPost.status]).send(createdPost.data)
-  //     return
-  //   }
-  //   res.status(HTTP_STATUSES[createdPost.status]).send({error: createdPost.errorMessage, data: createdPost.data})
-  //   return
-  // }
+  @UseGuards(BasicAuthGuard)
+  @Post(':blogId/posts')
+  async createPostForSpecialBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string, @Body() post: PostCreateModelQuery,  @Req() req: Request, @Res() res: Response) {
+
+    const token = req.headers.authorization?.split(' ')[1] || "unknown";
+
+    const currentUser = await serviceInfoLike.getIdUserByToken(token)
+
+    const {title, shortDescription, content} = post;
+
+    const result = await this.blogsQueryRepository.findBlogById(blogId);
+
+    if(!result) throw new NotFoundException([{message: 'Not found blog', field: 'blogId'}])
+
+    const createdPost = await this.commandBus.execute(new CreatePostCommand(title, shortDescription, content, blogId, currentUser));
+
+    return res.status(201).send(createdPost);
+  }
 }
 

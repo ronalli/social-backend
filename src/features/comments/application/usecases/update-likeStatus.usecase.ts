@@ -8,12 +8,13 @@ import {
   LikeStatus,
 } from '../../../likes/domain/like.entity';
 import { Types } from 'mongoose';
+import { LikeStatusModel } from '../../../likes/api/models/create-like.input.model';
 
 export class UpdateLikeStatusCommand {
   constructor(
     public parentId: string,
     public userId: string,
-    public status: string,
+    public status: LikeStatusModel,
     public login: string,
   ) {}
 }
@@ -42,11 +43,16 @@ export class UpdateLikeStatusHandler
       userId,
     );
 
+
     if (searchLike) {
       return await this.commentsRepository.updateStatusLike(command, comment);
     }
 
-    if(status === LikeStatus.None) {
+    const likeStatusValue = status.likeStatus;
+
+    if(likeStatusValue === LikeStatus.None) {
+      console.log('eee');
+
       return true;
     }
 
@@ -54,7 +60,7 @@ export class UpdateLikeStatusHandler
       _id: new Types.ObjectId(),
       userId,
       parentId,
-      status,
+      status: likeStatusValue,
       login,
       addedAt: new Date().toISOString(),
     });
@@ -62,10 +68,9 @@ export class UpdateLikeStatusHandler
    await this.commentsRepository.addStatusLike(like);
 
 
-    status === LikeStatus.Like
+    likeStatusValue === LikeStatus.Like
       ? (comment.likesCount += 1)
       : (comment.dislikesCount += 1);
-
 
     await comment.save();
 

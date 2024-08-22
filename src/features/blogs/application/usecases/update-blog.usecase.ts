@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ObjectId } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogModelType } from '../../domain/blog.entity';
-import { InternalServerErrorException } from '@nestjs/common';
+import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 
 export class UpdateBlogCommand {
   constructor(
@@ -22,6 +22,9 @@ export class UpdateBlogHandler implements ICommandHandler<UpdateBlogCommand> {
     const {name, description, websiteUrl, blogId} = command;
     try {
       const findBlog = await this.BlogModel.findOne({_id: new ObjectId(blogId)});
+
+      if(!findBlog) return false;
+
       if (findBlog) {
 
         findBlog.name = name;

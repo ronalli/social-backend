@@ -1,11 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { UpdateCommentModel } from '../../api/models/input/update-comment.model';
 
 export class UpdateCommentCommand {
   constructor(
     public commentId: string,
-    public content: string,
+    public content: UpdateCommentModel,
     public userId: string
 
   ) {

@@ -55,6 +55,7 @@ import { CreateCommentHandler } from './features/comments/application/usecases/c
 import { UpdateCommentHandler } from './features/comments/application/usecases/update-comment.usecase';
 import { DeleteCommentHandler } from './features/comments/application/usecases/delete-comment.usecase';
 import { UpdateLikeStatusHandler } from './features/comments/application/usecases/update-likeStatus.usecase';
+import { UpdateLikeStatusPostHandler } from './features/posts/application/usecases/update-likeStatus.post.usecase';
 
 config();
 
@@ -100,7 +101,7 @@ const CommandHandlersBlogs = [CreateBlogHandler, UpdateBlogHandler];
 
 const CommandHandlersPosts = [CreatePostHandler,UpdatePostHandler]
 
-const CommandHandlersComments = [CreateCommentHandler, UpdateCommentHandler, DeleteCommentHandler];
+const CommandHandlersComments = [CreateCommentHandler, UpdateCommentHandler, DeleteCommentHandler, UpdateLikeStatusPostHandler];
 
 const CommandHandlersLikeStatus = [UpdateLikeStatusHandler]
 

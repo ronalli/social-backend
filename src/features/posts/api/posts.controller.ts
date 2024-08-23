@@ -29,6 +29,8 @@ import { UpdatePostCommand } from '../application/usecases/update-post.usecase';
 import { ValidateObjectIdPipe } from '../../../common/pipes/validateObjectIdPipe';
 import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
 import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
+import { LikeStatusModel } from '../../likes/api/models/create-like.input.model';
+import { UpdateLikeStatusPostCommand } from '../application/usecases/update-likeStatus.post.usecase';
 
 
 @ApiTags('Posts')
@@ -121,5 +123,20 @@ export class PostsController {
 
     res.status(200).send(result);
   }
+
+  @UseGuards(AuthJwtGuard)
+  @Put(':postId/like-status')
+  async updateLikeStatusForSpecialPost(@Param('postId', ValidateObjectIdPipe) commentId: string, @Body() status: LikeStatusModel, @Req() req: Request, @Res() res: Response) {
+
+    const userId = req.userId!;
+    const login = req.login!;
+
+
+    await this.commandBus.execute(new UpdateLikeStatusPostCommand(commentId, userId, status, login))
+
+    return res.status(204).send({});
+
+  }
+
 }
 

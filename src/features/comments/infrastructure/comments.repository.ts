@@ -22,6 +22,7 @@ import { QueryParamsDto } from '../../../common/models/query-params.dto';
 import { QueryParamsService } from '../../../common/utils/create.default.values';
 import { MappingsCommentsService } from '../application/mappings/mapping.comments';
 import { UpdateLikeStatusCommand } from '../application/usecases/update-likeStatus.usecase';
+import { UpdateCommentModel } from '../api/models/input/update-comment.model';
 
 export interface ILikesInfoViewModel {
   likesCount: number;
@@ -39,13 +40,13 @@ export class CommentsRepository {
     private readonly mappingsCommentsService: MappingsCommentsService,
   ) {}
 
-  async updateComment(id: string, contentUpdate: string) {
+  async updateComment(id: string, contentUpdate: UpdateCommentModel) {
     try {
       const findComment = await this.CommentModel.findOne({
         _id: new ObjectId(id),
       });
       if (findComment) {
-        findComment.content = contentUpdate;
+        findComment.content = contentUpdate.content;
         await findComment.save();
         return true;
       }

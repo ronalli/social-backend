@@ -33,6 +33,7 @@ import { DeleteCommentCommand } from '../application/usecases/delete-comment.use
 import { ValidateObjectIdPipe } from '../../../common/pipes/validateObjectIdPipe';
 import { UpdateLikeStatusCommand } from '../application/usecases/update-likeStatus.usecase';
 import { LikeStatusModel } from '../../likes/api/models/create-like.input.model';
+import { UpdateCommentModel } from './models/input/update-comment.model';
 
 @ApiTags('Comments')
 @Controller('comments')
@@ -76,7 +77,7 @@ export class CommentsController {
   @Put(':commentId')
   async updateComment(
     @Param('commentId') commentId: string,
-    @Body('content') content: string,
+    @Body() content: UpdateCommentModel,
     @Req() req: Request,
     @Res() res: Response,
   ) {

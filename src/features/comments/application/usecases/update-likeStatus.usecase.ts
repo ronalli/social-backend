@@ -51,8 +51,6 @@ export class UpdateLikeStatusHandler
     const likeStatusValue = status.likeStatus;
 
     if(likeStatusValue === LikeStatus.None) {
-      console.log('eee');
-
       return true;
     }
 

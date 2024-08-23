@@ -8,7 +8,6 @@ import { Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment, CommentModelType } from '../../domain/comment.entity';
 import { MappingsCommentsService } from '../mappings/mapping.comments';
-import { CommentOutputModel } from '../../api/models/output/comment.output.model';
 
 export class CreateCommentCommand {
   constructor(

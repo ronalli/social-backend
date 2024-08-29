@@ -16,5 +16,4 @@ export class PostCreateModelQuery {
   @Trim()
   @Length(5, 1000)
   content: string;
-
 }

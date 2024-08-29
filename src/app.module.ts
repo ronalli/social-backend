@@ -56,6 +56,8 @@ import { UpdateCommentHandler } from './features/comments/application/usecases/u
 import { DeleteCommentHandler } from './features/comments/application/usecases/delete-comment.usecase';
 import { UpdateLikeStatusHandler } from './features/comments/application/usecases/update-likeStatus.usecase';
 import { UpdateLikeStatusPostHandler } from './features/posts/application/usecases/update-likeStatus.post.usecase';
+import { BlogIsExistConstraint } from './common/decorators/validate/blog-is-exist.decorator';
+import { IdMongoValidateConstraint } from './common/decorators/validate/id-mongo-validate';
 
 config();
 
@@ -134,6 +136,12 @@ const CommandHandlersLikeStatus = [UpdateLikeStatusHandler]
     NodemailerService,
     LoginIsExistConstraint,
     EmailIsExistConstraint,
+    BlogIsExistConstraint,
+    IdMongoValidateConstraint,
+    BlogIsExistConstraint,
+
+    // IdMongoValidateConstraint,
+    // IdAndBlogValidateConstraint,
     ...CommandHandlersUsers,
     ...CommandHandlersBlogs,
     ...CommandHandlersPosts,

@@ -51,7 +51,7 @@ export class CommentsController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const token = req.cookies['refreshToken'] || '';
+    const token = req.headers?.authorization?.split(' ')[1] || '';
 
     const currentStatus = await serviceInfoLike.initializeStatusLike(
       token,

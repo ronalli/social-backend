@@ -14,7 +14,7 @@ import {
   Query,
   Req,
   Res,
-  UseGuards,
+  UseGuards, UsePipes, ValidationPipe,
 } from '@nestjs/common';
 import { PostCreateModel } from './models/input/create-post.input.model';
 import { PostsService } from '../application/posts.service';
@@ -31,7 +31,8 @@ import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
 import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
 import { LikeStatusModel } from '../../likes/api/models/create-like.input.model';
 import { UpdateLikeStatusPostCommand } from '../application/usecases/update-likeStatus.post.usecase';
-
+import { CustomValidationPipe } from '../../../common/pipes/pipe';
+import { CreatePostSpecialPostModel } from './models/input/create-post.special.post.model';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -41,7 +42,7 @@ export class PostsController {
 
   @UseGuards(BasicAuthGuard)
   @Post()
-  async createPost(@Body() createModel: PostCreateModel, @Req() req: Request, @Res() res: Response) {
+  async createPost(@Body(CustomValidationPipe) createModel: any, @Req() req: Request, @Res() res: Response) {
 
     const token = req.headers.authorization?.split(' ')[1] || 'unknown';
     const currentUser = await serviceInfoLike.getIdUserByToken(token);
@@ -56,7 +57,7 @@ export class PostsController {
 
   @Get(':id')
   async getPost(@Param() id: string, @Req() req: Request, @Res() res: Response) {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.headers?.authorization?.split(' ')[1];
 
     const currentUser = await serviceInfoLike.getIdUserByToken(token);
 
@@ -82,7 +83,7 @@ export class PostsController {
   @UseGuards(BasicAuthGuard)
   @Put(':id')
   @HttpCode(204)
-  async updatePost(@Param('id', ValidateObjectIdPipe) id: string, @Body() updatePost: PostCreateModel, @Req() req: Request, @Res() res: Response) {
+  async updatePost(@Param('id') id: string, @Body(CustomValidationPipe) updatePost: any, @Req() req: Request, @Res() res: Response) {
 
     const {content, blogId, shortDescription, title, } = updatePost;
 
@@ -102,10 +103,10 @@ export class PostsController {
 
   @UseGuards(AuthJwtGuard)
   @Post(':postId/comments')
-  async createCommentForSpecialPost(@Param('postId', ValidateObjectIdPipe) postId: string, @Body('content') content: string, @Req() req: Request, @Res() res: Response) {
+  async createCommentForSpecialPost(@Param('postId', ValidateObjectIdPipe) postId: string, @Body() data: CreatePostSpecialPostModel, @Req() req: Request, @Res() res: Response) {
     const userId = req.userId!;
 
-    const result = await this.commandBus.execute(new CreateCommentCommand(content, postId, userId))
+    const result = await this.commandBus.execute(new CreateCommentCommand(data.content, postId, userId))
 
     if(!result) throw new BadRequestException([{message: 'Wrong', field: 'bad'}])
 
@@ -115,13 +116,13 @@ export class PostsController {
   @Get(':postId/comments')
   async getAllCommentsForPost(@Param('postId', ValidateObjectIdPipe) postId: string, @Query() query: QueryParamsDto, @Req() req: Request, @Res() res: Response) {
 
-    const token = req.cookies?.refreshToken || '';
+    const token = req.headers.authorization?.split(' ')[1];
 
     const currentUser = await serviceInfoLike.getIdUserByToken(token);
 
     const result = await this.commentsService.findAllComments(postId, query, currentUser);
 
-    res.status(200).send(result);
+    res.status(200).send(result.data);
   }
 
   @UseGuards(AuthJwtGuard)

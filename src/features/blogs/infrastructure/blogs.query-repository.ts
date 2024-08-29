@@ -89,9 +89,10 @@ export class BlogsQueryRepository {
 
   async findBlogById(blogId: string) {
 
-    if(!mongoose.Types.ObjectId.isValid(blogId)) {
-      throw new BadRequestException([{message: 'Invalid ID format', field: 'Id'}])
-    }
+    // if(!mongoose.Types.ObjectId.isValid(blogId)) {
+    //   throw new BadRequestException([{message: 'Invalid ID format', field: 'Id'}])
+    // }
+
     try {
 
       const foundBlog = await this.BlogModel.findOne({ _id: new ObjectId(blogId) });
@@ -103,7 +104,17 @@ export class BlogsQueryRepository {
 
     } catch (e) {
 
+      console.log(e);
+
       throw new InternalServerErrorException([{message: 'Error BD', field: 'db'}])
     }
   }
+
+  async blogIsExist (blogId: string) {
+
+    return !!(await this.BlogModel.countDocuments({_id: new ObjectId(blogId)}))
+
+    // return this.BlogModel.findOne({ _id: new ObjectId(blogId) });
+  }
+
 }

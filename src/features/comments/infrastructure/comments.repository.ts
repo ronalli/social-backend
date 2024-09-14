@@ -35,7 +35,6 @@ export class CommentsRepository {
   constructor(
     @InjectModel(Comment.name) private CommentModel: CommentModelType,
     @InjectModel(Like.name) private LikeModel: LikeModelType,
-    private readonly usersQueryRepository: UsersQueryRepository,
     private readonly queryParamsService: QueryParamsService,
     private readonly mappingsCommentsService: MappingsCommentsService,
   ) {}

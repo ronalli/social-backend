@@ -21,12 +21,15 @@ import { BasicAuthGuard } from '../../../common/guards/auth.basic.guard';
 import { UserOutputModel } from './models/output/user.output.model';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/usecases/create-user.usecase';
+import { InjectModel } from '@nestjs/mongoose';
+import { User, UserModelType } from '../domain/user.entity';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(
     @Inject(UsersService) private readonly usersService: UsersService,
+    @InjectModel(User.name) private UserModel: UserModelType,
     @Inject(UsersQueryRepository) private readonly usersQueryRepository: UsersQueryRepository, private readonly commandBus: CommandBus) {
   }
 

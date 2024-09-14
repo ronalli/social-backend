@@ -1,21 +1,18 @@
 import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-import { BadRequestException, Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
 import { UsersService } from '../../users/application/users.service';
-import { HTTP_STATUSES } from '../../../settings/http.status';
 import { LoginInputModel } from './models/input/login.input.model';
 import { UserCreateModel } from '../../users/api/models/input/create-user.input.model';
 import { SetNewPasswordModel } from './models/input/set-new-password.model';
 import { MappingsUsersService } from '../../users/application/mappings/mappings.users';
-import { MapingErrorsService } from '../../../common/utils/mappings.errors.service';
-import { MappingsRequestHeadersService } from '../../../common/utils/mappings.request.headers';
 import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService, private readonly usersService: UsersService, private readonly mappingsUsersService: MappingsUsersService, private readonly mapingErrorsService: MapingErrorsService, private readonly mappingsRequestHeadersService: MappingsRequestHeadersService) {
+  constructor(private readonly authService: AuthService, private readonly usersService: UsersService, private readonly mappingsUsersService: MappingsUsersService) {
   }
 
   @HttpCode(200)

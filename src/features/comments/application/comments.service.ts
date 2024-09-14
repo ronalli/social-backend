@@ -8,7 +8,7 @@ import { LikeStatus } from '../../likes/domain/like.entity';
 
 @Injectable()
 export class CommentsService {
-  constructor(private readonly commentsRepository: CommentsRepository, private readonly  postsQueryRepository: PostsQueryRepository) {
+  constructor(private readonly commentsRepository: CommentsRepository, private readonly postsQueryRepository: PostsQueryRepository) {
   }
 
   // async update(id: string, content: string, userId: string) {

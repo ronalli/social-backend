@@ -2,10 +2,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UsersQueryRepository } from '../../infrastructure/users.query-repository';
 import { BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserModelType } from '../../domain/user.entity';
 import { Types } from 'mongoose';
 import { bcryptService } from '../../../../common/services/password-hash.service';
 import { UsersRepository } from '../../infrastructure/users.repository';
+import { User, UserModelType } from '../../domain/user.entity';
 
 export class CreateUserCommand {
   constructor(
@@ -18,7 +18,9 @@ export class CreateUserCommand {
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
-  constructor(private readonly usersQueryRepository: UsersQueryRepository, private readonly usersRepository: UsersRepository, @InjectModel(User.name) private UserModel: UserModelType) {
+  constructor(private readonly usersQueryRepository: UsersQueryRepository,
+              private readonly usersRepository: UsersRepository,
+              @InjectModel(User.name) private readonly UserModel: UserModelType) {
   }
 
   async execute(command: CreateUserCommand): Promise<string> {

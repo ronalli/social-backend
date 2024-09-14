@@ -6,8 +6,6 @@ import {
   Delete,
   Get,
   Param,
-  Post,
-  Query,
   Req,
   Res,
   Put,
@@ -15,15 +13,11 @@ import {
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
-
-import { CommentsService } from '../application/comments.service';
-import { HTTP_STATUSES } from '../../../settings/http.status';
 import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Like,
   LikeModelType,
-  LikeStatus,
 } from '../../likes/domain/like.entity';
 import { serviceInfoLike } from '../../../common/services/initialization.status.like';
 import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
@@ -39,7 +33,6 @@ import { UpdateCommentModel } from './models/input/update-comment.model';
 @Controller('comments')
 export class CommentsController {
   constructor(
-    private readonly commentsService: CommentsService,
     private readonly commentsQueryRepository: CommentsQueryRepository,
     @InjectModel(Like.name) private LikeModel: LikeModelType,
     private readonly commandBus: CommandBus,

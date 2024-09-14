@@ -1,11 +1,7 @@
 import {ObjectId} from "mongodb";
-import { BadRequestException, Injectable, InternalServerErrorException} from '@nestjs/common';
-import {UsersQueryRepository} from './users.query-repository';
+import { Injectable, InternalServerErrorException} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument, UserModelType } from '../domain/user.entity';
-import { bcryptService } from '../../../common/services/password-hash.service';
-import { UserCreateModel } from '../api/models/input/create-user.input.model';
-import { Types } from 'mongoose';
 import { UserOutputModel, UserOutputModelMapper } from '../api/models/output/user.output.model';
 
 @Injectable()

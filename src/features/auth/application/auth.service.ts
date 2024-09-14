@@ -5,9 +5,8 @@ import { AuthRepository } from '../infrastructure/auth.repository';
 import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query-repository';
-import { AuthQueryRepository } from '../infrastructure/auth-query.repository';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument, UserModelType } from '../../users/domain/user.entity';
+import { User, UserModelType } from '../../users/domain/user.entity';
 import { bcryptService } from '../../../common/services/password-hash.service';
 import { jwtService } from '../../../common/services/jwt.service';
 import { LoginInputModel } from '../api/models/input/login.input.model';
@@ -22,7 +21,7 @@ import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly authRepository: AuthRepository, private readonly authQueryRepository: AuthQueryRepository, private readonly usersRepository: UsersRepository, private readonly usersQueryRepository: UsersQueryRepository, @InjectModel(User.name) private UserModel: UserModelType, @InjectModel(RecoveryCode.name) private RecoveryCodeModel: RecoveryCodeType, private readonly nodemailerService: NodemailerService) {
+  constructor(private readonly authRepository: AuthRepository, private readonly usersRepository: UsersRepository, private readonly usersQueryRepository: UsersQueryRepository, @InjectModel(User.name) private UserModel: UserModelType, @InjectModel(RecoveryCode.name) private RecoveryCodeModel: RecoveryCodeType, private readonly nodemailerService: NodemailerService) {
   }
 
   // async login(data: LoginInputModel, dataSession: IHeadersSession)
@@ -55,12 +54,6 @@ export class AuthService {
       } else {
 
         throw new UnauthorizedException();
-
-        // return {
-        //   status: ResultCode.Unauthorized,
-        //   errorMessage: 'Incorrect data entered',
-        //   data: null,
-        // };
       }
     }
 
@@ -154,23 +147,8 @@ export class AuthService {
       } catch (e) {
 
         throw new InternalServerErrorException(e);
-        // return {
-        //   status: ResultCode.InternalServerError,
-        //   errorMessage: {
-        //     field: 'DB',
-        //     message: 'Error DB',
-        //   },
-        // };
       }
     }
-
-    // return {
-    //   status: result.status,
-    //   errorMessage: {
-    //     message: result.message,
-    //     field: result.field,
-    //   },
-    // };
   }
 
   async resendCode(email: string) {
@@ -295,8 +273,6 @@ export class AuthService {
 
   async recoveryCode(email: string) {
     const response = await this.authRepository.findByEmail(email);
-
-    // console.log(response);
 
     const dataCode = await createRecoveryCode(email, '5m');
 

@@ -1,4 +1,3 @@
-import { BlogCreateModel } from '../api/models/input/create-blog.input.model';
 import { Injectable } from '@nestjs/common';
 import { BlogsRepository } from '../infrastructure/blogs.repository';
 

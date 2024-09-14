@@ -3,13 +3,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogModelType } from '../domain/blog.entity';
 import { MappingBlogsService } from '../application/mappings/mapping.blogs';
 import { ResultCode } from '../../../settings/http.status';
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Post, PostModelType } from '../../posts/domain/post.entity';
 import { MappingsPostsService } from '../../posts/application/mappings/mapping.posts';
 import { Like, LikeModelType } from '../../likes/domain/like.entity';
 import { BlogQueryDto } from '../api/models/blog-query.dto';
 import { QueryParamsService } from '../../../common/utils/create.default.values';
-import * as mongoose from 'mongoose';
 
 @Injectable()
 export class BlogsQueryRepository {

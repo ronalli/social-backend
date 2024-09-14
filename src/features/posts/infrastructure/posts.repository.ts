@@ -5,12 +5,10 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { PostsQueryRepository } from './posts.query-repository';
-import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query-repository';
+// import { PostsQueryRepository } from './posts.query-repository';
+// import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query-repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument, PostModelType } from '../domain/post.entity';
-import { PostCreateModel } from '../api/models/input/create-post.input.model';
-import { ResultCode } from '../../../settings/http.status';
 import {
   Like,
   LikeDocument,
@@ -25,8 +23,8 @@ export class PostsRepository {
   constructor(
     @InjectModel(Post.name) private PostModel: PostModelType,
     @InjectModel(Like.name) private LikeModel: LikeModelType,
-    private readonly blogsQueryRepository: BlogsQueryRepository,
-    private readonly postsQueryRepository: PostsQueryRepository,
+    // private readonly blogsQueryRepository: BlogsQueryRepository,
+    // private readonly postsQueryRepository: PostsQueryRepository,
     private readonly mappingsPostsService: MappingsPostsService,
   ) {}
 

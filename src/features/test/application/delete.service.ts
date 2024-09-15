@@ -1,9 +1,9 @@
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserModelType } from '../../users/domain/user.entity';
-import { Post, PostModelType } from '../../posts/domain/post.entity';
-import { Blog, BlogModelType } from '../../blogs/domain/blog.entity';
-import { Comment, CommentModelType } from '../../comments/domain/comment.entity';
 import { Injectable } from '@nestjs/common';
+import { User, UserModelType } from '../../users/domain/user.entity';
+import { Post, PostModelType } from '../../bloggers-platform/posts/domain/post.entity';
+import { Blog, BlogModelType } from '../../bloggers-platform/blogs/domain/blog.entity';
+import { Comment, CommentModelType } from '../../bloggers-platform/comments/domain/comment.entity';
 
 @Injectable()
 export class DeleteService {

@@ -1,6 +1,7 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
-import { BlogsQueryRepository } from '../../features/blogs/infrastructure/blogs.query-repository';
+import { BlogsQueryRepository } from '../../features/bloggers-platform/blogs/infrastructure/blogs.query-repository';
+
 
 @Injectable()
 export class CustomValidationPipe implements PipeTransform {

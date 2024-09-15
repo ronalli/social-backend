@@ -1,7 +1,6 @@
 import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
-import { BlogsQueryRepository } from '../../features/blogs/infrastructure/blogs.query-repository';
 import mongoose from 'mongoose';
-import { PostsQueryRepository } from '../../features/posts/infrastructure/posts.query-repository';
+import { PostsQueryRepository } from '../../features/bloggers-platform/posts/infrastructure/posts.query-repository';
 
 @Injectable()
 export class PostIdValidationPipe implements PipeTransform {

@@ -8,6 +8,7 @@ import { UserCreateModel } from '../../users/api/models/input/create-user.input.
 import { SetNewPasswordModel } from './models/input/set-new-password.model';
 import { MappingsUsersService } from '../../users/application/mappings/mappings.users';
 import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
+import { RefreshTokenGuard } from '../../../common/guards/refreshToken.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -97,19 +98,22 @@ export class AuthController {
   //   return;
   // }
 
-  // @Post()
-  // async refreshToken(@Req() req: Request, @Res() res: Response) {
-  //   const cookie = req.cookies.refreshToken;
-  //
-  //   const response = await this.authService.refreshToken(cookie);
-  //
-  //   if (response.data) {
-  //     res.cookie('refreshToken', response.data.refreshToken, { httpOnly: true, secure: true });
-  //     res.status(HTTP_STATUSES[response.status]).send({ 'accessToken': response.data.accessToken });
-  //     return;
-  //   }
-  //
-  //   res.status(HTTP_STATUSES[response.status]).send(response.errorMessage);
-  //   return;
-  // }
+  @UseGuards(RefreshTokenGuard)
+  @Post('refresh-token')
+  async refreshToken(@Req() req: Request, @Res() res: Response) {
+    const cookie = req.cookies.refreshToken;
+
+    // console.log('rrr');
+
+    const response = await this.authService.refreshToken(cookie);
+
+    // if (response.data) {
+    //   res.cookie('refreshToken', response.data.refreshToken, { httpOnly: true, secure: true });
+    //   res.status(HTTP_STATUSES[response.status]).send({ 'accessToken': response.data.accessToken });
+    //   return;
+    // }
+    //
+    // res.status(HTTP_STATUSES[response.status]).send(response.errorMessage);
+    // return;
+  }
 }

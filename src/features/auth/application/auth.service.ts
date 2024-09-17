@@ -16,12 +16,13 @@ import { RecoveryCode, RecoveryCodeType } from '../domain/recoveryCode.entity';
 import { NodemailerService } from '../../../common/services/nodemailer.service';
 import { emailExamples } from '../../../common/utils/emailExamples';
 import { Types } from 'mongoose';
+import { OldRefreshToken, OldRefreshTokenModel } from '../domain/refreshToken.entity';
 
 // private readonly securityServices: SecurityServices,
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly authRepository: AuthRepository, private readonly usersRepository: UsersRepository, private readonly usersQueryRepository: UsersQueryRepository, @InjectModel(User.name) private UserModel: UserModelType, @InjectModel(RecoveryCode.name) private RecoveryCodeModel: RecoveryCodeType, private readonly nodemailerService: NodemailerService) {
+  constructor(private readonly authRepository: AuthRepository, private readonly usersRepository: UsersRepository, private readonly usersQueryRepository: UsersQueryRepository, @InjectModel(User.name) private UserModel: UserModelType, @InjectModel(RecoveryCode.name) private RecoveryCodeModel: RecoveryCodeType, private readonly nodemailerService: NodemailerService, @InjectModel(OldRefreshToken.name) private OldRefreshCodeModel: OldRefreshTokenModel) {
   }
 
   // async login(data: LoginInputModel, dataSession: IHeadersSession)
@@ -58,8 +59,7 @@ export class AuthService {
     }
 
     throw new BadRequestException([{message:"If the inputModel has incorrect values", filed: 'login or email'}])
-    //
-    // return { status: result.status, errorMessage: result.errorMessage, data: null };
+
   }
 
   async registration(data: UserCreateModel) {
@@ -108,25 +108,11 @@ export class AuthService {
 
     if (result.data?.emailConfirmation?.isConfirmed) {
       return true;
-      // return {
-      //   status: ResultCode.Success,
-      //   errorMessage: {
-      //     message: 'Email already confirmed',
-      //     field: 'email',
-      //   },
-      // };
     }
 
     if (result.data?.emailConfirmation?.expirationDate && result.data.emailConfirmation.expirationDate < new Date()) {
 
       throw new  BadRequestException([{message: 'The code is not valid', field: 'email'}, ])
-      // return {
-      //   status: ResultCode.BadRequest,
-      //   errorMessage: {
-      //     message: 'The code is not valid',
-      //     field: 'email',
-      //   },
-      // };
     }
     if (result) {
       try {
@@ -219,57 +205,67 @@ export class AuthService {
   //   };
   // }
 
-  // async refreshToken(token: string) {
-  //   const validId = await jwtService.getUserIdByToken(token);
-  //
-  //   const findedToken = await RefreshTokenModel.findOne({ refreshToken: token });
-  //
-  //   if (findedToken) {
-  //     return {
-  //       status: ResultCode.Unauthorized,
-  //       data: null,
-  //       errorMessage: {
-  //         message: 'If the JWT refreshToken - invalid',
-  //         field: 'refreshToken',
-  //       },
-  //     };
-  //   }
-  //
-  //   if (validId && !findedToken) {
-  //
-  //     const newRefreshToken = new RefreshTokenModel({ refreshToken: token });
-  //
-  //     await newRefreshToken.save();
-  //
-  //     const user = await this.UserModel.findOne({ _id: new ObjectId(validId) });
-  //
-  //     if (user) {
-  //
-  //       const decode = await decodeToken(token);
-  //
-  //       if (decode) {
-  //         const deviceId = decode.deviceId;
-  //
-  //         const accessToken = await jwtService.createdJWT({ deviceId, userId: String(user._id) }, '10s');
-  //         const refreshToken = await jwtService.createdJWT({ deviceId, userId: String(user._id) }, '20s');
-  //
-  //         const response = await this.securityServices.updateVersionSession(refreshToken);
-  //
-  //         if (response.status === ResultCode.Success) {
-  //           return { status: ResultCode.Success, data: { accessToken, refreshToken } };
-  //         }
-  //       }
-  //     }
-  //   }
-  //   return {
-  //     status: ResultCode.Unauthorized,
-  //     data: null,
-  //     errorMessage: {
-  //       message: 'If the JWT refreshToken inside cookie is missing, expired or incorrect',
-  //       field: 'refreshToken',
-  //     },
-  //   };
-  // }
+  async refreshToken(token: string) {
+
+
+
+
+    const validId = await jwtService.getUserIdByToken(token);
+
+    console.log(validId);
+
+    const findedToken = await this.OldRefreshCodeModel.findOne({ refreshToken: token });
+
+    console.log(findedToken);
+
+
+    //
+    // if (findedToken) {
+    //   return {
+    //     status: ResultCode.Unauthorized,
+    //     data: null,
+    //     errorMessage: {
+    //       message: 'If the JWT refreshToken - invalid',
+    //       field: 'refreshToken',
+    //     },
+    //   };
+    // }
+    //
+    // if (validId && !findedToken) {
+    //
+    //   const newRefreshToken = new RefreshTokenModel({ refreshToken: token });
+    //
+    //   await newRefreshToken.save();
+    //
+    //   const user = await this.UserModel.findOne({ _id: new ObjectId(validId) });
+    //
+    //   if (user) {
+    //
+    //     const decode = await decodeToken(token);
+    //
+    //     if (decode) {
+    //       const deviceId = decode.deviceId;
+    //
+    //       const accessToken = await jwtService.createdJWT({ deviceId, userId: String(user._id) }, '10s');
+    //       const refreshToken = await jwtService.createdJWT({ deviceId, userId: String(user._id) }, '20s');
+    //
+    //       const response = await this.securityServices.updateVersionSession(refreshToken);
+    //
+    //       if (response.status === ResultCode.Success) {
+    //         return { status: ResultCode.Success, data: { accessToken, refreshToken } };
+    //       }
+    //     }
+    //   }
+    // }
+    // return {
+    //   status: ResultCode.Unauthorized,
+    //   data: null,
+    //   errorMessage: {
+    //     message: 'If the JWT refreshToken inside cookie is missing, expired or incorrect',
+    //     field: 'refreshToken',
+    //   },
+    // };
+  }
 
   async recoveryCode(email: string) {
     const response = await this.authRepository.findByEmail(email);

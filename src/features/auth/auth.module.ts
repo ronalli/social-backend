@@ -8,9 +8,15 @@ import { User, UserSchema } from '../users/domain/user.entity';
 import { RecoveryCode, RecoveryCodeSchema } from './domain/recoveryCode.entity';
 import { CqrsModule } from '@nestjs/cqrs';
 import { MappingsUsersService } from '../users/application/mappings/mappings.users';
+import { OldRefreshToken, OldRefreshTokenSchema } from './domain/refreshToken.entity';
 
 @Module({
-  imports: [CqrsModule, UsersModule, NodemailerService, MongooseModule.forFeature([{name: User.name, schema: UserSchema}]), MongooseModule.forFeature([{name: RecoveryCode.name, schema: RecoveryCodeSchema}])
+  imports: [
+    CqrsModule,
+    UsersModule,
+    NodemailerService,
+    MongooseModule.forFeature([{name: User.name, schema: UserSchema}]), MongooseModule.forFeature([{name: RecoveryCode.name, schema: RecoveryCodeSchema}]),
+    MongooseModule.forFeature([{ name: OldRefreshToken.name, schema: OldRefreshTokenSchema }])
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthRepository, NodemailerService, MappingsUsersService],

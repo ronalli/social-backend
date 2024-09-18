@@ -17,6 +17,8 @@ import { NodemailerService } from '../../../common/services/nodemailer.service';
 import { emailExamples } from '../../../common/utils/emailExamples';
 import { Types } from 'mongoose';
 import { OldRefreshToken, OldRefreshTokenModel } from '../domain/refreshToken.entity';
+import { ObjectId } from 'mongodb';
+import { decodeToken } from '../../../common/services/decode.token';
 
 // private readonly securityServices: SecurityServices,
 
@@ -142,7 +144,7 @@ export class AuthService {
 
     if (result.emailConfirmation?.isConfirmed) {
 
-      throw  new BadRequestException([{message: 'Email already confirmed', field: 'email'}, ])
+      throw new BadRequestException([{message: 'Email already confirmed', field: 'email'}, ])
     }
 
     if (result && !result.emailConfirmation?.isConfirmed) {
@@ -219,17 +221,34 @@ export class AuthService {
     console.log(findedToken);
 
 
-    //
-    // if (findedToken) {
-    //   return {
-    //     status: ResultCode.Unauthorized,
-    //     data: null,
-    //     errorMessage: {
-    //       message: 'If the JWT refreshToken - invalid',
-    //       field: 'refreshToken',
-    //     },
-    //   };
-    // }
+    if (findedToken) {
+      throw new UnauthorizedException();
+    }
+
+    if(validId && !findedToken) {
+      await this.OldRefreshCodeModel.insertMany([{
+        _id: new Types.ObjectId(),
+        refreshToken: token
+      }])
+
+      const currentUser = await this.UserModel.findOne({_id: new ObjectId(validId)})
+
+      if(currentUser) {
+        const decode = await decodeToken(token)
+
+        console.log(decode);
+
+        const deviceId = decode.deviceId;
+
+        const accessToken = await jwtService.createdJWT({ deviceId, userId: String(currentUser._id) }, '10s');
+
+        const refreshToken = await jwtService.createdJWT({ deviceId, userId: String(currentUser._id) }, '20s');
+
+
+      }
+
+    }
+
     //
     // if (validId && !findedToken) {
     //

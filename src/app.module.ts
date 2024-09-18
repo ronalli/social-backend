@@ -18,6 +18,7 @@ import { BloggersPlatformModule } from './features/bloggers-platform/bloggers-pl
 import { MappingBlogsService } from './features/bloggers-platform/blogs/application/mappings/mapping.blogs';
 import { MappingsCommentsService } from './features/bloggers-platform/comments/application/mappings/mapping.comments';
 import { MappingsPostsService } from './features/bloggers-platform/posts/application/mappings/mapping.posts';
+import { SecurityModule } from './features/security/security.module';
 
 config();
 
@@ -36,9 +37,12 @@ const mappingsProviders: Provider[] = [
     UsersModule,
     AuthModule,
     BloggersPlatformModule,
+    SecurityModule,
     DeleteModule,
   ],
-  controllers: [],
+  controllers: [
+
+  ],
   providers: [
     ...mappingsProviders,
     QueryParamsService,

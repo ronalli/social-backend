@@ -10,7 +10,6 @@ export class OldRefreshToken {
   refreshToken: string;
 }
 
-
 export const OldRefreshTokenSchema = SchemaFactory.createForClass(OldRefreshToken);
 
 OldRefreshTokenSchema.loadClass(OldRefreshToken)

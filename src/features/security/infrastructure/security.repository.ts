@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { IDecodeRefreshToken } from '../../../common/services/decode.token';
 import { InjectModel } from '@nestjs/mongoose';
 import { DeviceEntity, DeviceEntityModel } from '../domain/device.entity';
@@ -12,20 +12,10 @@ export class SecurityRepository {
   async deleteDevice(iat: string, deviceId: string) {
     try {
       const success = await this.DeviceModel.deleteOne({iat: iat, deviceId: deviceId})
-
-      return {
-        // status: ResultCode.NotContent, data: null
-      }
+      return true;
 
     } catch (e) {
-      return {
-        // status: ResultCode.InternalServerError,
-        data: null,
-        errorsMessage: [{
-          message: 'Error DB',
-          field: 'db'
-        }]
-      }
+      throw new InternalServerErrorException(e)
     }
   }
 
@@ -37,39 +27,18 @@ export class SecurityRepository {
 
       await this.DeviceModel.deleteMany({userId: userId, _id: {$ne: currentDevice?._id}})
 
-      return {
-        // status: ResultCode.NotContent,
-        data: null
-      }
+      return true;
+
     } catch (e) {
-      return {
-        // status: ResultCode.InternalServerError,
-        data: null,
-        errorsMessage: [{
-          message: 'Error DB',
-          field: 'db'
-        }]
-      }
+     throw new InternalServerErrorException(e)
     }
   }
 
   async getDevice(deviceId: string) {
     try {
-      const res = await this.DeviceModel.findOne({deviceId: deviceId})
-      return {
-        // status: ResultCode.Success,
-        data: res
-      }
+      return await this.DeviceModel.findOne({deviceId: deviceId})
     } catch (e) {
-      return {
-        // status: ResultCode.InternalServerError,
-        errorsMessage: [
-          {
-            message: 'Error DB',
-            field: 'token'
-          }
-        ]
-      }
+      throw new InternalServerErrorException(e)
     }
   }
 

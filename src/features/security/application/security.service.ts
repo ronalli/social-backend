@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { decodeToken, IDecodeRefreshToken } from '../../../common/services/decode.token';
 import { InjectModel } from '@nestjs/mongoose';
 import { DeviceEntity, DeviceEntityModel } from '../domain/device.entity';
@@ -34,41 +34,19 @@ export class SecurityService {
 
     const res = await this.securityRepository.getDevice(deviceIdParam);
 
-    if (res.errorsMessage) {
-      return res;
+    if (!res) {
+      throw new NotFoundException();
     }
-
-    if (!res.data) {
-      return {
-        // status: ResultCode.NotFound,
-        data: null
-      }
+    if (res.userId !== userId) {
+      throw new ForbiddenException();
     }
-
-    if (res.data.userId !== userId) {
-      return {
-        // status: ResultCode.Forbidden,
-        data: null,
-        errorsMessage: [{
-          message: 'Forbidden',
-          field: 'token'
-        }]
-      }
-    }
-    return await this.securityRepository.deleteDevice(res.data.iat, deviceIdParam)
+    return await this.securityRepository.deleteDevice(res.iat, deviceIdParam)
   }
 
   async deleteCurrentSession(data: IDecodeRefreshToken) {
     const {iat, userId, deviceId} = data;
 
-    const response = await this.securityRepository.deleteDevice(iat, deviceId)
-
-    if (response.errorsMessage) {
-      return {
-        ...response
-      }
-    }
-    return true;
+    return await this.securityRepository.deleteDevice(iat, deviceId)
   }
 
   async deleteDevices(token: string) {
@@ -76,10 +54,7 @@ export class SecurityService {
     const decode = await decodeToken(token);
 
     if (!decode) {
-      return {
-        // status: ResultCode.Unauthorized,
-        data: null,
-      }
+      throw new UnauthorizedException();
     }
 
     return await this.securityRepository.deleteDevicesButCurrent(decode)
@@ -87,7 +62,6 @@ export class SecurityService {
 
   async updateVersionSession(token: string) {
     const data = await decodeToken(token)
-
 
     if (!data) {
       throw new UnauthorizedException();

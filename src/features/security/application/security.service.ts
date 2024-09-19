@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { decodeToken, IDecodeRefreshToken } from '../../../common/services/decode.token';
 import { InjectModel } from '@nestjs/mongoose';
 import { DeviceEntity, DeviceEntityModel } from '../domain/device.entity';
@@ -88,34 +88,18 @@ export class SecurityService {
   async updateVersionSession(token: string) {
     const data = await decodeToken(token)
 
+
     if (!data) {
-      return {
-        // status: ResultCode.Unauthorized,
-        data: null,
-        errorsMessage: [{
-          message: 'Something went1 wrong',
-          field: 'token'
-        }]
-      }
+      throw new UnauthorizedException();
     }
 
     const response = await this.securityRepository.updateDevice(data);
 
     if (!response) {
-      return {
-        // status: ResultCode.Unauthorized,
-        data: null,
-        errorsMessage: [{
-          message: 'Something went2 wrong',
-          field: 'token'
-        }]
-      }
+      throw new UnauthorizedException();
     }
 
-    return {
-      // status: ResultCode.Success,
-      data: null,
-    }
+    return true;
   }
 
 }

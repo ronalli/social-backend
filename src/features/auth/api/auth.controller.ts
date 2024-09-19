@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
 import { UsersService } from '../../users/application/users.service';
 import { LoginInputModel } from './models/input/login.input.model';
@@ -9,21 +9,21 @@ import { SetNewPasswordModel } from './models/input/set-new-password.model';
 import { MappingsUsersService } from '../../users/application/mappings/mappings.users';
 import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
 import { RefreshTokenGuard } from '../../../common/guards/refreshToken.guard';
+import { MappingsRequestHeadersService } from '../../../common/utils/mappings.request.headers';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService, private readonly usersService: UsersService, private readonly mappingsUsersService: MappingsUsersService) {
+  constructor(private readonly authService: AuthService, private readonly usersService: UsersService, private readonly mappingsUsersService: MappingsUsersService, private readonly mappingsRequestHeadersService: MappingsRequestHeadersService) {
   }
 
   @HttpCode(200)
   @Post('login')
   async login(@Body() loginModel: LoginInputModel, @Req() req: Request, @Res() res: Response) {
 
-    // const dataSession = this.mappingsRequestHeadersService.getHeadersForCreateSession(req);
-    //
+    const dataSession = this.mappingsRequestHeadersService.getHeadersForCreateSession(req);
 
-    const result = await this.authService.login(loginModel);
+    const result = await this.authService.login(loginModel, dataSession);
 
     res.cookie('refreshToken', result.data.refreshToken, { httpOnly: true, secure: true });
 
@@ -103,9 +103,18 @@ export class AuthController {
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     const cookie = req.cookies.refreshToken;
 
-    // console.log('rrr');
-
     const response = await this.authService.refreshToken(cookie);
+
+    if(response.data) {
+      res.cookie('refreshToken', response.data.refreshToken, { httpOnly: true, secure: true });
+
+      return res.status(200).send({ 'accessToken': response.data.accessToken })
+
+    }
+
+    throw new UnauthorizedException();
+
+    // return res.status(200).send({ 'accessToken': response.data.accessToken })
 
     // if (response.data) {
     //   res.cookie('refreshToken', response.data.refreshToken, { httpOnly: true, secure: true });

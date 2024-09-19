@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { IDecodeRefreshToken } from '../../../common/services/decode.token';
 import { InjectModel } from '@nestjs/mongoose';
 import { DeviceEntity, DeviceEntityModel } from '../domain/device.entity';
@@ -80,16 +80,8 @@ export class SecurityRepository {
     const currentDevice = await this.DeviceModel.findOne({$and: [{deviceId: deviceId}, {userId: userId}]})
 
     if (!currentDevice) {
-      return {
-        // status: ResultCode.NotFound,
-        data: null,
-        errorsMessage: [{
-          message: 'Error device',
-          field: 'deviceId'
-        }]
-      }
+      throw new UnauthorizedException();
     }
-
 
     currentDevice.iat = iat;
     currentDevice.exp = exp;

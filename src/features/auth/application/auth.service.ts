@@ -19,17 +19,20 @@ import { Types } from 'mongoose';
 import { OldRefreshToken, OldRefreshTokenModel } from '../domain/refreshToken.entity';
 import { ObjectId } from 'mongodb';
 import { decodeToken } from '../../../common/services/decode.token';
+import { SecurityService } from '../../security/application/security.service';
+import { HeaderSessionModel } from '../../../common/models/header.session.model';
 
 // private readonly securityServices: SecurityServices,
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly authRepository: AuthRepository, private readonly usersRepository: UsersRepository, private readonly usersQueryRepository: UsersQueryRepository, @InjectModel(User.name) private UserModel: UserModelType, @InjectModel(RecoveryCode.name) private RecoveryCodeModel: RecoveryCodeType, private readonly nodemailerService: NodemailerService, @InjectModel(OldRefreshToken.name) private OldRefreshCodeModel: OldRefreshTokenModel) {
+  constructor(private readonly authRepository: AuthRepository, private readonly usersRepository: UsersRepository, private readonly usersQueryRepository: UsersQueryRepository, @InjectModel(User.name) private UserModel: UserModelType, @InjectModel(RecoveryCode.name) private RecoveryCodeModel: RecoveryCodeType, private readonly nodemailerService: NodemailerService, @InjectModel(OldRefreshToken.name) private OldRefreshCodeModel: OldRefreshTokenModel,
+              private readonly securityService: SecurityService,) {
   }
 
   // async login(data: LoginInputModel, dataSession: IHeadersSession)
 
-  async login(data: LoginInputModel) {
+  async login(data: LoginInputModel, dataSession: HeaderSessionModel) {
     const { loginOrEmail }: LoginInputModel = data;
     const result = await this.authRepository.findByLoginOrEmail(loginOrEmail);
 
@@ -51,7 +54,7 @@ export class AuthService {
           userId: String(result.data._id),
         }, '2h');
 
-        // await this.securityServices.createAuthSessions(refreshToken, dataSession);
+        await this.securityService.createAuthSessions(refreshToken, dataSession);
 
         return { status: ResultCode.Success, data: { accessToken, refreshToken } };
       } else {
@@ -209,16 +212,9 @@ export class AuthService {
 
   async refreshToken(token: string) {
 
-
-
-
     const validId = await jwtService.getUserIdByToken(token);
 
-    console.log(validId);
-
     const findedToken = await this.OldRefreshCodeModel.findOne({ refreshToken: token });
-
-    console.log(findedToken);
 
 
     if (findedToken) {
@@ -236,7 +232,6 @@ export class AuthService {
       if(currentUser) {
         const decode = await decodeToken(token)
 
-        console.log(decode);
 
         const deviceId = decode.deviceId;
 
@@ -244,10 +239,22 @@ export class AuthService {
 
         const refreshToken = await jwtService.createdJWT({ deviceId, userId: String(currentUser._id) }, '20s');
 
+        const response =  await this.securityService.updateVersionSession(refreshToken)
+
+
+        if(response) {
+          return {
+            data: { accessToken, refreshToken }
+          }
+        }
 
       }
 
+      throw new UnauthorizedException();
+
     }
+
+
 
     //
     // if (validId && !findedToken) {

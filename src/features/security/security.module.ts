@@ -4,6 +4,8 @@ import { SecurityQueryRepository } from './infrastructure/security-query.reposit
 import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
 import { DeviceEntity, DeviceEntitySchema } from './domain/device.entity';
+import { SecurityService } from './application/security.service';
+import { SecurityRepository } from './infrastructure/security.repository';
 
 @Module({
   imports: [
@@ -13,7 +15,7 @@ import { DeviceEntity, DeviceEntitySchema } from './domain/device.entity';
     ]),
   ],
   controllers: [SecurityController],
-  providers: [SecurityQueryRepository],
-  exports: [],
+  providers: [SecurityService, SecurityQueryRepository, SecurityRepository],
+  exports: [SecurityService],
 })
 export class SecurityModule {}

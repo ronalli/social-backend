@@ -2,7 +2,12 @@ import { add } from 'date-fns';
 import { randomUUID } from 'node:crypto';
 import { ResultCode } from '../../../settings/http.status';
 import { AuthRepository } from '../infrastructure/auth.repository';
-import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query-repository';
 import { InjectModel } from '@nestjs/mongoose';
@@ -16,7 +21,10 @@ import { RecoveryCode, RecoveryCodeType } from '../domain/recoveryCode.entity';
 import { NodemailerService } from '../../../common/services/nodemailer.service';
 import { emailExamples } from '../../../common/utils/emailExamples';
 import { Types } from 'mongoose';
-import { OldRefreshToken, OldRefreshTokenModel } from '../domain/refreshToken.entity';
+import {
+  OldRefreshToken,
+  OldRefreshTokenModel,
+} from '../domain/refreshToken.entity';
 import { ObjectId } from 'mongodb';
 import { decodeToken } from '../../../common/services/decode.token';
 import { SecurityService } from '../../security/application/security.service';
@@ -26,76 +34,107 @@ import { HeaderSessionModel } from '../../../common/models/header.session.model'
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly authRepository: AuthRepository, private readonly usersRepository: UsersRepository, private readonly usersQueryRepository: UsersQueryRepository, @InjectModel(User.name) private UserModel: UserModelType, @InjectModel(RecoveryCode.name) private RecoveryCodeModel: RecoveryCodeType, private readonly nodemailerService: NodemailerService, @InjectModel(OldRefreshToken.name) private OldRefreshCodeModel: OldRefreshTokenModel,
-              private readonly securityService: SecurityService,) {
-  }
-
-  // async login(data: LoginInputModel, dataSession: IHeadersSession)
+  constructor(
+    private readonly authRepository: AuthRepository,
+    private readonly usersRepository: UsersRepository,
+    private readonly usersQueryRepository: UsersQueryRepository,
+    @InjectModel(User.name) private UserModel: UserModelType,
+    @InjectModel(RecoveryCode.name) private RecoveryCodeModel: RecoveryCodeType,
+    private readonly nodemailerService: NodemailerService,
+    @InjectModel(OldRefreshToken.name)
+    private OldRefreshCodeModel: OldRefreshTokenModel,
+    private readonly securityService: SecurityService,
+  ) {}
 
   async login(data: LoginInputModel, dataSession: HeaderSessionModel) {
     const { loginOrEmail }: LoginInputModel = data;
     const result = await this.authRepository.findByLoginOrEmail(loginOrEmail);
 
     if (result.data) {
-
-      const success = await bcryptService.checkPassword(data.password, result.data.hash);
+      const success = await bcryptService.checkPassword(
+        data.password,
+        result.data.hash,
+      );
 
       if (success) {
-
         const devicedId = randomUUID();
 
-        const accessToken = await jwtService.createdJWT({
-          deviceId: devicedId,
-          userId: String(result.data._id),
-        }, '1h');
+        const accessToken = await jwtService.createdJWT(
+          {
+            deviceId: devicedId,
+            userId: String(result.data._id),
+          },
+          '1h',
+        );
 
-        const refreshToken = await jwtService.createdJWT({
-          deviceId: devicedId,
-          userId: String(result.data._id),
-        }, '2h');
+        const refreshToken = await jwtService.createdJWT(
+          {
+            deviceId: devicedId,
+            userId: String(result.data._id),
+          },
+          '2h',
+        );
 
-        await this.securityService.createAuthSessions(refreshToken, dataSession);
+        await this.securityService.createAuthSessions(
+          refreshToken,
+          dataSession,
+        );
 
-        return { status: ResultCode.Success, data: { accessToken, refreshToken } };
+        return {
+          status: ResultCode.Success,
+          data: { accessToken, refreshToken },
+        };
       } else {
-
         throw new UnauthorizedException();
       }
     }
 
-    throw new BadRequestException([{message:"If the inputModel has incorrect values", filed: 'login or email'}])
-
+    throw new BadRequestException([
+      {
+        message: 'If the inputModel has incorrect values',
+        filed: 'login or email',
+      },
+    ]);
   }
 
   async registration(data: UserCreateModel) {
     const { login, email, password } = data;
-    const result = await this.usersQueryRepository.doesExistByLoginOrEmail(login, email);
+    const result = await this.usersQueryRepository.doesExistByLoginOrEmail(
+      login,
+      email,
+    );
 
     if (!result) {
-      throw new BadRequestException([{message: 'User founded', field: 'login/email'}, ]);
+      throw new BadRequestException([
+        { message: 'User founded', field: 'login/email' },
+      ]);
     }
 
     const hash = await bcryptService.generateHash(password);
 
     const user = new this.UserModel({
-        _id: new Types.ObjectId(),
-        login,
-        email,
-        hash,
-        createdAt: new Date().toISOString(),
-        emailConfirmation: {
-          confirmationCode: randomUUID(),
-          expirationDate: add(new Date(), { hours: 0, minutes: 1 }),
-          isConfirmed: false,
-        },
+      _id: new Types.ObjectId(),
+      login,
+      email,
+      hash,
+      createdAt: new Date().toISOString(),
+      emailConfirmation: {
+        confirmationCode: randomUUID(),
+        expirationDate: add(new Date(), { hours: 0, minutes: 1 }),
+        isConfirmed: false,
       },
-    );
+    });
 
     await user.save();
 
     if (user) {
-      this.nodemailerService.sendEmail(email, user.emailConfirmation?.confirmationCode!, emailExamples.registrationEmail)
-        .catch(e => {
+      this.nodemailerService
+        .sendEmail(
+          email,
+          user.emailConfirmation?.confirmationCode!,
+          emailExamples.registrationEmail,
+        )
+        .catch((e) => {
           console.log(e);
         });
     }
@@ -104,39 +143,43 @@ export class AuthService {
   }
 
   async confirmEmail(code: string) {
-    const result= await this.usersQueryRepository.findUserByCodeConfirmation(code);
+    const result =
+      await this.usersQueryRepository.findUserByCodeConfirmation(code);
 
-    if(!result) {
-      throw new BadRequestException([{message: 'The code is incorrect', field: 'code'}]);
+    if (!result) {
+      throw new BadRequestException([
+        { message: 'The code is incorrect', field: 'code' },
+      ]);
     }
-
 
     if (result.data?.emailConfirmation?.isConfirmed) {
       return true;
     }
 
-    if (result.data?.emailConfirmation?.expirationDate && result.data.emailConfirmation.expirationDate < new Date()) {
-
-      throw new  BadRequestException([{message: 'The code is not valid', field: 'email'}, ])
+    if (
+      result.data?.emailConfirmation?.expirationDate &&
+      result.data.emailConfirmation.expirationDate < new Date()
+    ) {
+      throw new BadRequestException([
+        { message: 'The code is not valid', field: 'email' },
+      ]);
     }
     if (result) {
       try {
-
-        const foundUser = await this.UserModel.findOne({ _id: result.data._id });
+        const foundUser = await this.UserModel.findOne({
+          _id: result.data._id,
+        });
 
         if (foundUser && foundUser.emailConfirmation) {
           foundUser.emailConfirmation.isConfirmed = true;
           foundUser.emailConfirmation.expirationDate = null;
           foundUser.emailConfirmation.confirmationCode = null;
-
         }
 
         await foundUser.save();
 
         return true;
-
       } catch (e) {
-
         throw new InternalServerErrorException(e);
       }
     }
@@ -146,13 +189,17 @@ export class AuthService {
     const result = await this.checkUserCredential(email);
 
     if (result.emailConfirmation?.isConfirmed) {
-
-      throw new BadRequestException([{message: 'Email already confirmed', field: 'email'}, ])
+      throw new BadRequestException([
+        { message: 'Email already confirmed', field: 'email' },
+      ]);
     }
 
     if (result && !result.emailConfirmation?.isConfirmed) {
       const code = randomUUID();
-      const expirationDate = add(new Date().toISOString(), { hours: 0, minutes: 1 });
+      const expirationDate = add(new Date().toISOString(), {
+        hours: 0,
+        minutes: 1,
+      });
 
       const user = await this.UserModel.findOne({ _id: result._id });
 
@@ -161,100 +208,94 @@ export class AuthService {
         user.emailConfirmation.confirmationCode = code;
       }
 
-      await user.save()
+      await user.save();
 
-      this.nodemailerService.sendEmail(email, code, emailExamples.registrationEmail).catch(e => console.log(e));
+      this.nodemailerService
+        .sendEmail(email, code, emailExamples.registrationEmail)
+        .catch((e) => console.log(e));
 
       return true;
     }
   }
 
-  // async logout(token: string) {
-  //   const foundedToken = await RefreshTokenModel.findOne({ refreshToken: token });
-  //
-  //   if (foundedToken) {
-  //     return {
-  //       status: ResultCode.Unauthorized,
-  //       data: null,
-  //       errorMessage: {
-  //         message: 'If the JWT refreshToken inside cookie is missing, expired or incorrect',
-  //         filed: 'token',
-  //       },
-  //     };
-  //   }
-  //   const success = await jwtService.getUserIdByToken(token);
-  //
-  //   const invalidRefreshToken = new RefreshTokenModel({ refreshToken: token });
-  //
-  //   await invalidRefreshToken.save();
-  //
-  //   if (success) {
-  //
-  //     const data = await decodeToken(token);
-  //
-  //     if (data && await this.securityServices.deleteCurrentSession(data)) {
-  //       return {
-  //         status: ResultCode.NotContent,
-  //         data: null,
-  //       };
-  //     }
-  //   }
-  //
-  //   return {
-  //     status: ResultCode.Unauthorized,
-  //     data: null,
-  //     errorMessage: {
-  //       message: 'If the JWT refreshToken inside cookie is missing, expired or incorrect',
-  //       filed: 'token',
-  //     },
-  //   };
-  // }
+  async logout(token: string) {
+    const foundedToken = await this.OldRefreshCodeModel.findOne({
+      refreshToken: token,
+    });
+
+    if (foundedToken) {
+      throw new UnauthorizedException();
+    }
+    const success = await jwtService.getUserIdByToken(token);
+
+    const invalidRefreshToken = new this.OldRefreshCodeModel({
+      _id: new Types.ObjectId(),
+      refreshToken: token,
+    });
+
+    await invalidRefreshToken.save();
+
+    if (success) {
+      const data = await decodeToken(token);
+
+      if (data && (await this.securityService.deleteCurrentSession(data))) {
+        return true;
+      }
+    }
+
+    throw new UnauthorizedException();
+  }
 
   async refreshToken(token: string) {
-
     const validId = await jwtService.getUserIdByToken(token);
 
-    const findedToken = await this.OldRefreshCodeModel.findOne({ refreshToken: token });
-
+    const findedToken = await this.OldRefreshCodeModel.findOne({
+      refreshToken: token,
+    });
 
     if (findedToken) {
       throw new UnauthorizedException();
     }
 
-    if(validId && !findedToken) {
-      await this.OldRefreshCodeModel.insertMany([{
-        _id: new Types.ObjectId(),
-        refreshToken: token
-      }])
+    if (validId && !findedToken) {
+      await this.OldRefreshCodeModel.insertMany([
+        {
+          _id: new Types.ObjectId(),
+          refreshToken: token,
+        },
+      ]);
 
-      const currentUser = await this.UserModel.findOne({_id: new ObjectId(validId)})
+      const currentUser = await this.UserModel.findOne({
+        _id: new ObjectId(validId),
+      });
 
-      if(currentUser) {
-        const decode = await decodeToken(token)
-
+      if (currentUser) {
+        const decode = await decodeToken(token);
 
         const deviceId = decode.deviceId;
 
-        const accessToken = await jwtService.createdJWT({ deviceId, userId: String(currentUser._id) }, '10s');
+        const accessToken = await jwtService.createdJWT(
+          { deviceId, userId: String(currentUser._id) },
+          '10s',
+        );
 
-        const refreshToken = await jwtService.createdJWT({ deviceId, userId: String(currentUser._id) }, '20s');
+        const refreshToken = await jwtService.createdJWT(
+          { deviceId, userId: String(currentUser._id) },
+          '20s',
+        );
 
-        const response =  await this.securityService.updateVersionSession(refreshToken)
+        const response =
+          await this.securityService.updateVersionSession(refreshToken);
 
-
-        if(response) {
+        if (response) {
           return {
-            data: { accessToken, refreshToken }
-          }
+            data: { accessToken, refreshToken },
+          };
         }
-
       }
 
       throw new UnauthorizedException();
-
     }
-
-
 
     //
     // if (validId && !findedToken) {
@@ -298,19 +339,21 @@ export class AuthService {
 
     const dataCode = await createRecoveryCode(email, '5m');
 
-    const newCode = new this.RecoveryCodeModel({ _id: new Types.ObjectId(), code: dataCode });
-
+    const newCode = new this.RecoveryCodeModel({
+      _id: new Types.ObjectId(),
+      code: dataCode,
+    });
 
     await newCode.save();
 
-
-    this.nodemailerService.sendEmail(email, dataCode, emailExamples.recoveryPasswordByAccount).catch((e: Error) => console.log(e));
+    this.nodemailerService
+      .sendEmail(email, dataCode, emailExamples.recoveryPasswordByAccount)
+      .catch((e: Error) => console.log(e));
 
     return true;
   }
 
   async updatePassword(password: string, email: string) {
-
     const user = await this.UserModel.findOne({ email: email });
 
     if (user) {
@@ -329,7 +372,9 @@ export class AuthService {
 
     if (response) return { status: ResultCode.Success, data: response };
 
-    throw new BadRequestException([{message: 'The code is incorrect', field: 'recoveryCode'}]);
+    throw new BadRequestException([
+      { message: 'The code is incorrect', field: 'recoveryCode' },
+    ]);
   }
 
   async checkUserCredential(login: string) {

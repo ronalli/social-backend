@@ -58,5 +58,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       response.status(status).json({})
     }
 
+    if (status === HttpStatus.TOO_MANY_REQUESTS) {
+      response.status(status).json({})
+    }
+
   }
 }

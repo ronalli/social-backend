@@ -5,8 +5,10 @@ import { DeviceEntity, DeviceEntityModel } from '../domain/device.entity';
 import { SecurityRepository } from '../infrastructure/security.repository';
 import { SessionHeadersInput } from '../api/models/input/session-headers.input';
 import { Types } from 'mongoose';
+import { SkipThrottle } from '@nestjs/throttler';
 
-@Injectable()
+
+@SkipThrottle()
 export class SecurityService {
   constructor(
     @InjectModel(DeviceEntity.name) private DeviceModel: DeviceEntityModel,

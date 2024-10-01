@@ -64,7 +64,7 @@ export class AuthService {
             deviceId: devicedId,
             userId: String(result.data._id),
           },
-          '1h',
+          '10s',
         );
 
         const refreshToken = await jwtService.createdJWT(
@@ -72,7 +72,7 @@ export class AuthService {
             deviceId: devicedId,
             userId: String(result.data._id),
           },
-          '2h',
+          '20s',
         );
 
         await this.securityService.createAuthSessions(
@@ -89,12 +89,7 @@ export class AuthService {
       }
     }
 
-    throw new BadRequestException([
-      {
-        message: 'If the inputModel has incorrect values',
-        filed: 'login or email',
-      },
-    ]);
+    throw new UnauthorizedException();
   }
 
   async registration(data: UserCreateModel) {

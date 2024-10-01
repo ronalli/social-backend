@@ -20,6 +20,7 @@ import { MappingsUsersService } from '../../users/application/mappings/mappings.
 import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
 import { RefreshTokenGuard } from '../../../common/guards/refreshToken.guard';
 import { MappingsRequestHeadersService } from '../../../common/utils/mappings.request.headers';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -38,6 +39,7 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
+
     const dataSession =
       this.mappingsRequestHeadersService.getHeadersForCreateSession(req);
 
@@ -123,6 +125,7 @@ export class AuthController {
   }
 
   @UseGuards(RefreshTokenGuard)
+  @SkipThrottle()
   @Post('logout')
   async logout(@Req() req: Request, @Res() res: Response) {
     const cookie = req.cookies.refreshToken;

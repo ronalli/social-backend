@@ -1,6 +1,5 @@
 import { Module, Provider } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import {config} from 'dotenv';
 import { QueryParamsService } from './common/utils/create.default.values';
 import { MappingsUsersService } from './features/users/application/mappings/mappings.users';
 import { MapingErrorsService } from './common/utils/mappings.errors.service';
@@ -19,19 +18,16 @@ import { MappingBlogsService } from './features/bloggers-platform/blogs/applicat
 import { MappingsCommentsService } from './features/bloggers-platform/comments/application/mappings/mapping.comments';
 import { MappingsPostsService } from './features/bloggers-platform/posts/application/mappings/mapping.posts';
 import { SecurityModule } from './features/security/security.module';
-
-config();
-
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 const mappingsProviders: Provider[] = [
   MappingBlogsService,
   MappingsCommentsService,
-  MappingsPostsService
-]
-
+  MappingsPostsService,
+];
 
 @Module({
-
   imports: [
     MongooseModule.forRoot(appSettings.api.MONGO_CONNECTION_URI),
     UsersModule,
@@ -40,10 +36,12 @@ const mappingsProviders: Provider[] = [
     SecurityModule,
     DeleteModule,
   ],
-  controllers: [
-
-  ],
+  controllers: [],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     ...mappingsProviders,
     QueryParamsService,
     MappingsUsersService,

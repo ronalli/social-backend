@@ -9,7 +9,6 @@ import { SecurityRepository } from './infrastructure/security.repository';
 
 @Module({
   imports: [
-    CqrsModule,
     MongooseModule.forFeature([
       { name: DeviceEntity.name, schema: DeviceEntitySchema },
     ]),

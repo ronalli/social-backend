@@ -15,7 +15,11 @@ import { Request, Response } from 'express';
 import { decodeToken } from '../../../common/services/decode.token';
 import { SecurityQueryRepository } from '../infrastructure/security-query.repository';
 import { SecurityService } from '../application/security.service';
+import { mappingSessions } from '../../../common/utils/mappings.sessions.service';
+import { SkipThrottle } from '@nestjs/throttler';
 
+
+@SkipThrottle()
 @ApiTags('Security')
 @UseGuards(RefreshTokenGuard)
 @Controller('security')
@@ -40,7 +44,7 @@ export class SecurityController {
 
     if (!response) throw new UnauthorizedException();
 
-    return response;
+    return mappingSessions(response);
   }
 
   @UseGuards(RefreshTokenGuard)

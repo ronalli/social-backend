@@ -16,5 +16,4 @@ export class UserServiceMock extends UsersService {
     super(usersRepository);
   }
 
-
 }

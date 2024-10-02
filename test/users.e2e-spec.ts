@@ -4,7 +4,6 @@ import { initSettings } from './utils/init-settings';
 import { UsersService } from '../src/features/users/application/users.service';
 import { UsersRepository } from '../src/features/users/infrastructure/users.repository';
 import { UserServiceMock } from './mock/user.service.mock';
-import request from 'supertest';
 
 describe('Users Tests', () => {
   let app: INestApplication;

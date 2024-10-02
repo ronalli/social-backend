@@ -5,13 +5,9 @@ import { AppModule } from '../../src/app.module';
 import { UsersService } from '../../src/features/users/application/users.service';
 import { UserServiceMockObject } from '../mock/user.service.mock';
 import { UsersTestManager } from './users-test-manager';
-import dotenv from 'dotenv';
-import process from 'node:process';
 import { Connection } from 'mongoose';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { deleteAllData } from './delete-all-data';
-
-dotenv.config()
 
 export const initSettings = async (addSettingsToModuleBuilder?: (moduleBuilder: TestingModuleBuilder) => void) => {
 
@@ -36,7 +32,7 @@ export const initSettings = async (addSettingsToModuleBuilder?: (moduleBuilder: 
 
   const databaseConnection = app.get<Connection>(getConnectionToken());
   const httpServer = app.getHttpServer();
-  const userTestManger = new UsersTestManager(app, process.env.ADMIN_LOGIN, process.env.ADMIN_PASSWORD);
+  const userTestManger = new UsersTestManager(app);
 
   await deleteAllData(databaseConnection);
 

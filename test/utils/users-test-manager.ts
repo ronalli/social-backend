@@ -1,18 +1,9 @@
 import { INestApplication } from '@nestjs/common';
 import { UserCreateModel } from '../../src/features/users/api/models/input/create-user.input.model';
 import request from 'supertest';
-import dotenv from 'dotenv';
-import * as process from 'node:process';
-
-dotenv.config();
 
 export class UsersTestManager {
-  constructor(
-    protected readonly app: INestApplication,
-    private readonly admin: string,
-    private readonly password: string,
-  ) {
-  }
+  constructor(protected readonly app: INestApplication) {}
 
   expectCorrectModel(createModel: any, responseModel: any) {
     expect(createModel.login).toBe(responseModel.login);
@@ -23,37 +14,40 @@ export class UsersTestManager {
   async createUser(
     createModel: UserCreateModel,
     statusCode: number = 201,
+    login: string = 'admin',
+    password: string = 'qwerty',
   ) {
     return request(this.app.getHttpServer())
       .post('/api/users')
-      .auth(this.admin, this.password, {
+      .auth(login, password, {
         type: 'basic',
       })
       .send(createModel)
       .expect(statusCode);
   }
 
-  async updateUser(
-    userId: string,
-    updateModel: any,
-    statusCode: number = 204,
+  async getAllUsers(
+    statusCode: number = 200,
+    login: string = 'admin',
+    password: string = 'qwerty',
   ) {
     return request(this.app.getHttpServer())
-      .put(`/api/users/${userId}`)
-      .auth(this.admin, this.password, {
+      .get('/api/users/')
+      .auth(login, password, {
         type: 'basic',
       })
-      .send(updateModel)
       .expect(statusCode);
   }
 
   async deleteUser(
     userId: string,
     statusCode: number = 204,
+    login: string = 'admin',
+    password: string = 'qwerty',
   ) {
     return request(this.app.getHttpServer())
       .delete(`/api/users/${userId}`)
-      .auth(this.admin, this.password, {
+      .auth(login, password, {
         type: 'basic',
       })
       .expect(statusCode);

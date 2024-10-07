@@ -131,7 +131,6 @@ export class PostsController {
     const userId = req.userId!;
     const login = req.login!;
 
-
     await this.commandBus.execute(new UpdateLikeStatusPostCommand(commentId, userId, status, login))
 
     return res.status(204).send({});

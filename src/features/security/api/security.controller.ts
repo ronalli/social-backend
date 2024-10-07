@@ -17,6 +17,7 @@ import { SecurityQueryRepository } from '../infrastructure/security-query.reposi
 import { SecurityService } from '../application/security.service';
 import { mappingSessions } from '../../../common/utils/mappings.sessions.service';
 import { SkipThrottle } from '@nestjs/throttler';
+import { CommandBus } from '@nestjs/cqrs';
 
 
 @SkipThrottle()

@@ -12,7 +12,7 @@ export class BlogsTestManager {
     password: string = 'qwerty',
   ) {
     return request(this.app.getHttpServer())
-      .post('/blogs')
+      .post('/api/blogs')
       .auth(login, password, {
         type: 'basic',
       })
@@ -26,7 +26,7 @@ export class BlogsTestManager {
     password: string = 'qwerty',
   ) {
     return request(this.app.getHttpServer())
-      .get('/blogs')
+      .get('/api/blogs')
       .auth(login, password, {
         type: 'basic',
       }).expect(statusCode)

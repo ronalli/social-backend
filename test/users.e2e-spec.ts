@@ -1,26 +1,27 @@
 import { INestApplication } from '@nestjs/common';
 import { UsersTestManager } from './utils/users-test-manager';
-import { initSettings } from './utils/init-settings';
 import { UsersService } from '../src/features/users/application/users.service';
 import { UsersRepository } from '../src/features/users/infrastructure/users.repository';
 import { UserServiceMock } from './mock/user.service.mock';
+import { initBaseSettings } from './utils/base.init-settings';
 
 describe('Users Tests', () => {
   let app: INestApplication;
   let userTestManager: UsersTestManager;
 
   beforeAll(async () => {
-    const result = await initSettings((moduleBuilder) =>
-      moduleBuilder.overrideProvider(UsersService).useFactory({
-        factory: (repo: UsersRepository) => {
-          return new UserServiceMock(repo);
-        },
-        inject: [UsersRepository],
-      }),
-    );
+    const result =  await initBaseSettings([{
+      provider: UsersService, useValue: UserServiceMock
+    }], (moduleBuilder) =>
+        moduleBuilder.overrideProvider(UsersService).useFactory({
+          factory: (repo: UsersRepository) => {
+            return new UserServiceMock(repo);
+          },
+          inject: [UsersRepository],
+        }))
 
     app = result.app;
-    userTestManager = result.userTestManger;
+    userTestManager = new UsersTestManager(app);
   });
 
   afterAll(async () => {

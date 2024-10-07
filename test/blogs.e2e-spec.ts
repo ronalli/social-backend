@@ -1,43 +1,29 @@
 import { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
-import { AppModule } from '../src/app.module';
 import { BlogsTestManager } from './utils/blogs-test-manager';
-import { Connection } from 'mongoose';
-import { getConnectionToken } from '@nestjs/mongoose';
-import { deleteAllData } from './utils/delete-all-data';
-import { initSettingsBlogs } from './utils/init-settings-blogs';
 import { BlogsService } from '../src/features/bloggers-platform/blogs/application/blogs.service';
-import { BlogsRepository } from '../src/features/bloggers-platform/blogs/infrastructure/blogs.repository';
 import { BlogsServiceMock } from './mock/blogs.service.mock';
+import { initBaseSettings } from './utils/base.init-settings';
+import { BlogsRepository } from '../src/features/bloggers-platform/blogs/infrastructure/blogs.repository';
 
 describe('Blogs Test', () => {
   let app: INestApplication;
   let blogTestManager: BlogsTestManager;
 
   beforeAll(async () => {
-    const result = await initSettingsBlogs((moduleBuilder) =>
-      moduleBuilder.overrideProvider(BlogsService).useFactory({
-        factory: (repo: BlogsRepository) => {
-          return new BlogsServiceMock(repo);
-        },
-        inject: [BlogsRepository],
-      }),
-    );
+
+   const result = await initBaseSettings([{
+      provider: BlogsService, useValue: BlogsServiceMock
+    }], (moduleBuilder) =>
+     moduleBuilder.overrideProvider(BlogsService).useFactory({
+       factory: (repo: BlogsRepository) => {
+         return new BlogsServiceMock(repo);
+       },
+       inject: [BlogsRepository],
+     }))
 
     app = result.app;
-    blogTestManager = result.blogsTestManger;
+    blogTestManager = new BlogsTestManager(app);
 
-    // const module = await Test.createTestingModule({
-    //   imports: [AppModule],
-    // }).compile();
-    //
-    // app = module.createNestApplication();
-    // blogTestManager = new BlogsTestManager(app);
-    // connection = app.get(getConnectionToken());
-    //
-    // await deleteAllData(connection);
-    //
-    // await app.init();
   });
 
   afterAll(async () => {

@@ -9,14 +9,21 @@ import { BlogsService } from '../../src/features/bloggers-platform/blogs/applica
 import { BlogsTestManager } from './blogs-test-manager';
 import { BlogsServiceMockObject } from '../mock/blogs.service.mock';
 
-export const initSettingsBlogs = async (addSettingsToModuleBuilder?: (moduleBuilder: TestingModuleBuilder) => void) => {
-
+export const initBaseSettings = async (
+  providersToOverride: {
+    provider: any;
+    useValue: any;
+  }[] = [],
+  addSettingsToModuleBuilder?: (moduleBuilder: TestingModuleBuilder) => void,
+) => {
   console.log('in tests ENV: ', appSettings.env.getEnv());
   const testingModuleBuilder: TestingModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
   })
-    .overrideProvider(BlogsService)
-    .useValue(BlogsServiceMockObject);
+
+  providersToOverride.forEach(({provider, useValue}) => {
+    testingModuleBuilder.overrideProvider(provider).useValue(useValue);
+  })
 
   if (addSettingsToModuleBuilder) {
     addSettingsToModuleBuilder(testingModuleBuilder);
@@ -32,7 +39,7 @@ export const initSettingsBlogs = async (addSettingsToModuleBuilder?: (moduleBuil
 
   const databaseConnection = app.get<Connection>(getConnectionToken());
   const httpServer = app.getHttpServer();
-  const blogsTestManger = new BlogsTestManager(app);
+  // const blogsTestManger = new BlogsTestManager(app);
 
   await deleteAllData(databaseConnection);
 
@@ -40,8 +47,6 @@ export const initSettingsBlogs = async (addSettingsToModuleBuilder?: (moduleBuil
     app,
     databaseConnection,
     httpServer,
-    blogsTestManger,
+    // blogsTestManger,
   };
-
-
-}
+};

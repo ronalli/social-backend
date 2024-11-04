@@ -1,44 +1,38 @@
-import { HydratedDocument, Model, Types} from 'mongoose';
-import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-@Schema()
-export class EmailConfirmation {
-  @Prop({ type: String, default: null })
-  confirmationCode: string | null;
+// @Entity()
+// export class EmailConfirmation {
+//   @PrimaryGeneratedColumn()
+//   id: number;
+//
+//   @Column({ type: String, default: null, length: 100 })
+//   confirmationCode: string | null;
+//
+//   @Column({ type: Date, default: null, length: 50 })
+//   expirationDate: Date | null;
+//
+//   @Column({ type: Boolean, default: false, length: 5 })
+//   isConfirmed?: boolean;
+// }
 
-  @Prop({ type: Date, default: null })
-  expirationDate: Date | null;
-
-  @Prop({ type: Boolean, default: false })
-  isConfirmed?: boolean;
-}
-
-const EmailConfirmationSchema = SchemaFactory.createForClass(EmailConfirmation);
-
-@Schema()
+@Entity()
 export class User {
-  @Prop({type: Types.ObjectId, auto: true})
-  _id: Types.ObjectId;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Prop({ required: true })
+  @Column({type: String, length: 10})
   login: string;
 
-  @Prop({ required: true })
+  @Column({type: String, length: 20})
   email: string;
 
-  @Prop()
+  @Column({type: String, length: 100})
   hash: string;
 
-  @Prop({ required: true })
+  @Column({type: String, length: 100})
   createdAt: string;
 
-  @Prop({type: EmailConfirmationSchema})
-  emailConfirmation: EmailConfirmation
+  // @OneToOne(() => EmailConfirmation )
+  // @JoinColumn()
+  // emailConfirmation: EmailConfirmation
 }
-
-export const UserSchema = SchemaFactory.createForClass(User);
-UserSchema.loadClass(User);
-
-export type UserDocument = HydratedDocument<User>
-
-export type UserModelType = Model<UserDocument>

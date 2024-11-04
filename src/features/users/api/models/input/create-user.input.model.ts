@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 import { Trim } from '../../../../../common/decorators/transform/trim';
-import { LoginIsExist } from '../../../../../common/decorators/validate/login-is-exist.decorator';
-import { EmailIsExist } from '../../../../../common/decorators/validate/email-is-exist.decorator';
+// import { LoginIsExist } from '../../../../../common/decorators/validate/login-is-exist.decorator';
+// import { EmailIsExist } from '../../../../../common/decorators/validate/email-is-exist.decorator';
 
 export class UserCreateModel {
 
@@ -10,7 +10,7 @@ export class UserCreateModel {
   @IsNotEmpty()
   @Length(3, 10)
   @Matches(/^[a-zA-Z0-9_-]*$/)
-  @LoginIsExist()
+  // @LoginIsExist()
   login: string;
 
   @IsString()
@@ -23,6 +23,6 @@ export class UserCreateModel {
   @Trim()
   @IsNotEmpty()
   @Matches(/^[\w.-]+@([\w-]+\.)+[\w-]{2,4}$/)
-  @EmailIsExist()
+  // @EmailIsExist()
   email: string;
 }

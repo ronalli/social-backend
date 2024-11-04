@@ -31,4 +31,11 @@ export class BlogsTestManager {
         type: 'basic',
       }).expect(statusCode)
   }
+
+  async getBlog(id: string, statusCode: number = 200, login: string = 'admin', password: string = 'qwerty', ) {
+    return request(this.app.getHttpServer()).get(`/api/blogs/${id}`).auth(login, password, {
+      type: 'basic',
+    }).expect(statusCode);
+  }
+
 }

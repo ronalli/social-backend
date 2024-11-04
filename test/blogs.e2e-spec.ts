@@ -92,4 +92,26 @@ describe('Blogs Test', () => {
     expect(response.statusCode).toBe(400);
     expect(response.body.errorsMessages.length).toEqual(3)
   });
+
+  it('should created blog, and return correct data', async () => {
+    const blogDto = {
+      name: 'New blog 3',
+      description: 'super mega new blog 3',
+      websiteUrl: 'https://mega3-blog.com',
+    }
+    const response = await blogTestManager.createBlog(blogDto);
+
+    const result = await blogTestManager.getBlog(response.body.id)
+
+    expect(response.body).toEqual({
+      createdAt: expect.any(String),
+      name: result.body.name,
+      description: result.body.description,
+      websiteUrl: result.body.websiteUrl,
+      id: result.body.id,
+      isMembership: expect.any(Boolean)
+    })
+
+  })
+
 });

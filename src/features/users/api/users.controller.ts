@@ -49,11 +49,13 @@ export class UsersController {
 
     const {login, password, email} = createModel;
     //
-    const user = await this.commandBus.execute(new CreateUserCommand(login, password, email))
+    // const user = await this.commandBus.execute(new CreateUserCommand(login, password, email))
+
+    const user = await this.usersService.createUser(createModel);
 
     // const user = await this.usersService.createUser(createModel);
 
-    console.log(user);
+    return user;
 
     // return await this.usersService.findUser(createdUserId)
 

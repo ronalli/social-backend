@@ -28,7 +28,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
   ) {
   }
 
-  async execute(command: CreateUserCommand): Promise<User> {
+  async execute(command: CreateUserCommand): Promise<string> {
 
     const {password, login, email} = command;
 
@@ -61,6 +61,8 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     //     isConfirmed: true
     //   }
     // });
-    return this.userRepository.save(user)
+
+    const response = await this.userRepository.save(user)
+    return response.id.toString();
   }
 }

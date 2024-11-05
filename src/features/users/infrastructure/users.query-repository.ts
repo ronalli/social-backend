@@ -55,56 +55,56 @@
 //     }
 //   }
 //
-//   async doesExistById(id: string): Promise<UserOutputModel | null> {
-//     const findedUser = await this.UserModel.findOne({_id: new ObjectId(id)});
-//     if (findedUser) {
-//       return UserOutputModelMapper(findedUser);
-//     }
-//     return null;
-//   }
-//
-//   async findUserById(id: string) {
-//     try {
-//       return await this.UserModel.findOne({_id: new ObjectId(id)})
-//     } catch (e) {
-//       throw new InternalServerErrorException(e)
-//     }
-//   }
-//
-//   async doesExistByLoginOrEmail(login: string, email: string) {
-//     try {
-//       const user = await this.UserModel.findOne({
-//         $or: [{login: login}, {email: email}]
-//       });
-//
-//       return !user;
-//     } catch (e) {
-//       throw new InternalServerErrorException(e)
-//     }
-//   }
-//
-//   async findUserByCodeConfirmation(codeConfirmation: string) {
-//     try {
-//       const filter = {'emailConfirmation.confirmationCode': codeConfirmation}
-//       const user = await this.UserModel.findOne(filter);
-//       if (user) {
-//         return {data: user}
-//       }
-//       return false;
-//
-//     } catch (e) {
-//       throw new InternalServerErrorException(e)
-//     }
-//   }
-//
-//   _maping(users: UserDocument[]): UserOutputModel[] {
-//     return users.map(u => ({
-//       id: String(u._id),
-//       createdAt: u.createdAt,
-//       email: u.email,
-//       login: u.login,
-//     }))
-//   }
+//   // async doesExistById(id: string): Promise<UserOutputModel | null> {
+//   //   const findedUser = await this.UserModel.findOne({_id: new ObjectId(id)});
+//   //   if (findedUser) {
+//   //     return UserOutputModelMapper(findedUser);
+//   //   }
+//   //   return null;
+//   // }
+//   //
+//   // async findUserById(id: string) {
+//   //   try {
+//   //     return await this.UserModel.findOne({_id: new ObjectId(id)})
+//   //   } catch (e) {
+//   //     throw new InternalServerErrorException(e)
+//   //   }
+//   // }
+//   //
+//   // async doesExistByLoginOrEmail(login: string, email: string) {
+//   //   try {
+//   //     const user = await this.UserModel.findOne({
+//   //       $or: [{login: login}, {email: email}]
+//   //     });
+//   //
+//   //     return !user;
+//   //   } catch (e) {
+//   //     throw new InternalServerErrorException(e)
+//   //   }
+//   // }
+//   //
+//   // async findUserByCodeConfirmation(codeConfirmation: string) {
+//   //   try {
+//   //     const filter = {'emailConfirmation.confirmationCode': codeConfirmation}
+//   //     const user = await this.UserModel.findOne(filter);
+//   //     if (user) {
+//   //       return {data: user}
+//   //     }
+//   //     return false;
+//   //
+//   //   } catch (e) {
+//   //     throw new InternalServerErrorException(e)
+//   //   }
+//   // }
+//   //
+//   // _maping(users: UserDocument[]): UserOutputModel[] {
+//   //   return users.map(u => ({
+//   //     id: String(u._id),
+//   //     createdAt: u.createdAt,
+//   //     email: u.email,
+//   //     login: u.login,
+//   //   }))
+//   // }
 //
 //   _createDefaultValues(query: UserQueryDto) {
 //     return {

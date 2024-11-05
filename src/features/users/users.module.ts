@@ -5,11 +5,12 @@ import { User } from './domain/user.entity';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CreateUserHandler } from './application/usecases/create-user.usecase';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersRepository } from './infrastructure/users.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), CqrsModule],
   controllers: [UsersController],
-  providers: [UsersService, CreateUserHandler],
+  providers: [UsersService, UsersRepository, CreateUserHandler],
   // exports: [UsersService]
 })
 

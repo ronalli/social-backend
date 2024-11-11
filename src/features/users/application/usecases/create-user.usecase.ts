@@ -4,10 +4,11 @@ import { BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { bcryptService } from '../../../../common/services/password-hash.service';
-// import { UsersRepository } from '../../infrastructure/users.repository';
-import { User } from '../../domain/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+// import { User } from '../../domain/user.entity';
+// import { InjectRepository } from '@nestjs/typeorm';
+// import { Repository } from 'typeorm';
+// import {Pool} from 'pg';
+import { UsersRepository } from '../../infrastructure/users.repository';
 
 export class CreateUserCommand {
   constructor(
@@ -21,14 +22,14 @@ export class CreateUserCommand {
 @CommandHandler(CreateUserCommand)
 export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
   constructor(
+    // private pool: Pool,
               // private readonly usersQueryRepository: UsersQueryRepository,
-              // private readonly usersRepository: UsersRepository,
-              @InjectRepository(User) private readonly userRepository: Repository<User>
+              private readonly usersRepository: UsersRepository,
               // @InjectModel(User.name) private readonly UserModel: UserModelType
   ) {
   }
 
-  async execute(command: CreateUserCommand): Promise<string> {
+  async execute(command: CreateUserCommand): Promise<number> {
 
     const {password, login, email} = command;
 
@@ -39,10 +40,8 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     // }
 
     const hash = await bcryptService.generateHash(password);
-
     const createdAt = new Date().toISOString()
-
-    const user = this.userRepository.create({login, email, hash, createdAt})
+    return await this.usersRepository.create(login, email, hash, createdAt)
 
     // user.login = login;
     // user.email = email;
@@ -62,7 +61,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     //   }
     // });
 
-    const response = await this.userRepository.save(user)
-    return response.id.toString();
+    // const response = await this.userRepository.save(user)
+    // return user;
   }
 }

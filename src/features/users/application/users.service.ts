@@ -17,11 +17,11 @@ export class UsersService {
   ) {
   }
 
- async deleteUser(id: number): Promise<void> {
-    await this.usersRepository.delete(id)
+ async deleteUser(id: number): Promise<boolean> {
+    return await this.usersRepository.delete(id)
   }
 
-  async findUser(id: number): Promise<void> {
+  async findUser(id: number): Promise<UserOutputModel> {
     return await this.usersRepository.findUserById(id)
   }
   //
@@ -29,19 +29,19 @@ export class UsersService {
     return await this.usersRepository.findAllUser();
   }
   //
-  async createUser(createModel: UserCreateModel): Promise<UserOutputModel> {
-
-    const {password, login, email} = createModel;
-    const hash = await bcryptService.generateHash(password);
-    const createdAt = new Date().toISOString();
-
-    const user = await this.usersRepository.createUser(login, email, hash, createdAt)
-
-    return {
-      id: user.id.toString(),
-      createdAt: user.createdAt,
-      email: user.email,
-      login: user.login
-    }
-  }
+  // async createUser(createModel: UserCreateModel): Promise<UserOutputModel> {
+  //
+  //   const {password, login, email} = createModel;
+  //   const hash = await bcryptService.generateHash(password);
+  //   const createdAt = new Date().toISOString();
+  //
+  //   const user = await this.usersRepository.create(login, email, hash, createdAt)
+  //
+  //   return {
+  //     id: user.id.toString(),
+  //     createdAt: user.createdAt,
+  //     email: user.email,
+  //     login: user.login
+  //   }
+  // }
 }

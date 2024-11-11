@@ -38,7 +38,7 @@ export class UsersController {
 
   // @UseGuards(BasicAuthGuard)
   @Get('')
-    getAllUsers() {
+    getAllUsers(@Query() query: UserQueryDto, @Req() req: Request, @Res({passthrough: true}) res: Response, ) {
 
     return this.usersService.findAllUser()
   }
@@ -48,16 +48,9 @@ export class UsersController {
   async createUser(@Body() createModel: UserCreateModel) {
 
     const {login, password, email} = createModel;
-    //
-    // const user = await this.commandBus.execute(new CreateUserCommand(login, password, email))
+    const createdUserId = await this.commandBus.execute(new CreateUserCommand(login, password, email))
 
-    const user = await this.usersService.createUser(createModel);
-
-    // const user = await this.usersService.createUser(createModel);
-
-    return user;
-
-    // return await this.usersService.findUser(createdUserId)
+    return  await this.usersService.findUser(createdUserId);
 
   }
 
@@ -68,8 +61,8 @@ export class UsersController {
 
     const result = await this.usersService.deleteUser(+id)
 
-    // if(!result) {
-    //   throw new NotFoundException(`User with id ${id} not found`)
-    // }
+    if(!result) {
+      throw new NotFoundException(`User with id ${id} not found`)
+    }
   }
 }

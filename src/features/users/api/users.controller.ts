@@ -25,6 +25,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User, } from '../domain/user.entity';
 import { UserCreateModel } from './models/input/create-user.input.model';
 import { UserOutputModel } from './models/output/user.output.model';
+import { UsersQueryRepository } from '../infrastructure/users.query-repository';
 
 @ApiTags('Users')
 @Controller('sa/users')
@@ -32,7 +33,7 @@ export class UsersController {
   constructor(
     @Inject(UsersService) private readonly usersService: UsersService,
     // @InjectModel(User.name) private UserModel: UserModelType,
-    // @Inject(UsersQueryRepository) private readonly usersQueryRepository: UsersQueryRepository,
+    @Inject(UsersQueryRepository) private readonly usersQueryRepository: UsersQueryRepository,
     private readonly commandBus: CommandBus) {
   }
 
@@ -40,7 +41,7 @@ export class UsersController {
   @Get('')
     getAllUsers(@Query() query: UserQueryDto, @Req() req: Request, @Res({passthrough: true}) res: Response, ) {
 
-    return this.usersService.findAllUser()
+    return this.usersQueryRepository.getAllUsers(query)
   }
 
   // @UseGuards(BasicAuthGuard)

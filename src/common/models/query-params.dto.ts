@@ -1,5 +1,8 @@
-import { SortDirection } from 'mongodb';
+// import { SortDirection } from 'mongodb';
 import { IsOptional, IsString } from 'class-validator';
+
+
+export type SortDirection  = 'asc' | 'desc'
 
 export class QueryParamsDto {
 
@@ -20,3 +23,4 @@ export class QueryParamsDto {
   pageNumber?: number = 1;
 
 }
+

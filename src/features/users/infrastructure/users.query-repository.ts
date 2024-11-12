@@ -12,7 +12,6 @@ export class UsersQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async getAllUsers(queryParams: UserQueryDto) {
-    // console.log(queryParams);
 
     const {
       searchNameTerm,
@@ -30,23 +29,32 @@ export class UsersQueryRepository {
 
     const pagesCount = Math.ceil(totalCount.length / pageSize);
 
-    const query = `SELECT id, login, email, "createdAt" FROM public."users" ORDER BY "${sortBy}" ${sortDirection} LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)}`;
+    const loginPattern = searchLoginTerm ? `${searchLoginTerm}%` : null;
 
-    const result = await this.dataSource.query(query);
+    const emailPattern = searchEmailTerm ? `${searchEmailTerm}%` : null;
 
-    console.log(result, result.length);
+    const query = `
+            SELECT id, login, email, "createdAt" 
+            FROM public."users" 
+            WHERE 
+             (  $1::text IS NULL AND $2::text IS NULL) 
+                OR (login LIKE COALESCE($1::text, '%'))
+                AND (email LIKE COALESCE($2::text, '%'))
+            ORDER BY "${sortBy}" ${sortDirection} 
+            LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)}
+            `;
 
-    // const query = this._createDefaultValues(queryParams);
+    const result = await this.dataSource.query(query, [loginPattern, emailPattern]);
 
-    // return {
-    //   data: {
-    //     pagesCount: Math.ceil(totalCount / query.pageSize),
-    //     pageSize: query.pageSize,
-    //     page: query.pageNumber,
-    //     totalCount,
-    //     items: this._maping(allUsers)
-    //   }
-    // }
+    // console.log(result)
+
+    return {
+      pagesCount: pagesCount,
+      pageSize: +pageSize,
+      page: pageNumber,
+      totalCount: totalCount.length,
+      items: result
+    }
   }
 
   // async doesExistById(id: string): Promise<UserOutputModel | null> {

@@ -32,7 +32,6 @@ import { UsersQueryRepository } from '../infrastructure/users.query-repository';
 export class UsersController {
   constructor(
     @Inject(UsersService) private readonly usersService: UsersService,
-    // @InjectModel(User.name) private UserModel: UserModelType,
     @Inject(UsersQueryRepository) private readonly usersQueryRepository: UsersQueryRepository,
     private readonly commandBus: CommandBus) {
   }

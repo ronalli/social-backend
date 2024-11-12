@@ -73,17 +73,14 @@ export class UsersQueryRepository {
   //   }
   // }
   //
-  // async doesExistByLoginOrEmail(login: string, email: string) {
-  //   try {
-  //     const user = await this.UserModel.findOne({
-  //       $or: [{login: login}, {email: email}]
-  //     });
-  //
-  //     return !user;
-  //   } catch (e) {
-  //     throw new InternalServerErrorException(e)
-  //   }
-  // }
+  async doesExistByLoginOrEmail(login: string, email: string) {
+    const query = `SELECT * FROM public."users" WHERE login LIKE $1 OR email LIKE $2`
+
+    const result = await this.dataSource.query(query, [login, email])
+
+    return result.length === 0
+
+  }
   //
   // async findUserByCodeConfirmation(codeConfirmation: string) {
   //   try {

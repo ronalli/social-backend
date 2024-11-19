@@ -13,7 +13,8 @@ export class AuthRepository {
   }
 
   async findByLoginOrEmail(loginOrEmail: string) {
-    return null;
+    const query = `SELECT * FROM public."users" WHERE email = $1 OR login = $1`;
+    return await this.dataSource.query(query, [loginOrEmail]);
   }
 
   async createUser(data: RegistrationModelUser): Promise<number> {

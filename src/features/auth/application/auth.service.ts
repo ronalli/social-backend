@@ -11,7 +11,9 @@ import { UsersQueryRepository } from '../../users/infrastructure/users.query-rep
 import { bcryptService } from '../../../common/services/password-hash.service';
 import { jwtService } from '../../../common/services/jwt.service';
 import { UserCreateModel } from '../../users/api/models/input/create-user.input.model';
+import { randomUUID } from 'node:crypto';
 import { AuthRepository } from '../infrastructure/auth.repository';
+import { LoginInputModel } from '../api/models/input/login.input.model';
 
 @Injectable()
 export class AuthService {
@@ -21,51 +23,53 @@ export class AuthService {
     private readonly usersQueryRepository: UsersQueryRepository,
   ) {}
 
-  // async login(data: LoginInputModel, dataSession: HeaderSessionModel) {
-  //   const { loginOrEmail }: LoginInputModel = data;
-  //   const result = await this.authRepository.findByLoginOrEmail(loginOrEmail);
-  //
-  //   if (result.data) {
-  //     const success = await bcryptService.checkPassword(
-  //       data.password,
-  //       result.data.hash,
-  //     );
-  //
-  //     if (success) {
-  //       const devicedId = randomUUID();
-  //
-  //       const accessToken = await jwtService.createdJWT(
-  //         {
-  //           deviceId: devicedId,
-  //           userId: String(result.data._id),
-  //         },
-  //         '10s',
-  //       );
-  //
-  //       const refreshToken = await jwtService.createdJWT(
-  //         {
-  //           deviceId: devicedId,
-  //           userId: String(result.data._id),
-  //         },
-  //         '20s',
-  //       );
-  //
-  //       await this.securityService.createAuthSessions(
-  //         refreshToken,
-  //         dataSession,
-  //       );
-  //
-  //       return {
-  //         status: ResultCode.Success,
-  //         data: { accessToken, refreshToken },
-  //       };
-  //     } else {
-  //       throw new UnauthorizedException();
-  //     }
-  //   }
-  //
-  //   throw new UnauthorizedException();
-  // }
+  async login(data: LoginInputModel) {
+
+    const { loginOrEmail }: LoginInputModel = data;
+    const result = await this.authRepository.findByLoginOrEmail(loginOrEmail);
+
+    // console.log(result);
+
+    if (result.length) {
+      const success = await bcryptService.checkPassword(
+        data.password,
+        result[0].hash,
+      );
+
+      if (success) {
+        const devicedId = randomUUID();
+
+        const accessToken = await jwtService.createdJWT(
+          {
+            deviceId: devicedId,
+            userId: String(result[0].id),
+          },
+          '10s',
+        );
+
+        const refreshToken = await jwtService.createdJWT(
+          {
+            deviceId: devicedId,
+            userId: String(result[0].id),
+          },
+          '20s',
+        );
+
+        // await this.securityService.createAuthSessions(
+        //   refreshToken,
+        //   dataSession,
+        // );
+
+        return {
+          data: { accessToken, refreshToken },
+        };
+      } else {
+        throw new UnauthorizedException();
+      }
+    }
+
+    throw new UnauthorizedException();
+  }
 
   async registration(data: UserCreateModel) {
     const { login, email, password } = data;

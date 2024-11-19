@@ -11,6 +11,7 @@ import {
 import { AuthService } from '../application/auth.service';
 import { UsersService } from '../../users/application/users.service';
 import { UserCreateModel } from '../../users/api/models/input/create-user.input.model';
+import { LoginInputModel } from './models/input/login.input.model';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -21,25 +22,26 @@ export class AuthController {
   ) {}
 
   @HttpCode(200)
-  // @Post('login')
-  // async login(
-  //   @Body() loginModel: LoginInputModel,
-  //   @Req() req: Request,
-  //   @Res() res: Response,
-  // ) {
-  //
-  //   const dataSession =
-  //     this.mappingsRequestHeadersService.getHeadersForCreateSession(req);
-  //
-  //   const result = await this.authService.login(loginModel, dataSession);
-  //
-  //   res.cookie('refreshToken', result.data.refreshToken, {
-  //     httpOnly: true,
-  //     secure: true,
-  //   });
-  //
-  //   res.json({ accessToken: result.data.accessToken });
-  // }
+  @Post('login')
+  async login(
+    @Body() loginModel: LoginInputModel,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+
+    // const dataSession =
+    //   this.mappingsRequestHeadersService.getHeadersForCreateSession(req);
+
+    // const result = await this.authService.login(loginModel, dataSession);
+    const result = await this.authService.login(loginModel);
+
+    res.cookie('refreshToken', result.data.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+
+    res.json({ accessToken: result.data.accessToken });
+  }
   //
   // @HttpCode(204)
   // @Post('password-recovery')

@@ -12,7 +12,7 @@ import { UsersQueryRepository } from './infrastructure/users.query-repository';
   imports: [TypeOrmModule.forFeature([User]), CqrsModule],
   controllers: [UsersController],
   providers: [UsersService, UsersRepository, UsersQueryRepository, CreateUserHandler],
-  exports: [UsersService, UsersRepository]
+  exports: [UsersService, UsersRepository, UsersQueryRepository]
 })
 
 export class UsersModule {}

@@ -57,13 +57,14 @@ export class UsersQueryRepository {
     }
   }
 
-  // async doesExistById(id: string): Promise<UserOutputModel | null> {
-  //   const findedUser = await this.UserModel.findOne({_id: new ObjectId(id)});
-  //   if (findedUser) {
-  //     return UserOutputModelMapper(findedUser);
-  //   }
-  //   return null;
-  // }
+  async doesExistById(id: number) {
+    const query  = `SELECT * FROM public.users WHERE id = $1`
+    const result = await this.dataSource.query(query, [id])
+
+    console.log(result);
+
+    return result;
+  }
   //
   // async findUserById(id: string) {
   //   try {

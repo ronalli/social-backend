@@ -23,6 +23,7 @@ import { UsersModule } from './features/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { User } from './features/users/domain/user.entity';
+import { AuthModule } from './features/auth/auth.module';
 
 const mappingsProviders: Provider[] = [
   // MappingBlogsService,
@@ -46,7 +47,7 @@ const mappingsProviders: Provider[] = [
 
     }),
     UsersModule,
-    // AuthModule,
+    AuthModule,
     // BloggersPlatformModule,
     // SecurityModule,
     // DeleteModule,

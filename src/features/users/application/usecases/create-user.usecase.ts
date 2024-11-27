@@ -4,6 +4,7 @@ import { bcryptService } from '../../../../common/services/password-hash.service
 import { UsersRepository } from '../../infrastructure/users.repository';
 import { UsersQueryRepository } from '../../infrastructure/users.query-repository';
 import { BadRequestException } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 
 export class CreateUserCommand {
   constructor(
@@ -20,7 +21,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     private readonly usersRepository: UsersRepository,
   ) {}
 
-  async execute(command: CreateUserCommand): Promise<number> {
+  async execute(command: CreateUserCommand): Promise<string> {
     const { password, login, email } = command;
 
     const response = await this.usersQueryRepository.doesExistByLoginOrEmail(
@@ -39,6 +40,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
 
     const hash = await bcryptService.generateHash(password);
     const createdAt = new Date().toISOString();
-    return await this.usersRepository.create(login, email, hash, createdAt);
+    const id = randomUUID();
+    return await this.usersRepository.create(id, login, email, hash, createdAt);
   }
 }

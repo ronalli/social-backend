@@ -14,6 +14,9 @@ import { UserCreateModel } from '../../users/api/models/input/create-user.input.
 import { randomUUID } from 'node:crypto';
 import { AuthRepository } from '../infrastructure/auth.repository';
 import { LoginInputModel } from '../api/models/input/login.input.model';
+import {
+  ConfirmationInfoEmail,
+} from '../../../common/utils/createConfirmationInfoForEmail';
 
 @Injectable()
 export class AuthService {
@@ -86,9 +89,11 @@ export class AuthService {
 
     const hash = await bcryptService.generateHash(password);
     const createdAt = new Date().toISOString();
+    const id = randomUUID()
+    const confirmation = new ConfirmationInfoEmail(id)
 
 
-    const response = await this.authRepository.createUser({login, email, hash, createdAt})
+    const response = await this.authRepository.createUser({id, login, email, hash, createdAt}, confirmation);
 
     return true;
 

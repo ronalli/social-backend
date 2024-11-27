@@ -10,14 +10,15 @@ export class UsersRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async create(
+    id: string,
     login: string,
     email: string,
     hash: string,
     createdAt: string,
-  ): Promise<number> {
-    const values = [login, email, hash, createdAt];
+  ): Promise<string> {
+    const values = [id, login, email, hash, createdAt];
 
-    let query = `INSERT INTO public."users" (login, email, hash, "createdAt") VALUES($1, $2, $3, $4) RETURNING *`;
+    let query = `INSERT INTO public."users" (id, login, email, hash, "createdAt") VALUES($1, $2, $3, $4, $5) RETURNING *`;
 
     const result = await this.dataSource.query(query, values);
 

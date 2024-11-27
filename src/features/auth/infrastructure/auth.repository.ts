@@ -1,29 +1,48 @@
-import { Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
-import { UserCreateModel } from '../../users/api/models/input/create-user.input.model';
 import { RegistrationModelUser } from '../api/models/input/registration.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { ConfirmationInfoEmail } from '../../../common/utils/createConfirmationInfoForEmail';
 
 @Injectable()
 export class AuthRepository {
   constructor(
     @InjectDataSource() protected dataSource: DataSource,
-    private readonly usersRepository: UsersRepository) {
-  }
+    private readonly usersRepository: UsersRepository,
+  ) {}
 
   async findByLoginOrEmail(loginOrEmail: string) {
     const query = `SELECT * FROM public."users" WHERE email = $1 OR login = $1`;
     return await this.dataSource.query(query, [loginOrEmail]);
   }
 
-  async createUser(data: RegistrationModelUser): Promise<number> {
-    const {login, email, hash, createdAt} = data;
-    const values = [login, email, hash, createdAt];
+  async createUser(
+    data: RegistrationModelUser,
+    confirmation: ConfirmationInfoEmail,
+  ): Promise<string> {
+    const valuesUser = [
+      data.id,
+      data.login,
+      data.email,
+      data.hash,
+      data.createdAt,
+    ];
 
-    const query = `INSERT INTO public."users" (login, email, hash, "createdAt") VALUES($1, $2, $3, $4) RETURNING *;`
+    const valuesEmail = [
+      confirmation.userId,
+      confirmation.isConfirmed,
+      confirmation.expirationDate,
+      confirmation.confirmationCode,
+    ];
 
-    const response = await this.dataSource.query(query, values)
+    const query = `INSERT INTO public."users" (id, login, email, hash, "createdAt") VALUES($1, $2, $3, $4, $5) RETURNING *;`;
+
+    const response = await this.dataSource.query(query, valuesUser);
+
+    const queryEmail = `INSERT INTO public."confirmationEmailUsers" ("userId", "isConfirmed", "expirationDate", "confirmationCode") VALUES($1, $2, $3, $4) RETURNING *`;
+
+    await this.dataSource.query(queryEmail, valuesEmail)
 
     return response[0].id;
   }

@@ -9,6 +9,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthRepository } from './infrastructure/auth.repository';
 import { UsersRepository } from '../users/infrastructure/users.repository';
 import { UsersQueryRepository } from '../users/infrastructure/users.query-repository';
+import { MappingsUsersService } from '../users/application/mappings/mappings.users';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { UsersQueryRepository } from '../users/infrastructure/users.query-reposi
     ThrottlerGuard,
     AuthService,
     AuthRepository,
+    MappingsUsersService
   ],
   exports: [AuthService],
 })

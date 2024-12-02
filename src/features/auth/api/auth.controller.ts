@@ -2,16 +2,18 @@ import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
-  Controller,
+  Controller, Get,
   HttpCode,
   Post,
   Req,
-  Res,
+  Res, UseGuards,
 } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
 import { UsersService } from '../../users/application/users.service';
 import { UserCreateModel } from '../../users/api/models/input/create-user.input.model';
 import { LoginInputModel } from './models/input/login.input.model';
+import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
+import { MappingsUsersService } from '../../users/application/mappings/mappings.users';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -19,6 +21,8 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
+    private readonly mappingsUsersService: MappingsUsersService,
+
   ) {}
 
   @HttpCode(200)
@@ -101,18 +105,18 @@ export class AuthController {
   //   res.json();
   // }
   //
-  // @HttpCode(200)
-  // @UseGuards(AuthJwtGuard)
-  // @Get('me')
-  // async me(@Req() req: Request, @Res() res: Response) {
-  //   const userId = req['userId'];
-  //   if (userId !== null) {
-  //     const result = await this.usersService.findUser(userId);
-  //     if (result) {
-  //       res.json(this.mappingsUsersService.formatViewModel(result));
-  //     }
-  //   }
-  // }
+  @HttpCode(200)
+  @UseGuards(AuthJwtGuard)
+  @Get('me')
+  async me(@Req() req: Request, @Res() res: Response) {
+    const userId = req['userId'];
+    if (userId !== null) {
+      const result = await this.usersService.findUser(userId);
+      if (result) {
+        res.json(this.mappingsUsersService.formatViewModel(result));
+      }
+    }
+  }
   //
   // @UseGuards(RefreshTokenGuard)
   // @SkipThrottle()

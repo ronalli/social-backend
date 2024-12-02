@@ -61,9 +61,9 @@ export class UsersQueryRepository {
     const query  = `SELECT * FROM public.users WHERE id = $1`
     const result = await this.dataSource.query(query, [id])
 
-    console.log(result);
+    // console.log(result);
 
-    return result;
+    return result[0];
   }
   //
   // async findUserById(id: string) {

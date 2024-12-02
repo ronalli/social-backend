@@ -4,15 +4,15 @@ import { add } from 'date-fns';
 
 export class ConfirmationInfoEmail {
   userId: string;
-  expirationDate: Date;
+  expirationDate: Date | null;
   isConfirmed: boolean;
-  confirmationCode: string;
+  confirmationCode: string | null;
 
-  constructor(userId: string) {
-    this.confirmationCode = randomUUID()
+  constructor(userId: string, isDate: boolean = true) {
+    this.confirmationCode = isDate ? randomUUID() : null
     this.userId = userId;
-    this.expirationDate = add(new Date(), {hours: 0, minutes: 1});
-    this.isConfirmed = false;
+    this.expirationDate = isDate ? add(new Date(), {hours: 0, minutes: 1}) : null;
+    this.isConfirmed = !isDate;
   }
 
 }

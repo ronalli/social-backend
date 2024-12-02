@@ -92,7 +92,6 @@ export class AuthService {
     const id = randomUUID()
     const confirmation = new ConfirmationInfoEmail(id)
 
-
     const response = await this.authRepository.createUser({id, login, email, hash, createdAt}, confirmation);
 
     return true;
@@ -377,8 +376,6 @@ export class AuthService {
     if (!id) throw new UnauthorizedException()
 
     const payload = await this.usersQueryRepository.doesExistById(id);
-
-    console.log('1', payload);
 
     if (!payload) throw new UnauthorizedException();
 

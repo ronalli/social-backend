@@ -21,7 +21,7 @@ export class UsersService {
     return await this.usersRepository.delete(id)
   }
 
-  async findUser(id: number): Promise<UserOutputModel> {
+  async findUser(id: string): Promise<UserOutputModel> {
     return await this.usersRepository.findUserById(id)
   }
   //

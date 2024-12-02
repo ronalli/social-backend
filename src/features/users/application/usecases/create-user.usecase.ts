@@ -5,6 +5,7 @@ import { UsersRepository } from '../../infrastructure/users.repository';
 import { UsersQueryRepository } from '../../infrastructure/users.query-repository';
 import { BadRequestException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
+import { ConfirmationInfoEmail } from '../../../../common/utils/createConfirmationInfoForEmail';
 
 export class CreateUserCommand {
   constructor(
@@ -38,9 +39,12 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
       ]);
     }
 
+
     const hash = await bcryptService.generateHash(password);
     const createdAt = new Date().toISOString();
     const id = randomUUID();
-    return await this.usersRepository.create(id, login, email, hash, createdAt);
+    const confirmation = new ConfirmationInfoEmail(id, false)
+
+    return await this.usersRepository.create(id, login, email, hash, createdAt, confirmation);
   }
 }

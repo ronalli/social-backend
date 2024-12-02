@@ -46,17 +46,20 @@ export class AuthController {
 
     res.json({ accessToken: result.data.accessToken });
   }
-  //
-  // @HttpCode(204)
-  // @Post('password-recovery')
-  // async passwordRecovery(
-  //   @Body('email') email: string,
-  //   @Req() req: Request,
-  //   @Res() res: Response,
-  // ) {
-  //   await this.authService.recoveryCode(email);
-  //   res.json();
-  // }
+
+
+  @HttpCode(204)
+  @Post('password-recovery')
+  async passwordRecovery(
+    @Body('email') email: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+
+    await this.authService.recoveryCode(email);
+    res.json();
+  }
+
   //
   // @HttpCode(204)
   // @Post('new-password')
@@ -105,6 +108,7 @@ export class AuthController {
   //   res.json();
   // }
   //
+
   @HttpCode(200)
   @UseGuards(AuthJwtGuard)
   @Get('me')

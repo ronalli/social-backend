@@ -27,7 +27,8 @@ import { MappingsUsersService } from '../users/application/mappings/mappings.use
     ThrottlerGuard,
     AuthService,
     AuthRepository,
-    MappingsUsersService
+    MappingsUsersService,
+    NodemailerService
   ],
   exports: [AuthService],
 })

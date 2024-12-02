@@ -17,6 +17,11 @@ import { LoginInputModel } from '../api/models/input/login.input.model';
 import {
   ConfirmationInfoEmail,
 } from '../../../common/utils/createConfirmationInfoForEmail';
+import { createRecoveryCode } from '../../../common/utils/createRecoveryCode';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { NodemailerService } from '../../../common/services/nodemailer.service';
+import { emailExamples } from '../../../common/utils/emailExamples';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +29,8 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly usersRepository: UsersRepository,
     private readonly usersQueryRepository: UsersQueryRepository,
+    private readonly nodemailerService: NodemailerService,
+    @InjectDataSource() protected dataSource: DataSource,
   ) {}
 
   async login(data: LoginInputModel) {
@@ -319,24 +326,24 @@ export class AuthService {
     // };
   // }
 
-  // async recoveryCode(email: string) {
-  //   const response = await this.authRepository.findByEmail(email);
-  //
-  //   const dataCode = await createRecoveryCode(email, '5m');
-  //
-  //   const newCode = new this.RecoveryCodeModel({
-  //     _id: new Types.ObjectId(),
-  //     code: dataCode,
-  //   });
-  //
-  //   await newCode.save();
-  //
-  //   this.nodemailerService
-  //     .sendEmail(email, dataCode, emailExamples.recoveryPasswordByAccount)
-  //     .catch((e: Error) => console.log(e));
-  //
-  //   return true;
-  // }
+  async recoveryCode(email: string) {
+    const response = await this.authRepository.findByEmail(email);
+
+    if(response) {
+      const dataCode = await createRecoveryCode(email, '5m');
+
+      const values = [response.id, dataCode];
+
+      const query = `INSERT INTO public."recoveryCodes"("userId", code) VALUES ($1, $2) RETURNING *`;
+
+      await this.dataSource.query(query, values)
+
+      this.nodemailerService
+        .sendEmail(email, dataCode, emailExamples.recoveryPasswordByAccount)
+        .catch((e: Error) => console.log(e));
+    }
+    return true;
+  }
   //
   // async updatePassword(password: string, email: string) {
   //   const user = await this.UserModel.findOne({ email: email });

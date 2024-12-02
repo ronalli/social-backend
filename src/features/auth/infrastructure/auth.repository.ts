@@ -4,6 +4,7 @@ import { RegistrationModelUser } from '../api/models/input/registration.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ConfirmationInfoEmail } from '../../../common/utils/createConfirmationInfoForEmail';
+import { UserOutputModel } from '../../users/api/models/output/user.output.model';
 
 @Injectable()
 export class AuthRepository {
@@ -47,7 +48,12 @@ export class AuthRepository {
     return response[0].id;
   }
 
-  async findByEmail(email: string) {
-    return null;
+  async findByEmail(email: string): Promise<UserOutputModel> {
+
+    const query = `SELECT * from public."users" WHERE email = $1`;
+
+    const response = await this.dataSource.query(query, [email]);
+
+    return response[0]
   }
 }

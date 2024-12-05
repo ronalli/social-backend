@@ -2,11 +2,13 @@ import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
-  Controller, Get,
+  Controller,
+  Get,
   HttpCode,
   Post,
   Req,
-  Res, UseGuards,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
 import { UsersService } from '../../users/application/users.service';
@@ -14,6 +16,7 @@ import { UserCreateModel } from '../../users/api/models/input/create-user.input.
 import { LoginInputModel } from './models/input/login.input.model';
 import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
 import { MappingsUsersService } from '../../users/application/mappings/mappings.users';
+import { SetNewPasswordModel } from './models/input/set-new-password.model';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -22,7 +25,6 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
     private readonly mappingsUsersService: MappingsUsersService,
-
   ) {}
 
   @HttpCode(200)
@@ -32,7 +34,6 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-
     // const dataSession =
     //   this.mappingsRequestHeadersService.getHeadersForCreateSession(req);
 
@@ -47,7 +48,6 @@ export class AuthController {
     res.json({ accessToken: result.data.accessToken });
   }
 
-
   @HttpCode(204)
   @Post('password-recovery')
   async passwordRecovery(
@@ -55,27 +55,27 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-
     await this.authService.recoveryCode(email);
     res.json();
   }
 
-  //
-  // @HttpCode(204)
-  // @Post('new-password')
-  // async setNewPassword(
-  //   @Body() query: SetNewPasswordModel,
-  //   @Req() req: Request,
-  //   @Res() res: Response,
-  // ) {
-  //   const { newPassword, recoveryCode } = query;
-  //
-  //   const response =
-  //     await this.authService.checkValidRecoveryCode(recoveryCode);
-  //
-  //   await this.authService.updatePassword(newPassword, response.data);
-  //   return;
-  // }
+  @HttpCode(204)
+  @Post('new-password')
+  async setNewPassword(
+    @Body() query: SetNewPasswordModel,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const { newPassword, recoveryCode } = query;
+
+    const response =
+      await this.authService.checkValidRecoveryCode(recoveryCode);
+
+    await this.authService.updatePassword(newPassword, response);
+
+    res.json();
+  }
+
   //
   // @HttpCode(204)
   // @Post('registration-confirmation')
@@ -121,6 +121,7 @@ export class AuthController {
       }
     }
   }
+
   //
   // @UseGuards(RefreshTokenGuard)
   // @SkipThrottle()

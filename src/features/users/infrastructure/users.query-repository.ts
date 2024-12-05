@@ -80,8 +80,19 @@ export class UsersQueryRepository {
     const result = await this.dataSource.query(query, [login, email])
 
     return result.length === 0
+  }
+
+  async doesExistByEmail(email: string) {
+
+    const query = `SELECT * FROM public."users" WHERE email = $1`;
+
+    const response = await this.dataSource.query(query, [email]);
+
+    return response.length != 0;
 
   }
+
+
   //
   // async findUserByCodeConfirmation(codeConfirmation: string) {
   //   try {

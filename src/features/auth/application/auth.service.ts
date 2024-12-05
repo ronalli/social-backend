@@ -1,7 +1,7 @@
 import { ResultCode } from '../../../settings/http.status';
 import {
   BadRequestException,
-  Injectable,
+  Injectable, InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
@@ -95,70 +95,64 @@ export class AuthService {
     const id = randomUUID();
     const confirmation = new ConfirmationInfoEmail(id);
 
-    const response = await this.authRepository.createUser(
+    const userId = await this.authRepository.createUser(
       { id, login, email, hash, createdAt },
       confirmation,
     );
 
+    if(userId) {
+
+      const confirmationCode = await this.usersQueryRepository.doesExistConfirmationCode(userId);
+
+      this.nodemailerService
+          .sendEmail(
+            email,
+           confirmationCode,
+            emailExamples.registrationEmail,
+          )
+          .catch((e) => {
+            console.log(e);
+          });
+    }
     return true;
 
-    // if (user) {
-    //   this.nodemailerService
-    //     .sendEmail(
-    //       email,
-    //       user.emailConfirmation?.confirmationCode!,
-    //       emailExamples.registrationEmail,
-    //     )
-    //     .catch((e) => {
-    //       console.log(e);
-    //     });
-    // }
-    //
-    // return true;
   }
 
-  // async confirmEmail(code: string) {
-  //   const result =
-  //     await this.usersQueryRepository.findUserByCodeConfirmation(code);
-  //
-  //   if (!result) {
-  //     throw new BadRequestException([
-  //       { message: 'The code is incorrect', field: 'code' },
-  //     ]);
-  //   }
-  //
-  //   if (result.data?.emailConfirmation?.isConfirmed) {
-  //     return true;
-  //   }
-  //
-  //   if (
-  //     result.data?.emailConfirmation?.expirationDate &&
-  //     result.data.emailConfirmation.expirationDate < new Date()
-  //   ) {
-  //     throw new BadRequestException([
-  //       { message: 'The code is not valid', field: 'email' },
-  //     ]);
-  //   }
-  //   if (result) {
-  //     try {
-  //       const foundUser = await this.UserModel.findOne({
-  //         _id: result.data._id,
-  //       });
-  //
-  //       if (foundUser && foundUser.emailConfirmation) {
-  //         foundUser.emailConfirmation.isConfirmed = true;
-  //         foundUser.emailConfirmation.expirationDate = null;
-  //         foundUser.emailConfirmation.confirmationCode = null;
-  //       }
-  //
-  //       await foundUser.save();
-  //
-  //       return true;
-  //     } catch (e) {
-  //       throw new InternalServerErrorException(e);
-  //     }
-  //   }
-  // }
+  async confirmEmail(code: string) {
+    const isFindCode =
+      await this.usersQueryRepository.findCodeConfirmation(code);
+
+    if (!isFindCode) {
+      throw new BadRequestException([
+        { message: 'The code is incorrect', field: 'code' },
+      ]);
+    }
+
+    if (isFindCode.isConfirmed) {
+      return true;
+    }
+
+    if (
+      isFindCode.expirationDate &&
+      isFindCode.expirationDate < new Date()
+    ) {
+      throw new BadRequestException([
+        { message: 'The code is not valid', field: 'email' },
+      ]);
+    }
+
+    const foundUser = await this.usersQueryRepository.doesExistById(isFindCode.userId)
+
+    if (isFindCode && foundUser) {
+
+      const query = `UPDATE public."confirmationEmailUsers" SET "isConfirmed" = $1, "expirationDate" = $2, "confirmationCode" = $3 RETURNING *`;
+
+      await this.dataSource.query(query, [true, null, null])
+
+    }
+    return true;
+
+  }
   //
   // async resendCode(email: string) {
   //   const result = await this.checkUserCredential(email);

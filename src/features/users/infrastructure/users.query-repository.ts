@@ -92,21 +92,30 @@ export class UsersQueryRepository {
 
   }
 
+  async doesExistConfirmationCode(userId: string): Promise<string> {
+    const query = `SELECT * FROM public."confirmationEmailUsers" WHERE "userId" = $1`
+
+    const result = await this.dataSource.query(query, [userId])
+
+    return result[0].confirmationCode;
+  }
+
 
   //
-  // async findUserByCodeConfirmation(codeConfirmation: string) {
-  //   try {
-  //     const filter = {'emailConfirmation.confirmationCode': codeConfirmation}
-  //     const user = await this.UserModel.findOne(filter);
-  //     if (user) {
-  //       return {data: user}
-  //     }
-  //     return false;
-  //
-  //   } catch (e) {
-  //     throw new InternalServerErrorException(e)
-  //   }
-  // }
+  async findCodeConfirmation(codeConfirmation: string) {
+
+    const query = `SELECT * FROM public."confirmationEmailUsers" WHERE "confirmationCode" = $1`;
+
+    const response = await this.dataSource.query(query, [codeConfirmation])
+
+    // console.log('www', response);
+
+    if(response.length === 0) {
+      return false;
+    }
+
+    return response[0];
+  }
   //
   // _maping(users: UserDocument[]): UserOutputModel[] {
   //   return users.map(u => ({

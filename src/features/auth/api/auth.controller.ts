@@ -77,15 +77,16 @@ export class AuthController {
   }
 
   //
-  // @HttpCode(204)
-  // @Post('registration-confirmation')
-  // async confirmationEmail(
-  //   @Body('code') code: string,
-  //   @Req() req: Request,
-  //   @Res() res: Response,
-  // ) {
-  //   return await this.authService.confirmEmail(code);
-  // }
+  @HttpCode(204)
+  @Post('registration-confirmation')
+  async confirmationEmail(
+    @Body('code') code: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    await this.authService.confirmEmail(code);
+    res.json();
+  }
 
   @HttpCode(204)
   @Post('registration')

@@ -100,6 +100,14 @@ export class UsersQueryRepository {
     return result[0].confirmationCode;
   }
 
+  async doesExistConfirmationEmail(userId: string): Promise<string> {
+    const query = `SELECT * FROM public."confirmationEmailUsers" WHERE "userId" = $1`
+
+    const result = await this.dataSource.query(query, [userId])
+
+    return result[0].isConfirmed;
+  }
+
 
   //
   async findCodeConfirmation(codeConfirmation: string) {

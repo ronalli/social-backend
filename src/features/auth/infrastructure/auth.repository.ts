@@ -43,17 +43,30 @@ export class AuthRepository {
 
     const queryEmail = `INSERT INTO public."confirmationEmailUsers" ("userId", "isConfirmed", "expirationDate", "confirmationCode") VALUES($1, $2, $3, $4) RETURNING *`;
 
-    await this.dataSource.query(queryEmail, valuesEmail)
+    await this.dataSource.query(queryEmail, valuesEmail);
 
     return response[0].id;
   }
 
   async findByEmail(email: string): Promise<UserOutputModel> {
-
     const query = `SELECT * from public."users" WHERE email = $1`;
 
     const response = await this.dataSource.query(query, [email]);
 
-    return response[0]
+    return response[0];
+  }
+
+  async updateConfirmationInfo(
+    id: string,
+    expirationDate: Date,
+    confirmationCode: string,
+  ) {
+    const query = `UPDATE public."confirmationEmailUsers" SET "expirationDate" = $1, "confirmationCode" = $2 WHERE "userId" = $3`;
+
+    return await this.dataSource.query(query, [
+      expirationDate,
+      confirmationCode,
+      id,
+    ]);
   }
 }

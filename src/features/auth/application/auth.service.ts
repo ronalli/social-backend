@@ -1,7 +1,8 @@
 import { ResultCode } from '../../../settings/http.status';
 import {
   BadRequestException,
-  Injectable, InternalServerErrorException,
+  Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
@@ -19,6 +20,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { NodemailerService } from '../../../common/services/nodemailer.service';
 import { emailExamples } from '../../../common/utils/emailExamples';
+import { add } from 'date-fns';
 
 @Injectable()
 export class AuthService {
@@ -100,22 +102,17 @@ export class AuthService {
       confirmation,
     );
 
-    if(userId) {
-
-      const confirmationCode = await this.usersQueryRepository.doesExistConfirmationCode(userId);
+    if (userId) {
+      const confirmationCode =
+        await this.usersQueryRepository.doesExistConfirmationCode(userId);
 
       this.nodemailerService
-          .sendEmail(
-            email,
-           confirmationCode,
-            emailExamples.registrationEmail,
-          )
-          .catch((e) => {
-            console.log(e);
-          });
+        .sendEmail(email, confirmationCode, emailExamples.registrationEmail)
+        .catch((e) => {
+          console.log(e);
+        });
     }
     return true;
-
   }
 
   async confirmEmail(code: string) {
@@ -132,60 +129,63 @@ export class AuthService {
       return true;
     }
 
-    if (
-      isFindCode.expirationDate &&
-      isFindCode.expirationDate < new Date()
-    ) {
+    if (isFindCode.expirationDate && isFindCode.expirationDate < new Date()) {
       throw new BadRequestException([
         { message: 'The code is not valid', field: 'email' },
       ]);
     }
 
-    const foundUser = await this.usersQueryRepository.doesExistById(isFindCode.userId)
+    const foundUser = await this.usersQueryRepository.doesExistById(
+      isFindCode.userId,
+    );
 
     if (isFindCode && foundUser) {
-
       const query = `UPDATE public."confirmationEmailUsers" SET "isConfirmed" = $1, "expirationDate" = $2, "confirmationCode" = $3 RETURNING *`;
 
-      await this.dataSource.query(query, [true, null, null])
-
+      await this.dataSource.query(query, [true, null, null]);
     }
     return true;
-
   }
-  //
-  // async resendCode(email: string) {
-  //   const result = await this.checkUserCredential(email);
-  //
-  //   if (result.emailConfirmation?.isConfirmed) {
-  //     throw new BadRequestException([
-  //       { message: 'Email already confirmed', field: 'email' },
-  //     ]);
-  //   }
-  //
-  //   if (result && !result.emailConfirmation?.isConfirmed) {
-  //     const code = randomUUID();
-  //     const expirationDate = add(new Date().toISOString(), {
-  //       hours: 0,
-  //       minutes: 1,
-  //     });
-  //
-  //     const user = await this.UserModel.findOne({ _id: result._id });
-  //
-  //     if (user && user.emailConfirmation) {
-  //       user.emailConfirmation.expirationDate = expirationDate;
-  //       user.emailConfirmation.confirmationCode = code;
-  //     }
-  //
-  //     await user.save();
-  //
-  //     this.nodemailerService
-  //       .sendEmail(email, code, emailExamples.registrationEmail)
-  //       .catch((e) => console.log(e));
-  //
-  //     return true;
-  //   }
-  // }
+
+  async resendCode(email: string) {
+    const result = await this.checkUserCredential(email);
+
+    if (!result) {
+      throw new BadRequestException([
+        {
+          message: 'If the inputModel has incorrect values',
+          field: 'email',
+        },
+      ]);
+    }
+
+
+    const isConfirmed = await this.usersQueryRepository.doesExistConfirmationEmail(result.id)
+
+    if (isConfirmed) {
+      throw new BadRequestException([
+        { message: 'Email already confirmed', field: 'email' },
+      ]);
+    }
+
+    if (result && !isConfirmed) {
+      const code = randomUUID();
+      const expirationDate = add(new Date().toISOString(), {
+        hours: 0,
+        minutes: 1,
+      });
+
+      await this.authRepository.updateConfirmationInfo(result.id, expirationDate, code)
+
+
+      this.nodemailerService
+          .sendEmail(email, code, emailExamples.registrationEmail)
+          .catch((e) => console.log(e));
+
+      return true;
+    }
+  }
+
   //
   // async logout(token: string) {
   //   const foundedToken = await this.OldRefreshCodeModel.findOne({
@@ -346,11 +346,10 @@ export class AuthService {
     ]);
   }
 
-  //
-  // async checkUserCredential(login: string) {
-  //   return await this.authRepository.findByEmail(login);
-  // }
-  //
+  async checkUserCredential(login: string) {
+    return await this.authRepository.findByEmail(login);
+  }
+
   async checkAccessToken(authHeader: string) {
     const token = authHeader.split(' ');
 

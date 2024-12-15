@@ -76,7 +76,6 @@ export class AuthController {
     res.json();
   }
 
-  //
   @HttpCode(204)
   @Post('registration-confirmation')
   async confirmationEmail(
@@ -99,16 +98,16 @@ export class AuthController {
     res.json();
   }
 
-  // @HttpCode(204)
-  // @Post('registration-email-resending')
-  // async resendConfirmationCode(
-  //   @Body('email') email: string,
-  //   @Res() res: Response,
-  // ) {
-  //   await this.authService.resendCode(email);
-  //   res.json();
-  // }
-  //
+  @HttpCode(204)
+  @Post('registration-email-resending')
+  async resendConfirmationCode(
+    @Body('email') email: string,
+    @Res() res: Response,
+  ) {
+    await this.authService.resendCode(email);
+    res.json();
+  }
+
 
   @HttpCode(200)
   @UseGuards(AuthJwtGuard)

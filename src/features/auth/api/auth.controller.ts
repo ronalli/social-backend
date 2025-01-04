@@ -139,11 +139,11 @@ export class AuthController {
     }
 
     const response = await this.authService.logout(cookie);
-    //
-    // if (response) {
-    //   res.clearCookie('refreshToken', { httpOnly: true, secure: true });
-    //   return res.status(204).send({});
-    // }
+
+    if (response) {
+      res.clearCookie('refreshToken', { httpOnly: true, secure: true });
+      return res.status(204).send({});
+    }
 
     throw new UnauthorizedException();
   }

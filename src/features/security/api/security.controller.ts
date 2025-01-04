@@ -17,8 +17,6 @@ import { SecurityQueryRepository } from '../infrastructure/security-query.reposi
 import { SecurityService } from '../application/security.service';
 import { mappingSessions } from '../../../common/utils/mappings.sessions.service';
 import { SkipThrottle } from '@nestjs/throttler';
-import { CommandBus } from '@nestjs/cqrs';
-
 
 @SkipThrottle()
 @ApiTags('Security')
@@ -33,19 +31,20 @@ export class SecurityController {
   @UseGuards(RefreshTokenGuard)
   @Get('devices')
   async getSessions(@Req() req: Request) {
-    // const token = req.cookies.refreshToken;
-    // const data = await decodeToken(token);
-    //
-    // if (!data) {
-    //   throw new UnauthorizedException();
-    // }
-    //
-    // const { userId } = data;
-    // const response = await this.securityQueryRepository.allSessionsUser(userId);
-    //
-    // if (!response) throw new UnauthorizedException();
-    //
-    // return mappingSessions(response);
+    const token = req.cookies.refreshToken;
+    const data = await decodeToken(token);
+
+    if (!data) {
+      throw new UnauthorizedException();
+    }
+
+    const { userId } = data;
+
+    const response = await this.securityQueryRepository.allSessionsUser(userId);
+
+    if (!response) throw new UnauthorizedException();
+
+    return mappingSessions(response);
   }
 
   @UseGuards(RefreshTokenGuard)
@@ -55,22 +54,20 @@ export class SecurityController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    // const refreshToken = req.cookies.refreshToken;
-    //
-    // if (!refreshToken || !deviceId) {
-    //   throw new NotFoundException();
-    // }
-    // const decode = await decodeToken(refreshToken);
-    //
-    // if (decode) {
-    //   const response = await this.securityService.deleteAuthSessionWithParam(
-    //     decode,
-    //     deviceId,
-    //   );
-    //
-    //   return res.status(204).send({})
-    // }
-    // throw new UnauthorizedException();
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken || !deviceId) {
+      throw new NotFoundException();
+    }
+
+    const decode = await decodeToken(refreshToken);
+
+    if (decode) {
+      await this.securityService.deleteAuthSessionWithParam(decode, deviceId);
+
+      return res.status(204).send({});
+    }
+    throw new UnauthorizedException();
   }
 
   @UseGuards(RefreshTokenGuard)

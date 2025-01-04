@@ -40,18 +40,15 @@ export class SecurityRepository {
   }
 
   async deleteDevicesButCurrent(data: IDecodeRefreshToken) {
-    // const {iat, userId, deviceId} = data;
-    //
-    // try {
-    //   const currentDevice = await this.DeviceModel.findOne({iat: iat})
-    //
-    //   await this.DeviceModel.deleteMany({userId: userId, _id: {$ne: currentDevice?._id}})
-    //
-    //   return true;
-    //
-    // } catch (e) {
-    //  throw new InternalServerErrorException(e)
-    // }
+    const {iat, userId} = data;
+
+    const query = `DELETE FROM public."deviceSessions" WHERE ("userId" = $1 AND NOT iat = $2);`
+
+
+    const result = await this.dataSource.query(query, [userId, iat])
+
+    return result[1] > 0;
+
   }
 
   async getDevice(deviceId: string) {
@@ -62,11 +59,6 @@ export class SecurityRepository {
 
     return result[0];
 
-    // try {
-    //   return await this.DeviceModel.findOne({deviceId: deviceId})
-    // } catch (e) {
-    //   throw new InternalServerErrorException(e)
-    // }
   }
 
   async updateDevice(data: IDecodeRefreshToken) {

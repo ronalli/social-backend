@@ -1,4 +1,3 @@
-// import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
@@ -16,11 +15,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
-// import { UsersQueryRepository } from '../infrastructure/users.query-repository';
-// import { UserCreateModel } from './models/input/create-user.input.model';
 import { UserQueryDto } from './models/user-query.dto';
 import { BasicAuthGuard } from '../../../common/guards/auth.basic.guard';
-// import { UserOutputModel } from './models/output/user.output.model';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/usecases/create-user.usecase';
 import { UserCreateModel } from './models/input/create-user.input.model';

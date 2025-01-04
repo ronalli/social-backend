@@ -7,7 +7,8 @@ import {
   HttpCode,
   Post,
   Req,
-  Res, UnauthorizedException,
+  Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
@@ -113,7 +114,6 @@ export class AuthController {
     res.json();
   }
 
-
   @HttpCode(200)
   @UseGuards(AuthJwtGuard)
   @Get('me')
@@ -127,7 +127,6 @@ export class AuthController {
     }
   }
 
-  //
   @UseGuards(RefreshTokenGuard)
   @SkipThrottle()
   @Post('logout')
@@ -147,6 +146,7 @@ export class AuthController {
 
     throw new UnauthorizedException();
   }
+
   //
   // @UseGuards(RefreshTokenGuard)
   // @Post('refresh-token')

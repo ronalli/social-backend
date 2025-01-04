@@ -5,6 +5,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ConfirmationInfoEmail } from '../../../common/utils/createConfirmationInfoForEmail';
 import { UserOutputModel } from '../../users/api/models/output/user.output.model';
+import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class AuthRepository {
@@ -69,4 +70,18 @@ export class AuthRepository {
       id,
     ]);
   }
+
+  async addRotterRefreshToken(token: string) {
+
+    const id = randomUUID();
+
+    const query = `
+    INSERT INTO public."oldRefreshTokens" (id, "refreshToken") VALUES ($1, $2) RETURNING *`;
+
+    const result = await this.dataSource.query(query, [id, token]);
+
+    return result[0];
+
+  }
+
 }

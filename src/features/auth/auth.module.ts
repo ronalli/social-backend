@@ -10,6 +10,7 @@ import { AuthRepository } from './infrastructure/auth.repository';
 import { UsersRepository } from '../users/infrastructure/users.repository';
 import { UsersQueryRepository } from '../users/infrastructure/users.query-repository';
 import { MappingsUsersService } from '../users/application/mappings/mappings.users';
+import { AuthQueryRepository } from './infrastructure/auth-query.repository';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MappingsUsersService } from '../users/application/mappings/mappings.use
     ThrottlerGuard,
     AuthService,
     AuthRepository,
+    AuthQueryRepository,
     MappingsUsersService,
     NodemailerService
   ],

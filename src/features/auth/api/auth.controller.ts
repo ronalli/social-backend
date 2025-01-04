@@ -7,7 +7,7 @@ import {
   HttpCode,
   Post,
   Req,
-  Res,
+  Res, UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
@@ -17,6 +17,8 @@ import { LoginInputModel } from './models/input/login.input.model';
 import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
 import { MappingsUsersService } from '../../users/application/mappings/mappings.users';
 import { SetNewPasswordModel } from './models/input/set-new-password.model';
+import { RefreshTokenGuard } from '../../../common/guards/refreshToken.guard';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -123,25 +125,25 @@ export class AuthController {
   }
 
   //
-  // @UseGuards(RefreshTokenGuard)
-  // @SkipThrottle()
-  // @Post('logout')
-  // async logout(@Req() req: Request, @Res() res: Response) {
-  //   const cookie = req.cookies.refreshToken;
-  //
-  //   if (!cookie) {
-  //     throw new UnauthorizedException();
-  //   }
-  //
-  //   const response = await this.authService.logout(cookie);
-  //
-  //   if (response) {
-  //     res.clearCookie('refreshToken', { httpOnly: true, secure: true });
-  //     return res.status(204).send({});
-  //   }
-  //
-  //   throw new UnauthorizedException();
-  // }
+  @UseGuards(RefreshTokenGuard)
+  @SkipThrottle()
+  @Post('logout')
+  async logout(@Req() req: Request, @Res() res: Response) {
+    const cookie = req.cookies.refreshToken;
+
+    if (!cookie) {
+      throw new UnauthorizedException();
+    }
+
+    const response = await this.authService.logout(cookie);
+    //
+    // if (response) {
+    //   res.clearCookie('refreshToken', { httpOnly: true, secure: true });
+    //   return res.status(204).send({});
+    // }
+
+    throw new UnauthorizedException();
+  }
   //
   // @UseGuards(RefreshTokenGuard)
   // @Post('refresh-token')

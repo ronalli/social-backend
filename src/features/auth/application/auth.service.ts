@@ -21,6 +21,8 @@ import { DataSource } from 'typeorm';
 import { NodemailerService } from '../../../common/services/nodemailer.service';
 import { emailExamples } from '../../../common/utils/emailExamples';
 import { add } from 'date-fns';
+import { AuthQueryRepository } from '../infrastructure/auth-query.repository';
+import { decodeToken } from '../../../common/services/decode.token';
 
 @Injectable()
 export class AuthService {
@@ -29,6 +31,7 @@ export class AuthService {
     private readonly usersRepository: UsersRepository,
     private readonly usersQueryRepository: UsersQueryRepository,
     private readonly nodemailerService: NodemailerService,
+    private readonly authQueryRepository: AuthQueryRepository,
     @InjectDataSource() protected dataSource: DataSource,
   ) {}
 
@@ -187,33 +190,46 @@ export class AuthService {
   }
 
   //
-  // async logout(token: string) {
-  //   const foundedToken = await this.OldRefreshCodeModel.findOne({
-  //     refreshToken: token,
-  //   });
-  //
-  //   if (foundedToken) {
-  //     throw new UnauthorizedException();
-  //   }
-  //   const success = await jwtService.getUserIdByToken(token);
-  //
-  //   const invalidRefreshToken = new this.OldRefreshCodeModel({
-  //     _id: new Types.ObjectId(),
-  //     refreshToken: token,
-  //   });
-  //
-  //   await invalidRefreshToken.save();
-  //
-  //   if (success) {
-  //     const data = await decodeToken(token);
-  //
-  //     if (data && (await this.securityService.deleteCurrentSession(data))) {
-  //       return true;
-  //     }
-  //   }
-  //
-  //   throw new UnauthorizedException();
-  // }
+  async logout(token: string) {
+
+    console.log(token);
+
+    const foundedToken = await this.authQueryRepository.findOneOldRefreshToken(token);
+
+    if (foundedToken) {
+      throw new UnauthorizedException();
+    }
+
+    const correctIdUser = await jwtService.getUserIdByToken(token);
+
+    const successAddRefreshToken = await this.authRepository.addRotterRefreshToken(token);
+
+
+    //add search user on id
+    if(correctIdUser) {
+      const data = await decodeToken(token);
+
+      if(data) {
+
+        //add func sessions
+
+        return true;
+      }
+    }
+
+    throw new UnauthorizedException();
+
+    //
+    // if (success) {
+    //   const data = await decodeToken(token);
+    //
+    //   if (data && (await this.securityService.deleteCurrentSession(data))) {
+    //     return true;
+    //   }
+    // }
+    //
+    // throw new UnauthorizedException();
+  }
   //
   // async refreshToken(token: string) {
   //   const validId = await jwtService.getUserIdByToken(token);

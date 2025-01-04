@@ -11,6 +11,11 @@ import { UsersRepository } from '../users/infrastructure/users.repository';
 import { UsersQueryRepository } from '../users/infrastructure/users.query-repository';
 import { MappingsUsersService } from '../users/application/mappings/mappings.users';
 import { AuthQueryRepository } from './infrastructure/auth-query.repository';
+import { SecurityService } from '../security/application/security.service';
+import { SecurityModule } from '../security/security.module';
+import { MappingsRequestHeadersService } from '../../common/utils/mappings.request.headers';
+import { SecurityQueryRepository } from '../security/infrastructure/security-query.repository';
+import { SecurityRepository } from '../security/infrastructure/security.repository';
 
 @Module({
   imports: [
@@ -22,6 +27,7 @@ import { AuthQueryRepository } from './infrastructure/auth-query.repository';
     ]),
     CqrsModule,
     UsersModule,
+    SecurityModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -30,7 +36,11 @@ import { AuthQueryRepository } from './infrastructure/auth-query.repository';
     AuthRepository,
     AuthQueryRepository,
     MappingsUsersService,
-    NodemailerService
+    NodemailerService,
+    SecurityService,
+    SecurityQueryRepository,
+    SecurityRepository,
+    MappingsRequestHeadersService
   ],
   exports: [AuthService],
 })

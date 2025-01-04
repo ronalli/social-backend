@@ -1,34 +1,27 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model, Types } from 'mongoose';
+import { IsString } from 'class-validator';
 
-@Schema()
-export class DeviceEntity {
-  @Prop({ type: Types.ObjectId, auto: true })
-  _id: Types.ObjectId;
+export class DeviceSessionEntity {
 
-  @Prop({ required: true })
+  @IsString()
+  id: string;
+
+  @IsString()
   deviceId: string;
 
-  @Prop({ required: true })
+  @IsString()
   deviceName: string;
 
-  @Prop({ required: true })
+  @IsString()
   exp: string;
 
-  @Prop({ required: true })
+  @IsString()
   iat: string;
 
-  @Prop({ required: true })
+  @IsString()
   ip: string;
 
-  @Prop({ required: true })
+  @IsString()
   userId: string;
 }
 
-export const DeviceEntitySchema = SchemaFactory.createForClass(DeviceEntity);
-
-DeviceEntitySchema.loadClass(DeviceEntity);
-
-export type DeviceEntityDocument = HydratedDocument<DeviceEntity>
-export type DeviceEntityModel = Model<DeviceEntityDocument>
 

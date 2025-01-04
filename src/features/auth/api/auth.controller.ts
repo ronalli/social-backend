@@ -18,6 +18,9 @@ import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
 import { MappingsUsersService } from '../../users/application/mappings/mappings.users';
 import { SetNewPasswordModel } from './models/input/set-new-password.model';
 import { RefreshTokenGuard } from '../../../common/guards/refreshToken.guard';
+
+import { MappingsRequestHeadersService } from '../../../common/utils/mappings.request.headers';
+
 import { SkipThrottle } from '@nestjs/throttler';
 
 @ApiTags('Auth')
@@ -27,6 +30,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
     private readonly mappingsUsersService: MappingsUsersService,
+    private readonly mappingsRequestHeadersService: MappingsRequestHeadersService,
   ) {}
 
   @HttpCode(200)
@@ -36,11 +40,10 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    // const dataSession =
-    //   this.mappingsRequestHeadersService.getHeadersForCreateSession(req);
+    const dataSession =
+      this.mappingsRequestHeadersService.getHeadersForCreateSession(req);
 
-    // const result = await this.authService.login(loginModel, dataSession);
-    const result = await this.authService.login(loginModel);
+    const result = await this.authService.login(loginModel, dataSession);
 
     res.cookie('refreshToken', result.data.refreshToken, {
       httpOnly: true,

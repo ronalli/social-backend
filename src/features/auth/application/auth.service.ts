@@ -23,6 +23,8 @@ import { emailExamples } from '../../../common/utils/emailExamples';
 import { add } from 'date-fns';
 import { AuthQueryRepository } from '../infrastructure/auth-query.repository';
 import { decodeToken } from '../../../common/services/decode.token';
+import { SecurityService } from '../../security/application/security.service';
+import { HeaderSessionModel } from '../../../common/models/header.session.model';
 
 @Injectable()
 export class AuthService {
@@ -32,10 +34,11 @@ export class AuthService {
     private readonly usersQueryRepository: UsersQueryRepository,
     private readonly nodemailerService: NodemailerService,
     private readonly authQueryRepository: AuthQueryRepository,
+    private readonly securityService: SecurityService,
     @InjectDataSource() protected dataSource: DataSource,
   ) {}
 
-  async login(data: LoginInputModel) {
+  async login(data: LoginInputModel, dataSession: HeaderSessionModel) {
     const { loginOrEmail }: LoginInputModel = data;
     const result = await this.authRepository.findByLoginOrEmail(loginOrEmail);
 
@@ -66,10 +69,10 @@ export class AuthService {
           '20s',
         );
 
-        // await this.securityService.createAuthSessions(
-        //   refreshToken,
-        //   dataSession,
-        // );
+        await this.securityService.createAuthSessions(
+          refreshToken,
+          dataSession,
+        );
 
         return {
           data: { accessToken, refreshToken },

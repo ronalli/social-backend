@@ -20,9 +20,6 @@ export class AuthQueryRepository {
     return result[0];
   }
 
-
-
-
   async findByEmail(email: string){
     // try {
     //   const user = await this.UserModel.findOne({email: email})

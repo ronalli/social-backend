@@ -147,23 +147,22 @@ export class AuthController {
     throw new UnauthorizedException();
   }
 
-  //
-  // @UseGuards(RefreshTokenGuard)
-  // @Post('refresh-token')
-  // async refreshToken(@Req() req: Request, @Res() res: Response) {
-  //   const cookie = req.cookies.refreshToken;
-  //
-  //   const response = await this.authService.refreshToken(cookie);
-  //
-  //   if (response.data) {
-  //     res.cookie('refreshToken', response.data.refreshToken, {
-  //       httpOnly: true,
-  //       secure: true,
-  //     });
-  //
-  //     return res.status(200).send({ accessToken: response.data.accessToken });
-  //   }
-  //
-  //   throw new UnauthorizedException();
-  // }
+  @UseGuards(RefreshTokenGuard)
+  @Post('refresh-token')
+  async refreshToken(@Req() req: Request, @Res() res: Response) {
+    const cookie = req.cookies.refreshToken;
+
+    const response = await this.authService.refreshToken(cookie);
+
+    if (response.data) {
+      res.cookie('refreshToken', response.data.refreshToken, {
+        httpOnly: true,
+        secure: true,
+      });
+
+      return res.status(200).send({ accessToken: response.data.accessToken });
+    }
+
+    throw new UnauthorizedException();
+  }
 }

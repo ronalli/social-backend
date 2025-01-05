@@ -68,18 +68,19 @@ export class SecurityService {
   }
 
   async updateVersionSession(token: string) {
-    // const data = await decodeToken(token)
-    //
-    // if (!data) {
-    //   throw new UnauthorizedException();
-    // }
-    //
-    // const response = await this.securityRepository.updateDevice(data);
-    //
-    // if (!response) {
-    //   throw new UnauthorizedException();
-    // }
-    //
-    // return true;
+
+    const data = await decodeToken(token)
+
+    if (!data) {
+      throw new UnauthorizedException();
+    }
+
+    const response = await this.securityRepository.updateDevice(data);
+
+    if (!response) {
+      throw new UnauthorizedException();
+    }
+
+    return true;
   }
 }

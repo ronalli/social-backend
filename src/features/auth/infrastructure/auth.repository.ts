@@ -71,7 +71,7 @@ export class AuthRepository {
     ]);
   }
 
-  async addRotterRefreshToken(token: string) {
+  async addOverdueRefreshToken(token: string) {
 
     const id = randomUUID();
 

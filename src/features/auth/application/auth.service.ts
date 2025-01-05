@@ -25,6 +25,7 @@ import { AuthQueryRepository } from '../infrastructure/auth-query.repository';
 import { decodeToken } from '../../../common/services/decode.token';
 import { SecurityService } from '../../security/application/security.service';
 import { HeaderSessionModel } from '../../../common/models/header.session.model';
+import { UsersService } from '../../users/application/users.service';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +36,7 @@ export class AuthService {
     private readonly nodemailerService: NodemailerService,
     private readonly authQueryRepository: AuthQueryRepository,
     private readonly securityService: SecurityService,
+    private readonly usersService: UsersService,
     @InjectDataSource() protected dataSource: DataSource,
   ) {}
 
@@ -165,8 +167,8 @@ export class AuthService {
       ]);
     }
 
-
-    const isConfirmed = await this.usersQueryRepository.doesExistConfirmationEmail(result.id)
+    const isConfirmed =
+      await this.usersQueryRepository.doesExistConfirmationEmail(result.id);
 
     if (isConfirmed) {
       throw new BadRequestException([
@@ -181,12 +183,15 @@ export class AuthService {
         minutes: 1,
       });
 
-      await this.authRepository.updateConfirmationInfo(result.id, expirationDate, code)
-
+      await this.authRepository.updateConfirmationInfo(
+        result.id,
+        expirationDate,
+        code,
+      );
 
       this.nodemailerService
-          .sendEmail(email, code, emailExamples.registrationEmail)
-          .catch((e) => console.log(e));
+        .sendEmail(email, code, emailExamples.registrationEmail)
+        .catch((e) => console.log(e));
 
       return true;
     }
@@ -194,10 +199,10 @@ export class AuthService {
 
   //
   async logout(token: string) {
-
     console.log(token);
 
-    const foundedToken = await this.authQueryRepository.findOneOldRefreshToken(token);
+    const foundedToken =
+      await this.authQueryRepository.findOneOldRefreshToken(token);
 
     if (foundedToken) {
       throw new UnauthorizedException();
@@ -205,15 +210,14 @@ export class AuthService {
 
     const correctIdUser = await jwtService.getUserIdByToken(token);
 
-    const successAddRefreshToken = await this.authRepository.addRotterRefreshToken(token);
-
+    const successAddRefreshToken =
+      await this.authRepository.addOverdueRefreshToken(token);
 
     //add search user on id
-    if(correctIdUser) {
+    if (correctIdUser) {
       const data = await decodeToken(token);
 
-      if(data) {
-
+      if (data) {
         //add func sessions
 
         return true;
@@ -233,57 +237,48 @@ export class AuthService {
     //
     // throw new UnauthorizedException();
   }
+
   //
-  // async refreshToken(token: string) {
-  //   const validId = await jwtService.getUserIdByToken(token);
-  //
-  //   const findedToken = await this.OldRefreshCodeModel.findOne({
-  //     refreshToken: token,
-  //   });
-  //
-  //   if (findedToken) {
-  //     throw new UnauthorizedException();
-  //   }
-  //
-  //   if (validId && !findedToken) {
-  //     await this.OldRefreshCodeModel.insertMany([
-  //       {
-  //         _id: new Types.ObjectId(),
-  //         refreshToken: token,
-  //       },
-  //     ]);
-  //
-  //     const currentUser = await this.UserModel.findOne({
-  //       _id: new ObjectId(validId),
-  //     });
-  //
-  //     if (currentUser) {
-  //       const decode = await decodeToken(token);
-  //
-  //       const deviceId = decode.deviceId;
-  //
-  //       const accessToken = await jwtService.createdJWT(
-  //         { deviceId, userId: String(currentUser._id) },
-  //         '10s',
-  //       );
-  //
-  //       const refreshToken = await jwtService.createdJWT(
-  //         { deviceId, userId: String(currentUser._id) },
-  //         '20s',
-  //       );
-  //
-  //       const response =
-  //         await this.securityService.updateVersionSession(refreshToken);
-  //
-  //       if (response) {
-  //         return {
-  //           data: { accessToken, refreshToken },
-  //         };
-  //       }
-  //     }
-  //
-  //     throw new UnauthorizedException();
-  //   }
+  async refreshToken(token: string) {
+    const validId = await jwtService.getUserIdByToken(token);
+
+    const findedToken =
+      await this.authQueryRepository.findOneOldRefreshToken(token);
+
+    if (findedToken) {
+      throw new UnauthorizedException();
+    }
+
+    if (validId && !findedToken) {
+      await this.authRepository.addOverdueRefreshToken(token);
+
+      const currentUser = await this.usersService.findUser(validId);
+
+      if (currentUser) {
+        const decode = await decodeToken(token);
+        const deviceId = decode.deviceId;
+        const accessToken = await jwtService.createdJWT(
+          { deviceId, userId: currentUser.id },
+          '10s',
+        );
+        const refreshToken = await jwtService.createdJWT(
+          { deviceId, userId: currentUser.id },
+          '20s',
+        );
+
+        const response =
+          await this.securityService.updateVersionSession(refreshToken);
+
+        if (response) {
+          return {
+            data: { accessToken, refreshToken },
+          };
+        }
+      }
+    }
+
+    throw new UnauthorizedException();
+  }
 
   //
   // if (validId && !findedToken) {

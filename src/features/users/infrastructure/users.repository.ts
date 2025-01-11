@@ -59,8 +59,14 @@ export class UsersRepository {
     // }
   }
 
-  async delete(id: number): Promise<boolean> {
-    const query = `DELETE FROM public."users" WHERE id = $1`;
+  async delete(id: string): Promise<boolean> {
+
+    const query = `WITH deleted_table AS (
+        DELETE FROM public."confirmationEmailUsers"
+        WHERE "userId" = $1
+        )
+        DELETE FROM public."users" WHERE "id" = $1
+        ;`;
 
     const result = await this.dataSource.query(query, [id])
 

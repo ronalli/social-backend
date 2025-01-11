@@ -1,23 +1,22 @@
-import { Inject, Injectable } from '@nestjs/common';
-// import { UsersRepository } from '../infrastructure/users.repository';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../domain/user.entity';
-import { Repository } from 'typeorm';
-import { UserCreateModel } from '../api/models/input/create-user.input.model';
-import { bcryptService } from '../../../common/services/password-hash.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { UserOutputModel } from '../api/models/output/user.output.model';
+import {validate as isValidUUID} from 'uuid'
 
 @Injectable()
 export class UsersService {
   constructor(
-    // @InjectRepository(User) private readonly userRepository: Repository<User>
     private usersRepository: UsersRepository
 
   ) {
   }
 
- async deleteUser(id: number): Promise<boolean> {
+ async deleteUser(id: string): Promise<boolean> {
+
+    if(!isValidUUID(id)) {
+      throw new NotFoundException();
+    }
+
     return await this.usersRepository.delete(id)
   }
 

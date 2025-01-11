@@ -2,7 +2,7 @@ import { ResultCode } from '../../../settings/http.status';
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
+  InternalServerErrorException, NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
@@ -26,6 +26,8 @@ import { decodeToken } from '../../../common/services/decode.token';
 import { SecurityService } from '../../security/application/security.service';
 import { HeaderSessionModel } from '../../../common/models/header.session.model';
 import { UsersService } from '../../users/application/users.service';
+import {validate as isValidUUID} from 'uuid'
+
 
 @Injectable()
 export class AuthService {
@@ -44,8 +46,6 @@ export class AuthService {
     const { loginOrEmail }: LoginInputModel = data;
     const result = await this.authRepository.findByLoginOrEmail(loginOrEmail);
 
-    // console.log(result);
-
     if (result.length) {
       const success = await bcryptService.checkPassword(
         data.password,
@@ -60,7 +60,7 @@ export class AuthService {
             deviceId: devicedId,
             userId: String(result[0].id),
           },
-          '10s',
+          '6m', //10s
         );
 
         const refreshToken = await jwtService.createdJWT(
@@ -94,9 +94,15 @@ export class AuthService {
       email,
     );
 
-    if (!result) {
+    if (result.resultEmail.length !== 0) {
       throw new BadRequestException([
-        { message: 'User founded', field: 'login/email' },
+        { message: 'User founded', field: 'email' },
+      ]);
+    }
+
+    if (result.resultLogin.length !== 0) {
+      throw new BadRequestException([
+        { message: 'User founded', field: 'login' },
       ]);
     }
 
@@ -124,6 +130,13 @@ export class AuthService {
   }
 
   async confirmEmail(code: string) {
+
+    if(!isValidUUID(code)) {
+      throw new BadRequestException([
+        { message: 'The code is not valid', field: 'code' },
+      ])
+    }
+
     const isFindCode =
       await this.usersQueryRepository.findCodeConfirmation(code);
 
@@ -148,9 +161,9 @@ export class AuthService {
     );
 
     if (isFindCode && foundUser) {
-      const query = `UPDATE public."confirmationEmailUsers" SET "isConfirmed" = $1, "expirationDate" = $2, "confirmationCode" = $3 RETURNING *`;
+      const query = `UPDATE public."confirmationEmailUsers" SET "isConfirmed" = $1, "expirationDate" = $2, "confirmationCode" = $3 WHERE "userId" = $4 RETURNING *;`;
 
-      await this.dataSource.query(query, [true, null, null]);
+      await this.dataSource.query(query, [true, null, null,isFindCode.userId]);
     }
     return true;
   }
@@ -259,7 +272,7 @@ export class AuthService {
         const deviceId = decode.deviceId;
         const accessToken = await jwtService.createdJWT(
           { deviceId, userId: currentUser.id },
-          '10s',
+          '6m', //10s
         );
         const refreshToken = await jwtService.createdJWT(
           { deviceId, userId: currentUser.id },

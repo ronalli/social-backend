@@ -34,12 +34,12 @@ export class UsersController {
 
   @UseGuards(BasicAuthGuard)
   @Get('')
-  getAllUsers(
+  async getAllUsers(
     @Query() query: UserQueryDto,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.usersQueryRepository.getAllUsers(query);
+    return await this.usersQueryRepository.getAllUsers(query);
   }
 
   @UseGuards(BasicAuthGuard)
@@ -57,7 +57,7 @@ export class UsersController {
   @Delete(':id')
   @HttpCode(204)
   async deleteUser(@Param('id') id: string) {
-    const result = await this.usersService.deleteUser(+id);
+    const result = await this.usersService.deleteUser(id);
 
     if (!result) {
       throw new NotFoundException(`User with id ${id} not found`);

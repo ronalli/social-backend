@@ -14,7 +14,6 @@ export class UsersQueryRepository {
   async getAllUsers(queryParams: UserQueryDto) {
 
     const {
-      searchNameTerm,
       sortDirection,
       sortBy,
       pageSize,
@@ -23,36 +22,43 @@ export class UsersQueryRepository {
       searchEmailTerm,
     } = queryParams;
 
-    const totalCount = await this.dataSource.query(
-      `SELECT * FROM public."users"`,
-    );
+
+    const loginPattern = searchLoginTerm ? `%${searchLoginTerm}%` : null;
+
+    const emailPattern = searchEmailTerm ? `%${searchEmailTerm}%` : null;
+
+    const totalCountQuery = `
+            SELECT id, login, email, "createdAt" 
+            FROM public."users" 
+            WHERE
+            ($1::text IS NULL AND $2::text IS NULL)
+             OR 
+             (login ILIKE COALESCE($1::text, '%') OR email ILIKE COALESCE($2::text, '%'))
+    `;
+
+    const totalCount = await this.dataSource.query(totalCountQuery, [loginPattern, emailPattern]);
 
     const pagesCount = Math.ceil(totalCount.length / pageSize);
-
-    const loginPattern = searchLoginTerm ? `${searchLoginTerm}%` : null;
-
-    const emailPattern = searchEmailTerm ? `${searchEmailTerm}%` : null;
 
     const query = `
             SELECT id, login, email, "createdAt" 
             FROM public."users" 
-            WHERE 
-             (  $1::text IS NULL AND $2::text IS NULL) 
-                OR (login LIKE COALESCE($1::text, '%'))
-                AND (email LIKE COALESCE($2::text, '%'))
-            ORDER BY "${sortBy}" ${sortDirection} 
+            WHERE
+            ($1::text IS NULL AND $2::text IS NULL)
+             OR 
+             (login ILIKE COALESCE($1::text, '%') OR email ILIKE COALESCE($2::text, '%'))
+            ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
             LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)}
             `;
 
     const result = await this.dataSource.query(query, [loginPattern, emailPattern]);
 
-    // console.log(result)
 
     return {
-      pagesCount: pagesCount,
+      pagesCount: +pagesCount,
+      page: +pageNumber,
       pageSize: +pageSize,
-      page: pageNumber,
-      totalCount: totalCount.length,
+      totalCount: +totalCount.length,
       items: result
     }
   }
@@ -75,11 +81,17 @@ export class UsersQueryRepository {
   // }
   //
   async doesExistByLoginOrEmail(login: string, email: string) {
-    const query = `SELECT * FROM public."users" WHERE login LIKE $1 OR email LIKE $2`
+    // const query = `SELECT * FROM public."users" WHERE login LIKE $1 OR email LIKE $2`
 
-    const result = await this.dataSource.query(query, [login, email])
+    const queryLogin = `SELECT * FROM public.users WHERE  login = $1`
 
-    return result.length === 0
+    const queryEmail = `SELECT * FROM public.users WHERE email = $1`
+
+    const resultLogin = await this.dataSource.query(queryLogin, [login])
+
+    const resultEmail = await this.dataSource.query(queryEmail, [email])
+
+    return {resultLogin, resultEmail}
   }
 
   async doesExistByEmail(email: string) {
@@ -115,8 +127,6 @@ export class UsersQueryRepository {
     const query = `SELECT * FROM public."confirmationEmailUsers" WHERE "confirmationCode" = $1`;
 
     const response = await this.dataSource.query(query, [codeConfirmation])
-
-    // console.log('www', response);
 
     if(response.length === 0) {
       return false;

@@ -28,7 +28,6 @@ import { HeaderSessionModel } from '../../../common/models/header.session.model'
 import { UsersService } from '../../users/application/users.service';
 import {validate as isValidUUID} from 'uuid'
 
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -60,7 +59,7 @@ export class AuthService {
             deviceId: devicedId,
             userId: String(result[0].id),
           },
-          '6m', //10s
+          '10s', //10s
         );
 
         const refreshToken = await jwtService.createdJWT(
@@ -106,10 +105,14 @@ export class AuthService {
       ]);
     }
 
+    console.log('e45346', new Date().toISOString());
+
+
     const hash = await bcryptService.generateHash(password);
     const createdAt = new Date().toISOString();
     const id = randomUUID();
     const confirmation = new ConfirmationInfoEmail(id);
+
 
     const userId = await this.authRepository.createUser(
       { id, login, email, hash, createdAt },
@@ -230,8 +233,11 @@ export class AuthService {
     if (correctIdUser) {
       const data = await decodeToken(token);
 
+      console.log('1', data);
+
       if (data) {
-        //add func sessions
+
+        await this.securityService.deleteCurrentSession(data)
 
         return true;
       }
@@ -272,7 +278,7 @@ export class AuthService {
         const deviceId = decode.deviceId;
         const accessToken = await jwtService.createdJWT(
           { deviceId, userId: currentUser.id },
-          '6m', //10s
+          '10s',
         );
         const refreshToken = await jwtService.createdJWT(
           { deviceId, userId: currentUser.id },

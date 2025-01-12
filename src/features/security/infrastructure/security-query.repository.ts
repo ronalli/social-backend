@@ -9,11 +9,15 @@ export class SecurityQueryRepository {
 
   async allSessionsUser(userId: string) {
 
+    const currentDate = new Date().toISOString();
+
+
     const query = `
       SELECT * FROM public."deviceSessions" 
-      WHERE "userId" = $1;
+      WHERE "userId" = $1 AND CAST("exp" AS TIMESTAMP) > $2;
     `
-    return await this.dataSource.query(query, [userId])
+
+    return await this.dataSource.query(query, [userId, currentDate])
 
 
   //   try {

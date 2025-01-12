@@ -26,6 +26,8 @@ import { User } from './features/users/domain/user.entity';
 import { AuthModule } from './features/auth/auth.module';
 import { DeleteModule } from './features/test/delete.module';
 import { SecurityModule } from './features/security/security.module';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 const mappingsProviders: Provider[] = [
   // MappingBlogsService,
@@ -56,10 +58,10 @@ const mappingsProviders: Provider[] = [
   ],
   controllers: [],
   providers: [
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ThrottlerGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     // ...mappingsProviders,
     // QueryParamsService,
     // MappingsUsersService,

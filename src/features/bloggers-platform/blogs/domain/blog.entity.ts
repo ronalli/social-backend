@@ -1,3 +1,26 @@
+import { IsString, isUUID } from 'class-validator';
+
+export class BlogEntity {
+
+  @IsString()
+  id: string;
+
+  @IsString()
+  name: string;
+
+  @IsString()
+  description: string;
+
+  @IsString()
+  websiteUrl: string;
+
+  @IsString()
+  createdAt: string;
+
+  @IsString()
+  isMembership: boolean;
+}
+
 import {HydratedDocument, Model, Types} from "mongoose";
 import { SchemaFactory, Schema, Prop } from '@nestjs/mongoose';
 
@@ -27,4 +50,3 @@ BlogSchema.loadClass(Blog)
 
 export type BlogDocument = HydratedDocument<Blog>;
 export type BlogModelType = Model<BlogDocument>
-

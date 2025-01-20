@@ -22,17 +22,18 @@ import { PostsService } from '../../posts/application/posts.service';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateBlogCommand } from '../application/usecases/create-blog.usecase';
 import { UpdateBlogCommand } from '../application/usecases/update-blog.usecase';
-import { CreatePostCommand } from '../../posts/application/usecases/create-post.usecase';
 import { PostCreateModelQuery } from '../../posts/api/models/input/create-post.input.query.model';
 import { BasicAuthGuard } from '../../../../common/guards/auth.basic.guard';
 import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdPipe';
 import { QueryParamsDto } from '../../../../common/models/query-params.dto';
 import { serviceInfoLike } from '../../../../common/services/initialization.status.like';
 
+// @Inject(PostsService) private readonly  postsService: PostsService,
+
 @ApiTags('Blogs')
-@Controller('blogs')
+@Controller('sa/blogs')
 export class BlogsController {
-  constructor(@Inject(BlogsService) private readonly blogsService: BlogsService, @Inject(BlogsQueryRepository) private readonly  blogsQueryRepository: BlogsQueryRepository, @Inject(PostsService) private readonly  postsService: PostsService, private readonly commandBus: CommandBus) {
+  constructor(@Inject(BlogsService) private readonly blogsService: BlogsService, @Inject(BlogsQueryRepository) private readonly  blogsQueryRepository: BlogsQueryRepository, private readonly commandBus: CommandBus) {
   }
 
   @UseGuards(BasicAuthGuard)
@@ -47,13 +48,13 @@ export class BlogsController {
   @Get(':blogId')
   async getBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
 
-    const result = await this.blogsQueryRepository.findBlogById(blogId);
-
-    if(!result) {
-      throw new NotFoundException([{message: `Blog with id ${blogId} not found`, field: 'blogId'}])
-    }
-
-    return result
+    // const result = await this.blogsQueryRepository.findBlogById(blogId);
+    //
+    // if(!result) {
+    //   throw new NotFoundException([{message: `Blog with id ${blogId} not found`, field: 'blogId'}])
+    // }
+    //
+    // return result
   }
 
   @Get()
@@ -79,43 +80,44 @@ export class BlogsController {
   @Delete(':blogId')
   @HttpCode(204)
   async delete(@Param('blogId', ValidateObjectIdPipe) blogId: string): Promise<boolean> {
-    return await this.blogsService.deleteBlog(blogId);
+    return true;
+    // return await this.blogsService.deleteBlog(blogId);
   }
 
   @Get(':blogId/posts')
   async getAllPostsForBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string, @Query() query: QueryParamsDto,  @Req() req: Request, @Res() res: Response) {
 
-
-    const header = req.headers.authorization?.split(' ')[1];
-    const currentUser = await serviceInfoLike.getIdUserByToken(header)
-
-    const result = await this.blogsQueryRepository.findBlogById(blogId);
-
-    if (result) {
-      const foundPosts= await this.blogsQueryRepository.getAndSortPostsSpecialBlog(blogId, query, currentUser)
-      return res.status(200).send(foundPosts.data)
-    }
-
-    throw new NotFoundException([{message: 'If specified blog is not exists', field: 'blogId'}])
+    //
+    // const header = req.headers.authorization?.split(' ')[1];
+    // const currentUser = await serviceInfoLike.getIdUserByToken(header)
+    //
+    // const result = await this.blogsQueryRepository.findBlogById(blogId);
+    //
+    // if (result) {
+    //   const foundPosts= await this.blogsQueryRepository.getAndSortPostsSpecialBlog(blogId, query, currentUser)
+    //   return res.status(200).send(foundPosts.data)
+    // }
+    //
+    // throw new NotFoundException([{message: 'If specified blog is not exists', field: 'blogId'}])
   }
 
   @UseGuards(BasicAuthGuard)
   @Post(':blogId/posts')
   async createPostForSpecialBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string, @Body() post: PostCreateModelQuery,  @Req() req: Request, @Res() res: Response) {
 
-    const token = req.headers.authorization?.split(' ')[1] || "unknown";
-
-    const currentUser = await serviceInfoLike.getIdUserByToken(token)
-
-    const {title, shortDescription, content} = post;
-
-    const result = await this.blogsQueryRepository.findBlogById(blogId);
-
-    if(!result) throw new NotFoundException([{message: 'Not found blog', field: 'blogId'}])
-
-    const createdPost = await this.commandBus.execute(new CreatePostCommand(title, shortDescription, content, blogId, currentUser));
-
-    return res.status(201).send(createdPost);
+    // const token = req.headers.authorization?.split(' ')[1] || "unknown";
+    //
+    // const currentUser = await serviceInfoLike.getIdUserByToken(token)
+    //
+    // const {title, shortDescription, content} = post;
+    //
+    // const result = await this.blogsQueryRepository.findBlogById(blogId);
+    //
+    // if(!result) throw new NotFoundException([{message: 'Not found blog', field: 'blogId'}])
+    //
+    // const createdPost = await this.commandBus.execute(new CreatePostCommand(title, shortDescription, content, blogId, currentUser));
+    //
+    // return res.status(201).send(createdPost);
   }
 }
 

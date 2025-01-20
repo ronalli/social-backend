@@ -1,32 +1,39 @@
-import {ObjectId} from "mongodb";
+
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogDocument, BlogModelType } from '../domain/blog.entity';
+import { BlogEntity } from '../domain/blog.entity';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {
+  constructor(@InjectDataSource() protected dataSource: DataSource) {
   }
 
-  async create(blog: BlogDocument) {
+  async create(blog: BlogEntity) {
 
-    const insertResult = await this.BlogModel.insertMany([blog])
+    const {id, name, description, websiteUrl, createdAt, isMembership} = blog;
 
-    return insertResult[0].id
+    let query = `INSERT INTO public."blogs" (id, "createdAt", description, name, "websiteUrl", "isMembership") VALUES($1, $2, $3, $4, $5, $6) RETURNING *;`
+
+    const result = await this.dataSource.query(query, [id, name, description, websiteUrl, createdAt, isMembership]);
+
+    return result[0].id
+
+
   }
 
 
-  async delete(blogId: string) {
-
-    const foundBlog = await this.BlogModel.findOne({ _id: new ObjectId(blogId) });
-
-    if (!foundBlog) throw new NotFoundException([{ message: 'Not found blog', field: 'blogId' }]);
-
-    try {
-      await this.BlogModel.deleteOne({ _id: new ObjectId(blogId) });
-      return true;
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
-  }
+  // async delete(blogId: string) {
+  //
+  //   const foundBlog = await this.BlogModel.findOne({ _id: new ObjectId(blogId) });
+  //
+  //   if (!foundBlog) throw new NotFoundException([{ message: 'Not found blog', field: 'blogId' }]);
+  //
+  //   try {
+  //     await this.BlogModel.deleteOne({ _id: new ObjectId(blogId) });
+  //     return true;
+  //   } catch (e) {
+  //     throw new InternalServerErrorException(e);
+  //   }
+  // }
 }

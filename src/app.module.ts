@@ -28,6 +28,7 @@ import { DeleteModule } from './features/test/delete.module';
 import { SecurityModule } from './features/security/security.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { BloggersPlatformModule } from './features/bloggers-platform/bloggers-platform.module';
 
 const mappingsProviders: Provider[] = [
   // MappingBlogsService,
@@ -52,7 +53,7 @@ const mappingsProviders: Provider[] = [
     }),
     UsersModule,
     AuthModule,
-    // BloggersPlatformModule,
+    BloggersPlatformModule,
     SecurityModule,
     DeleteModule,
   ],

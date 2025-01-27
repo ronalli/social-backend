@@ -1,8 +1,9 @@
-
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { BlogEntity } from '../domain/blog.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { BlogCreateModel } from '../api/models/input/create-blog.input.model';
+import { BlogUpdateModel } from '../api/models/input/update-blog.input';
 
 @Injectable()
 export class BlogsRepository {
@@ -19,6 +20,17 @@ export class BlogsRepository {
 
     return result[0].id
 
+  }
+
+  async updateBlog(blog: BlogUpdateModel) {
+
+    let query = `UPDATE public.blogs SET name = $1, description = $2, "websiteUrl" = $3 WHERE id = $4 RETURNING *;`;
+
+    const values = [blog.name, blog.description, blog.websiteUrl, blog.blogId]
+
+    const response = await this.dataSource.query(query, values);
+
+    return response[0];
 
   }
 

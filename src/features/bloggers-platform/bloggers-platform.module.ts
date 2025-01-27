@@ -13,6 +13,7 @@ import { PostsService } from './posts/application/posts.service';
 import { PostsQueryRepository } from './posts/infrastructure/posts.query-repository';
 import { PostsRepository } from './posts/infrastructure/posts.repository';
 import { CreateBlogHandler } from './blogs/application/usecases/create-blog.usecase';
+import { UpdateBlogHandler } from './blogs/application/usecases/update-blog.usecase';
 
 @Module({
   imports: [
@@ -36,8 +37,7 @@ import { CreateBlogHandler } from './blogs/application/usecases/create-blog.usec
     // MappingsPostsService,
     QueryParamsService,
     CreateBlogHandler,
-//
-//     UpdateBlogHandler,
+    UpdateBlogHandler,
 //     MappingsCommentsService, CreateCommentHandler, UpdateCommentHandler, DeleteCommentHandler, UpdateLikeStatusPostHandler, UpdateLikeStatusHandler,
 //     CreatePostHandler,UpdatePostHandler,
   ],

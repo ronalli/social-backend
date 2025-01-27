@@ -1,6 +1,5 @@
-
 import { MappingBlogsService } from '../application/mappings/mapping.blogs';
-import {Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { MappingsPostsService } from '../../posts/application/mappings/mapping.posts';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
 import { BlogQueryDto } from '../api/models/blog-query.dto';
@@ -10,15 +9,16 @@ import { DataSource } from 'typeorm';
 
 @Injectable()
 export class BlogsQueryRepository {
-
   constructor(
-    @InjectDataSource() protected dataSource: DataSource
+    @InjectDataSource() protected dataSource: DataSource,
     // queryParamsService: QueryParamsService, private readonly mappingsBlogsService: MappingBlogsService, private readonly mappingsPostsService: MappingsPostsService
+  ) {}
 
+  async getAndSortPostsSpecialBlog(
+    blogId: string,
+    queryParams: BlogQueryDto,
+    currentUser: string | null,
   ) {
-  }
-
-  async getAndSortPostsSpecialBlog(blogId: string, queryParams: BlogQueryDto, currentUser: string | null) {
     // const query = this.queryParamsService.createDefaultValues(queryParams);
     //
     // const search = query.searchNameTerm ?
@@ -89,40 +89,13 @@ export class BlogsQueryRepository {
   }
 
   async findBlogById(blogId: string) {
-
-
-    const query = `SELECT * FROM public."blogs" WHERE id = $1;`
-
+    const query = `SELECT * FROM public."blogs" WHERE id = $1;`;
     const result = await this.dataSource.query(query, [blogId]);
-
     return result[0];
-
-    // if(!mongoose.Types.ObjectId.isValid(blogId)) {
-    //   throw new BadRequestException([{message: 'Invalid ID format', field: 'Id'}])
-    // }
-    //
-    // try {
-    //
-    //   const foundBlog = await this.BlogModel.findOne({ _id: new ObjectId(blogId) });
-    //
-    //   if (foundBlog)
-    //       return this.mappingsBlogsService.formatingDataForOutputBlog(foundBlog);
-    //
-    //   return false;
-    //
-    // } catch (e) {
-    //
-    //   console.log(e);
-    //
-    //   throw new InternalServerErrorException([{message: 'Error BD', field: 'db'}])
-    // }
   }
 
-  async blogIsExist (blogId: string) {
-
+  async blogIsExist(blogId: string) {
     // return !!(await this.BlogModel.countDocuments({_id: new ObjectId(blogId)}))
-
     // return this.BlogModel.findOne({ _id: new ObjectId(blogId) });
   }
-
 }

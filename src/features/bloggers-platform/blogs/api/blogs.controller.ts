@@ -97,8 +97,8 @@ export class BlogsController {
   async delete(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
   ): Promise<boolean> {
-    return true;
-    // return await this.blogsService.deleteBlog(blogId);
+
+    return await this.blogsService.deleteBlog(blogId);
   }
 
   @Get(':blogId/posts')

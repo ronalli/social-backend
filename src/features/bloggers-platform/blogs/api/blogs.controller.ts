@@ -48,13 +48,13 @@ export class BlogsController {
   @Get(':blogId')
   async getBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
 
-    // const result = await this.blogsQueryRepository.findBlogById(blogId);
-    //
-    // if(!result) {
-    //   throw new NotFoundException([{message: `Blog with id ${blogId} not found`, field: 'blogId'}])
-    // }
-    //
-    // return result
+    const result = await this.blogsQueryRepository.findBlogById(blogId);
+
+    if(!result) {
+      throw new NotFoundException([{message: `Blog with id ${blogId} not found`, field: 'blogId'}])
+    }
+
+    return result
   }
 
   @Get()

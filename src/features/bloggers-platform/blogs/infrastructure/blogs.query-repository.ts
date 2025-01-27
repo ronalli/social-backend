@@ -11,7 +11,8 @@ import { DataSource } from 'typeorm';
 export class BlogsQueryRepository {
   constructor(
     @InjectDataSource() protected dataSource: DataSource,
-    // queryParamsService: QueryParamsService, private readonly mappingsBlogsService: MappingBlogsService, private readonly mappingsPostsService: MappingsPostsService
+    public queryParamsService: QueryParamsService,
+    // private readonly mappingsBlogsService: MappingBlogsService, private readonly mappingsPostsService: MappingsPostsService
   ) {}
 
   async getAndSortPostsSpecialBlog(
@@ -56,7 +57,45 @@ export class BlogsQueryRepository {
   }
 
   async getAllBlogs(queryParams: BlogQueryDto) {
-    // const query = this.queryParamsService.createDefaultValues(queryParams);
+
+    const defaultQueryParams = this.queryParamsService.createDefaultValues(queryParams);
+
+    const {
+      searchNameTerm,
+      sortBy,
+      sortDirection,
+      pageNumber,
+      pageSize
+    } = defaultQueryParams;
+
+
+    const namePattern = searchNameTerm ? `%${searchNameTerm}%` : null;
+
+    const totalCountQuery = `SELECT * FROM public.blogs WHERE ($1::text IS NULL)
+        OR (name ILIKE COALESCE($1::text, '%'));`;
+
+    const totalCount = await this.dataSource.query(totalCountQuery, [namePattern]);
+
+    const pagesCount = Math.ceil(totalCount.length / pageSize);
+
+    const query = `
+    SELECT * FROM public.blogs WHERE ($1::text IS NULL)
+        OR (name ILIKE COALESCE($1::text, '%'))
+        ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
+        LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};
+        `;
+
+    const result = await this.dataSource.query(query, [namePattern]);
+
+    return {
+      pagesCount: +pagesCount,
+      page: +pageNumber,
+      pageSize: +pageSize,
+      totalCount: +totalCount.length,
+      items: result
+    }
+
+
     //
     // const search = query.searchNameTerm ?
     //   { name: { $regex: `${query.searchNameTerm}`, $options: 'i' } } : {};

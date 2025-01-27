@@ -53,7 +53,6 @@ export class UsersQueryRepository {
 
     const result = await this.dataSource.query(query, [loginPattern, emailPattern]);
 
-
     return {
       pagesCount: +pagesCount,
       page: +pageNumber,

@@ -19,10 +19,10 @@ export class BlogsRepository {
 
     const result = await this.dataSource.query(query, [
       id,
-      name,
-      description,
-      websiteUrl,
       createdAt,
+      description,
+      name,
+      websiteUrl,
       isMembership,
     ]);
 

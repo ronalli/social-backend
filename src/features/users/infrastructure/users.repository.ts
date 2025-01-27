@@ -1,6 +1,4 @@
-import { ObjectId } from 'mongodb';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-
+import { Injectable} from '@nestjs/common';
 import { UserOutputModel } from '../api/models/output/user.output.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -33,7 +31,7 @@ export class UsersRepository {
 
     const queryEmail = `INSERT INTO public."confirmationEmailUsers" ("userId", "isConfirmed", "expirationDate", "confirmationCode") VALUES($1, $2, $3, $4) RETURNING *`;
 
-    await this.dataSource.query(queryEmail, valuesEmail)
+    await this.dataSource.query(queryEmail, valuesEmail);
 
     return result[0].id;
   }
@@ -51,16 +49,9 @@ export class UsersRepository {
     const response = await this.dataSource.query(query, values);
 
     return response[0];
-
-    // try {
-    //  return await this.UserModel.findOne({_id: new ObjectId(id)})
-    // } catch (e) {
-    //   throw new InternalServerErrorException(e)
-    // }
   }
 
   async delete(id: string): Promise<boolean> {
-
     const query = `WITH deleted_table AS (
         DELETE FROM public."confirmationEmailUsers"
         WHERE "userId" = $1
@@ -68,33 +59,8 @@ export class UsersRepository {
         DELETE FROM public."users" WHERE "id" = $1
         ;`;
 
-    const result = await this.dataSource.query(query, [id])
+    const result = await this.dataSource.query(query, [id]);
 
     return result[1] > 0;
-
-    // try {
-    //
-    //   const deletingResult = await this.UserModel.deleteOne({_id: new ObjectId(id)});
-    //
-    //   return !!deletingResult.deletedCount
-    // } catch (e) {
-    //   throw new InternalServerErrorException(e)
-    // }
   }
-
-  // async doesExistById(id: string): Promise<UserOutputModel | null> {
-  //   const findedUser = await this.UserModel.findOne({_id: new ObjectId(id)});
-  //   if (findedUser) {
-  //     return UserOutputModelMapper(findedUser);
-  //   }
-  //   return null;
-  // }
-
-  // async loginIsExist(login: string): Promise<boolean> {
-  //   return !!(await this.UserModel.countDocuments({login}))
-  // }
-  //
-  // async emailIsExist(email: string): Promise<boolean> {
-  //   return !!(await this.UserModel.countDocuments({email}))
-  // }
 }

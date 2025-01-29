@@ -26,45 +26,45 @@ export class UpdateLikeStatusPostHandler
   ) {}
 
   async execute(command: UpdateLikeStatusPostCommand): Promise<any> {
-    const { parentId, userId, status, login } = command;
-
-    const post = await this.postsRepository.getPost(parentId);
-
-    if (!post) {
-      throw new NotFoundException([
-        { message: 'Not found post', field: 'postId' },
-      ]);
-    }
-
-    const searchLike = await this.postsRepository.getLike(parentId, userId);
-
-    if (searchLike) {
-      return await this.postsRepository.updateStatusLike(command, post);
-    }
-
-    const likeStatusValue = status.likeStatus;
-
-    if(likeStatusValue === LikeStatus.None) {
-      return true;
-    }
-
-    const like = new this.LikeModel({
-      _id: new Types.ObjectId(),
-      userId,
-      parentId,
-      status: likeStatusValue,
-      login,
-      addedAt: new Date().toISOString(),
-    });
-
-    await this.postsRepository.addStatusLike(like)
-
-    likeStatusValue === LikeStatus.Like
-      ? (post.likesCount += 1)
-      : (post.dislikesCount += 1);
-
-    await post.save();
-
-    return true;
+    // const { parentId, userId, status, login } = command;
+    //
+    // const post = await this.postsRepository.getPost(parentId);
+    //
+    // if (!post) {
+    //   throw new NotFoundException([
+    //     { message: 'Not found post', field: 'postId' },
+    //   ]);
+    // }
+    //
+    // const searchLike = await this.postsRepository.getLike(parentId, userId);
+    //
+    // if (searchLike) {
+    //   return await this.postsRepository.updateStatusLike(command, post);
+    // }
+    //
+    // const likeStatusValue = status.likeStatus;
+    //
+    // if(likeStatusValue === LikeStatus.None) {
+    //   return true;
+    // }
+    //
+    // const like = new this.LikeModel({
+    //   _id: new Types.ObjectId(),
+    //   userId,
+    //   parentId,
+    //   status: likeStatusValue,
+    //   login,
+    //   addedAt: new Date().toISOString(),
+    // });
+    //
+    // await this.postsRepository.addStatusLike(like)
+    //
+    // likeStatusValue === LikeStatus.Like
+    //   ? (post.likesCount += 1)
+    //   : (post.dislikesCount += 1);
+    //
+    // await post.save();
+    //
+    // return true;
   }
 }

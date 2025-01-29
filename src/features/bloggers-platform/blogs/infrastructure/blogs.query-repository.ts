@@ -94,37 +94,6 @@ export class BlogsQueryRepository {
       totalCount: +totalCount.length,
       items: result
     }
-
-
-    //
-    // const search = query.searchNameTerm ?
-    //   { name: { $regex: `${query.searchNameTerm}`, $options: 'i' } } : {};
-    //
-    // const filter = {
-    //   ...search,
-    // };
-    //
-    // try {
-    //
-    //   const allBlogs = await this.BlogModel
-    //     .find(filter)
-    //     .sort({ [query.sortBy]: query.sortDirection })
-    //     .skip((query.pageNumber - 1) * query.pageSize)
-    //     .limit(query.pageSize);
-    //
-    //
-    //   const totalCount = await this.BlogModel.countDocuments(filter);
-    //
-    //   return {
-    //       pagesCount: Math.ceil(totalCount / query.pageSize),
-    //       page: query.pageNumber,
-    //       pageSize: query.pageSize,
-    //       totalCount,
-    //       items: allBlogs.map(x => this.mappingsBlogsService.formatingDataForOutputBlog(x)),
-    //   };
-    // } catch (e) {
-    //   throw new InternalServerErrorException([{message: 'Error DB', field: 'DB'}])
-    // }
   }
 
   async findBlogById(blogId: string) {
@@ -134,6 +103,12 @@ export class BlogsQueryRepository {
   }
 
   async blogIsExist(blogId: string) {
+
+    const query = `SELECT * FROM public."blogs" WHERE id = $1;`;
+    const result = await this.dataSource.query(query, [blogId]);
+
+    return !!result[0]
+
     // return !!(await this.BlogModel.countDocuments({_id: new ObjectId(blogId)}))
     // return this.BlogModel.findOne({ _id: new ObjectId(blogId) });
   }

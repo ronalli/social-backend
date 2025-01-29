@@ -14,6 +14,8 @@ import { PostsQueryRepository } from './posts/infrastructure/posts.query-reposit
 import { PostsRepository } from './posts/infrastructure/posts.repository';
 import { CreateBlogHandler } from './blogs/application/usecases/create-blog.usecase';
 import { UpdateBlogHandler } from './blogs/application/usecases/update-blog.usecase';
+import { PostsController } from './posts/api/posts.controller';
+import { CreatePostHandler } from './posts/application/usecases/create-post.usecase';
 
 @Module({
   imports: [
@@ -22,26 +24,27 @@ import { UpdateBlogHandler } from './blogs/application/usecases/update-blog.usec
     UsersModule,
   ],
 //   controllers: [CommentsController, PostsController, BlogsController],
-  controllers: [BlogsController],
+  controllers: [BlogsController, PostsController],
   providers: [
     // CommentsService,
-    // PostsService,
+    PostsService,
     BlogsService,
 //     CommentsRepository,
 //     CommentsQueryRepository,
-//     PostsRepository,
-//     PostsQueryRepository,
+    PostsRepository,
+    PostsQueryRepository,
     BlogsRepository,
     BlogsQueryRepository,
     MappingBlogsService,
-    // MappingsPostsService,
+    MappingsPostsService,
     QueryParamsService,
     CreateBlogHandler,
     UpdateBlogHandler,
+    CreatePostHandler,
 //     MappingsCommentsService, CreateCommentHandler, UpdateCommentHandler, DeleteCommentHandler, UpdateLikeStatusPostHandler, UpdateLikeStatusHandler,
-//     CreatePostHandler,UpdatePostHandler,
+//     UpdatePostHandler,
   ],
-  exports: [BlogsService, BlogsQueryRepository, BlogsRepository]
+  exports: [BlogsService, BlogsQueryRepository, BlogsRepository, PostsService, PostsRepository, PostsQueryRepository]
   // exports: [BlogsService, BlogsQueryRepository, BlogsRepository, PostsService, PostsRepository, PostsQueryRepository, CommentsService, CommentsRepository]
 })
 //

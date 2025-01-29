@@ -1,7 +1,11 @@
 import { IsNotEmpty, IsString, Length } from 'class-validator';
 import { Trim } from '../../../../../../common/decorators/transform/trim';
 
-export class PostCreateModel {
+export class PostCreateDBModel {
+
+  @IsString()
+  @IsNotEmpty()
+  id: string
 
   @IsString()
   @IsNotEmpty()
@@ -24,4 +28,9 @@ export class PostCreateModel {
   @IsString()
   @IsNotEmpty()
   blogId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  createdAt: string
+
 }

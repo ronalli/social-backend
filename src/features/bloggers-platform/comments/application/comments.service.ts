@@ -51,13 +51,13 @@ export class CommentsService {
 
   async findAllComments(postId: string, queryParams: QueryParamsDto, currentUser: string | null) {
 
-    const result = await this.postsQueryRepository.getPostById(postId);
-
-    if (result) {
-      return await this.commentsRepository.getCommentsForSpecialPost(postId, queryParams, currentUser)
-    }
-
-    throw new NotFoundException([{message: 'If post for passed postId doesn\'t exist', field: 'postId'}])
+    // const result = await this.postsQueryRepository.getPostById(postId);
+    //
+    // if (result) {
+    //   return await this.commentsRepository.getCommentsForSpecialPost(postId, queryParams, currentUser)
+    // }
+    //
+    // throw new NotFoundException([{message: 'If post for passed postId doesn\'t exist', field: 'postId'}])
   }
 
   // async updateLikeStatus(dataLike: Omit<ILikeTypeDB, 'addedAt'>) {

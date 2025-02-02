@@ -110,18 +110,19 @@ export class BlogsController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    //
-    // const header = req.headers.authorization?.split(' ')[1];
-    // const currentUser = await serviceInfoLike.getIdUserByToken(header)
-    //
-    // const result = await this.blogsQueryRepository.findBlogById(blogId);
-    //
-    // if (result) {
-    //   const foundPosts= await this.blogsQueryRepository.getAndSortPostsSpecialBlog(blogId, query, currentUser)
-    //   return res.status(200).send(foundPosts.data)
-    // }
-    //
-    // throw new NotFoundException([{message: 'If specified blog is not exists', field: 'blogId'}])
+
+    const header = req.headers.authorization?.split(' ')[1];
+    const currentUser = await serviceInfoLike.getIdUserByToken(header)
+
+    const blogFound = await this.blogsQueryRepository.blogIsExist(blogId);
+
+    if (blogFound) {
+      const foundPosts= await this.blogsQueryRepository.getAndSortPostsSpecialBlog(blogId, query, currentUser)
+
+      return res.status(200).send(foundPosts)
+    }
+
+    throw new NotFoundException([{message: 'If specified blog is not exists', field: 'blogId'}])
   }
 
   @UseGuards(BasicAuthGuard)

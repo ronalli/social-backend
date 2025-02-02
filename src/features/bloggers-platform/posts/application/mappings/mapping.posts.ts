@@ -1,39 +1,35 @@
-import { PostDocument } from '../../domain/post.entity';
-import { PostOutputModel, PostOutputModelDB } from '../../api/models/output/post.output.model';
-import { Inject, Injectable } from '@nestjs/common';
-import { LikeDocument, LikeModelType } from '../../../../likes/domain/like.entity';
+import {
+  PostOutputModel,
+  PostOutputModelDB,
+} from '../../api/models/output/post.output.model';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  LikeDocument,
+  LikeModelType,
+} from '../../../../likes/domain/like.entity';
 import { BlogsQueryRepository } from '../../../blogs/infrastructure/blogs.query-repository';
+import { PostsRepository } from '../../infrastructure/posts.repository';
 
 @Injectable()
 export class MappingsPostsService {
   constructor(
-    @Inject(BlogsQueryRepository) protected readonly blogsQueryRepository: BlogsQueryRepository
-  ) {
+    // private readonly postsRepository: PostsRepository,
+    @Inject(forwardRef(() => BlogsQueryRepository)) private readonly blogsQueryRepository: BlogsQueryRepository,
+  ) {}
+
+  async formatingAllPostForView(posts: PostOutputModelDB[]) {
+    const result: PostOutputModel[] = [];
+    for (const post of posts) {
+      const viewPost = await this.formatingDataForOutputPost(post);
+      result.push(viewPost);
+    }
+    return result;
   }
 
-  async formatingAllPostForView(posts: PostDocument[], user: string | null, LikeModel: LikeModelType) {
-
-    // const result: PostOutputModel[] = [];
-    //
-    // for(const post of posts) {
-    //
-    //   const viewPost = await this.formatingDataForOutputPost(post, user, LikeModel)
-    //
-    //   result.push(viewPost);
-    // }
-    //
-    // return result;
-  }
-
-  async formatingDataForOutputPost(post: PostOutputModelDB) : Promise<PostOutputModel> {
-    const {
-      id,
-      title,
-      shortDescription,
-      content,
-      createdAt,
-      blogId
-    } = post;
+  async formatingDataForOutputPost(
+    post: PostOutputModelDB,
+  ): Promise<PostOutputModel> {
+    const { id, title, shortDescription, content, createdAt, blogId } = post;
 
     const currentBlog = await this.blogsQueryRepository.findBlogById(blogId);
 
@@ -48,12 +44,11 @@ export class MappingsPostsService {
       extendedLikesInfo: {
         likesCount: 0,
         dislikesCount: 0,
-        myStatus: "None",
-        newestLikes: []
-      }
-    }
+        myStatus: 'None',
+        newestLikes: [],
+      },
+    };
   }
-
 
   // async formatingDataForOutputPost(post: PostDocument, user: string | null, LikeModel: LikeModelType): Promise<PostOutputModel> {
   //   const currentStatus = await LikeModel.findOne({
@@ -87,12 +82,12 @@ export class MappingsPostsService {
   // }
 
   formatViewNewestLikes(data: LikeDocument[]) {
-    return data.map(d=> {
+    return data.map((d) => {
       return {
         userId: d.userId,
         login: d.login,
-        addedAt: d.addedAt
-      }
-    })
+        addedAt: d.addedAt,
+      };
+    });
   }
 }

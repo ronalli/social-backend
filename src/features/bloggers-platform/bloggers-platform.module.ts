@@ -28,13 +28,15 @@ import { CreatePostHandler } from './posts/application/usecases/create-post.usec
   providers: [
     // CommentsService,
     PostsService,
-    BlogsService,
-//     CommentsRepository,
-//     CommentsQueryRepository,
     PostsRepository,
     PostsQueryRepository,
+    BlogsService,
     BlogsRepository,
     BlogsQueryRepository,
+//     CommentsRepository,
+//     CommentsQueryRepository,
+
+
     MappingBlogsService,
     MappingsPostsService,
     QueryParamsService,

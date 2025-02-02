@@ -29,11 +29,14 @@ import { SecurityModule } from './features/security/security.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { BloggersPlatformModule } from './features/bloggers-platform/bloggers-platform.module';
+import { MappingsPostsService } from './features/bloggers-platform/posts/application/mappings/mapping.posts';
+import { MappingBlogsService } from './features/bloggers-platform/blogs/application/mappings/mapping.blogs';
+import { MappingsCommentsService } from './features/bloggers-platform/comments/application/mappings/mapping.comments';
 
 const mappingsProviders: Provider[] = [
-  // MappingBlogsService,
-  // MappingsCommentsService,
-  // MappingsPostsService,
+  MappingBlogsService,
+  MappingsCommentsService,
+  MappingsPostsService,
 ];
 
 @Module({

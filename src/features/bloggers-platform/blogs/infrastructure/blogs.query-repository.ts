@@ -6,6 +6,7 @@ import { BlogQueryDto } from '../api/models/blog-query.dto';
 import { ResultCode } from '../../../../settings/http.status';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { BlogOutputModel } from '../api/models/output/blog.output.model';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -96,7 +97,7 @@ export class BlogsQueryRepository {
     }
   }
 
-  async findBlogById(blogId: string) {
+  async findBlogById(blogId: string): Promise<BlogOutputModel> {
     const query = `SELECT * FROM public."blogs" WHERE id = $1;`;
     const result = await this.dataSource.query(query, [blogId]);
     return result[0];

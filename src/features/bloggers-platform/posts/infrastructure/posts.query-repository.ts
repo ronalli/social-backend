@@ -3,14 +3,23 @@ import { PostQueryDto } from '../api/models/post-query.dto';
 import { MappingsPostsService } from '../application/mappings/mapping.posts';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
 import { ResultCode } from '../../../../settings/http.status';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class PostsQueryRepository {
-  constructor(private readonly queryParamsService: QueryParamsService, private readonly mappingsPostsService: MappingsPostsService) {
-  }
+  constructor(
+    private readonly queryParamsService: QueryParamsService,
+    private readonly mappingsPostsService: MappingsPostsService,
+    @InjectDataSource() protected dataSource: DataSource,
+  ) {}
 
   async getPosts(queryParams: PostQueryDto, currentUser: string | null) {
-    // const query = this.queryParamsService.createDefaultValues(queryParams);
+    const defaultQueryParams =
+      this.queryParamsService.createDefaultValues(queryParams);
+
+    const { searchNameTerm } = defaultQueryParams;
+
     // try {
     //   const allPosts = await this.PostModel.find()
     //     .sort({ [query.sortBy]: query.sortDirection })
@@ -36,16 +45,10 @@ export class PostsQueryRepository {
   }
 
   async getPostById(id: string) {
-  //   try {
-  //     const foundPost = await this.PostModel.findOne({ _id: new ObjectId(id) });
-  //     if (foundPost) {
-  //       return foundPost;
-  //     }
-  //     else {
-  //       return false;
-  //     }
-  //   } catch (e) {
-  //     throw new InternalServerErrorException(e)
-  //   }
+    const query = `SELECT * FROM public.posts WHERE id = $1;`;
+
+    const response = await this.dataSource.query(query, [id]);
+
+    return  await this.mappingsPostsService.formatingDataForOutputPost(response[0])
   }
 }

@@ -28,6 +28,8 @@ import { BasicAuthGuard } from '../../../../common/guards/auth.basic.guard';
 import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdPipe';
 import { QueryParamsDto } from '../../../../common/models/query-params.dto';
 import { serviceInfoLike } from '../../../../common/services/initialization.status.like';
+import { CreatePostCommand } from '../../posts/application/usecases/create-post.usecase';
+import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-repository';
 
 // @Inject(PostsService) private readonly  postsService: PostsService,
 
@@ -38,6 +40,7 @@ export class BlogsController {
     @Inject(BlogsService) private readonly blogsService: BlogsService,
     @Inject(BlogsQueryRepository)
     private readonly blogsQueryRepository: BlogsQueryRepository,
+    @Inject(PostsQueryRepository) private readonly postsQueryRepository: PostsQueryRepository,
     private readonly commandBus: CommandBus,
   ) {}
 
@@ -129,18 +132,17 @@ export class BlogsController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    // const token = req.headers.authorization?.split(' ')[1] || "unknown";
-    //
-    // const currentUser = await serviceInfoLike.getIdUserByToken(token)
-    //
-    // const {title, shortDescription, content} = post;
-    //
-    // const result = await this.blogsQueryRepository.findBlogById(blogId);
-    //
-    // if(!result) throw new NotFoundException([{message: 'Not found blog', field: 'blogId'}])
-    //
-    // const createdPost = await this.commandBus.execute(new CreatePostCommand(title, shortDescription, content, blogId, currentUser));
-    //
-    // return res.status(201).send(createdPost);
+    const token = req.headers.authorization?.split(' ')[1] || "unknown";
+    const currentUser = await serviceInfoLike.getIdUserByToken(token)
+    const {title, shortDescription, content} = post;
+    const result = await this.blogsQueryRepository.findBlogById(blogId);
+
+    if(!result) throw new NotFoundException([{message: 'Not found blog', field: 'blogId'}])
+
+    const idCreatedPost = await this.commandBus.execute(new CreatePostCommand(title, shortDescription, content, blogId, currentUser));
+
+    const newPost = await this.postsQueryRepository.getPostById(idCreatedPost)
+
+    return res.status(201).send(newPost);
   }
 }

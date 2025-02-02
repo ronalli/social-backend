@@ -82,12 +82,10 @@ export class PostsController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    // const token = req.headers.authorization?.split(' ')[1];
-    //
-    // const currentUser = await serviceInfoLike.getIdUserByToken(token);
-    //
-    // const result = await this.postsQueryRepository.getPosts(query, currentUser);
-    //
+    const token = req.headers.authorization?.split(' ')[1];
+    const currentUser = await serviceInfoLike.getIdUserByToken(token);
+    const result = await this.postsQueryRepository.getPosts(query, currentUser);
+
     // res.status(200).send(result.data);
   }
 

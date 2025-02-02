@@ -21,7 +21,7 @@ export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {
     private readonly postsRepository: PostsRepository,
   ) {}
 
-  async execute(command: CreatePostCommand): Promise<any> {
+  async execute(command: CreatePostCommand): Promise<string> {
     const { currentUser, ...post } = command;
 
     const findBlog = await this.blogsQueryRepository.blogIsExist(command.blogId);
@@ -38,19 +38,5 @@ export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {
     };
 
     return await this.postsRepository.create(newPost, currentUser);
-
-    // const post = new this.PostModel({
-    //   _id: new Types.ObjectId(),
-    //   title,
-    //   shortDescription,
-    //   content,
-    //   blogId,
-    //   blogName: findBlog.name,
-    //   createdAt: new Date().toISOString(),
-    //   dislikesCount: 0,
-    //   likesCount: 0
-    // });
-    //
-    // return await this.postsRepository.create(post, currentUser)
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BlogsRepository } from '../infrastructure/blogs.repository';
+import { PostUpdateSpecialModel } from '../../posts/api/models/input/update-post.special.blog.model';
 
 @Injectable()
 export class BlogsService {
@@ -7,5 +8,9 @@ export class BlogsService {
   }
   async deleteBlog(blogId: string){
     return await this.blogsRepository.delete(blogId);
+  }
+
+  async updatePostBySpecialBlog(post: PostUpdateSpecialModel, blogId: string, postId: string) {
+    return await this.blogsRepository.updatePost(post, blogId, postId)
   }
 }

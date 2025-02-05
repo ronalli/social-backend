@@ -30,6 +30,7 @@ import { QueryParamsDto } from '../../../../common/models/query-params.dto';
 import { serviceInfoLike } from '../../../../common/services/initialization.status.like';
 import { CreatePostCommand } from '../../posts/application/usecases/create-post.usecase';
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-repository';
+import { PostUpdateSpecialModel } from '../../posts/api/models/input/update-post.special.blog.model';
 
 // @Inject(PostsService) private readonly  postsService: PostsService,
 
@@ -40,7 +41,8 @@ export class BlogsController {
     @Inject(BlogsService) private readonly blogsService: BlogsService,
     @Inject(BlogsQueryRepository)
     private readonly blogsQueryRepository: BlogsQueryRepository,
-    @Inject(PostsQueryRepository) private readonly postsQueryRepository: PostsQueryRepository,
+    @Inject(PostsQueryRepository)
+    private readonly postsQueryRepository: PostsQueryRepository,
     private readonly commandBus: CommandBus,
   ) {}
 
@@ -103,6 +105,7 @@ export class BlogsController {
     return await this.blogsService.deleteBlog(blogId);
   }
 
+  @UseGuards(BasicAuthGuard)
   @Get(':blogId/posts')
   async getAllPostsForBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
@@ -110,19 +113,25 @@ export class BlogsController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-
     const header = req.headers.authorization?.split(' ')[1];
-    const currentUser = await serviceInfoLike.getIdUserByToken(header)
+    const currentUser = await serviceInfoLike.getIdUserByToken(header);
 
     const blogFound = await this.blogsQueryRepository.blogIsExist(blogId);
 
     if (blogFound) {
-      const foundPosts= await this.blogsQueryRepository.getAndSortPostsSpecialBlog(blogId, query, currentUser)
+      const foundPosts =
+        await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
+          blogId,
+          query,
+          currentUser,
+        );
 
-      return res.status(200).send(foundPosts)
+      return res.status(200).send(foundPosts);
     }
 
-    throw new NotFoundException([{message: 'If specified blog is not exists', field: 'blogId'}])
+    throw new NotFoundException([
+      { message: 'If specified blog is not exists', field: 'blogId' },
+    ]);
   }
 
   @UseGuards(BasicAuthGuard)
@@ -133,17 +142,51 @@ export class BlogsController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const token = req.headers.authorization?.split(' ')[1] || "unknown";
-    const currentUser = await serviceInfoLike.getIdUserByToken(token)
-    const {title, shortDescription, content} = post;
+    const token = req.headers.authorization?.split(' ')[1] || 'unknown';
+    const currentUser = await serviceInfoLike.getIdUserByToken(token);
+    const { title, shortDescription, content } = post;
     const result = await this.blogsQueryRepository.findBlogById(blogId);
 
-    if(!result) throw new NotFoundException([{message: 'Not found blog', field: 'blogId'}])
+    if (!result)
+      throw new NotFoundException([
+        { message: 'Not found blog', field: 'blogId' },
+      ]);
 
-    const idCreatedPost = await this.commandBus.execute(new CreatePostCommand(title, shortDescription, content, blogId, currentUser));
+    const idCreatedPost = await this.commandBus.execute(
+      new CreatePostCommand(
+        title,
+        shortDescription,
+        content,
+        blogId,
+        currentUser,
+      ),
+    );
 
-    const newPost = await this.postsQueryRepository.getPostById(idCreatedPost)
+    const newPost = await this.postsQueryRepository.getPostById(idCreatedPost);
 
     return res.status(201).send(newPost);
+  }
+
+  @UseGuards(BasicAuthGuard)
+  @Put(':blogId/posts/:postId')
+  @HttpCode(204)
+  async updatePostForSpecialBlog(
+    @Param('blogId', ValidateObjectIdPipe) blogId: string,
+    @Param('postId', ValidateObjectIdPipe) postId: string,
+    @Body() post: PostUpdateSpecialModel,
+  ) {
+    const response = await this.blogsService.updatePostBySpecialBlog(
+      post,
+      blogId,
+      postId,
+    );
+
+    if (!response) {
+      throw new NotFoundException([
+        { message: 'Not found post', field: 'postId or blogId' },
+      ]);
+    }
+
+    return;
   }
 }

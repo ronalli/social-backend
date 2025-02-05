@@ -7,6 +7,7 @@ import { BlogEntity } from '../domain/blog.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BlogUpdateModel } from '../api/models/input/update-blog.input';
+import { PostUpdateSpecialModel } from '../../posts/api/models/input/update-post.special.blog.model';
 
 @Injectable()
 export class BlogsRepository {
@@ -56,11 +57,23 @@ export class BlogsRepository {
 
   }
 
-
   async findBlogById(blogId: string) {
     const query = `SELECT * FROM public."blogs" WHERE id = $1;`;
     const result = await this.dataSource.query(query, [blogId]);
     return result[0];
+  }
+
+
+  async updatePost(post: PostUpdateSpecialModel, blogId: string, postId: string): Promise<boolean> {
+
+    const {title, shortDescription, content} = post;
+
+    const query = `UPDATE public.posts SET title = $1, "shortDescription" = $2, content = $3 WHERE id = $4 AND "blogId" = $5 RETURNING *`
+
+    const result = await this.dataSource.query(query, [title, shortDescription, content, postId, blogId])
+
+    return result[1] > 0
+
   }
 
 }

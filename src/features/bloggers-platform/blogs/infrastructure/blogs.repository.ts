@@ -68,12 +68,21 @@ export class BlogsRepository {
 
     const {title, shortDescription, content} = post;
 
-    const query = `UPDATE public.posts SET title = $1, "shortDescription" = $2, content = $3 WHERE id = $4 AND "blogId" = $5 RETURNING *`
+    const query = `UPDATE public.posts SET title = $1, "shortDescription" = $2, content = $3 WHERE id = $4 AND "blogId" = $5 RETURNING *;`;
 
     const result = await this.dataSource.query(query, [title, shortDescription, content, postId, blogId])
 
     return result[1] > 0
 
+  }
+
+  async deletePost(blogId: string, postId: string): Promise<boolean> {
+
+    const query = `DELETE FROM public.posts WHERE id = $1 AND "blogId" = $2 RETURNING *;`
+
+    const response = await this.dataSource.query(query, [postId, blogId]);
+
+    return response[1] > 0;
   }
 
 }

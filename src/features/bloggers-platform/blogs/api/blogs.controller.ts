@@ -189,4 +189,28 @@ export class BlogsController {
 
     return;
   }
+
+  @UseGuards(BasicAuthGuard)
+  @Delete(':blogId/posts/:postId')
+  @HttpCode(204)
+  async deletePostForSpecialBlog(
+    @Param('blogId', ValidateObjectIdPipe) blogId: string,
+    @Param('postId', ValidateObjectIdPipe) postId: string,
+  ) {
+    const response = await this.blogsService.deletePostBySpecialBlog(
+      blogId,
+      postId,
+    );
+
+    if (!response) {
+      throw new NotFoundException([
+        { message: 'Not found post', field: 'postId or blogId' },
+      ]);
+    }
+
+    return;
+  }
+
+
+
 }

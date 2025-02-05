@@ -4,13 +4,21 @@ import { PostUpdateSpecialModel } from '../../posts/api/models/input/update-post
 
 @Injectable()
 export class BlogsService {
-  constructor( private readonly blogsRepository: BlogsRepository) {
-  }
-  async deleteBlog(blogId: string){
+  constructor(private readonly blogsRepository: BlogsRepository) {}
+
+  async deleteBlog(blogId: string) {
     return await this.blogsRepository.delete(blogId);
   }
 
-  async updatePostBySpecialBlog(post: PostUpdateSpecialModel, blogId: string, postId: string) {
-    return await this.blogsRepository.updatePost(post, blogId, postId)
+  async updatePostBySpecialBlog(
+    post: PostUpdateSpecialModel,
+    blogId: string,
+    postId: string,
+  ) {
+    return await this.blogsRepository.updatePost(post, blogId, postId);
+  }
+
+  async deletePostBySpecialBlog(blogId: string, postId: string) {
+    return await this.blogsRepository.deletePost(blogId, postId);
   }
 }

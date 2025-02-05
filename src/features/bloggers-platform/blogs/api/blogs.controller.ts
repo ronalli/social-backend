@@ -35,7 +35,8 @@ import { PostUpdateSpecialModel } from '../../posts/api/models/input/update-post
 // @Inject(PostsService) private readonly  postsService: PostsService,
 
 @ApiTags('Blogs')
-@Controller('sa/blogs')
+@Controller('')
+// @UseGuards(BasicAuthGuard)
 export class BlogsController {
   constructor(
     @Inject(BlogsService) private readonly blogsService: BlogsService,
@@ -47,7 +48,7 @@ export class BlogsController {
   ) {}
 
   @UseGuards(BasicAuthGuard)
-  @Post()
+  @Post('sa/blogs')
   async createBlog(@Body() createModel: BlogCreateModel) {
     const { name, websiteUrl, description } = createModel;
     const createdBlogId = await this.commandBus.execute(
@@ -57,26 +58,14 @@ export class BlogsController {
     return await this.blogsQueryRepository.findBlogById(createdBlogId);
   }
 
-  @Get(':blogId')
-  async getBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
-    const result = await this.blogsQueryRepository.findBlogById(blogId);
-
-    if (!result) {
-      throw new NotFoundException([
-        { message: `Blog with id ${blogId} not found`, field: 'blogId' },
-      ]);
-    }
-
-    return result;
-  }
-
-  @Get()
+  @UseGuards(BasicAuthGuard)
+  @Get('sa/blogs')
   async getBlogs(@Query() query: QueryParamsDto) {
     return await this.blogsQueryRepository.getAllBlogs(query);
   }
 
   @UseGuards(BasicAuthGuard)
-  @Put(':blogId')
+  @Put('sa/blogs/:blogId')
   @HttpCode(204)
   async update(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
@@ -97,7 +86,7 @@ export class BlogsController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Delete(':blogId')
+  @Delete('sa/blogs/:blogId')
   @HttpCode(204)
   async delete(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
@@ -106,7 +95,7 @@ export class BlogsController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Get(':blogId/posts')
+  @Get('sa/blogs/:blogId/posts')
   async getAllPostsForBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Query() query: QueryParamsDto,
@@ -135,7 +124,7 @@ export class BlogsController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Post(':blogId/posts')
+  @Post('sa/blogs/:blogId/posts')
   async createPostForSpecialBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Body() post: PostCreateModelQuery,
@@ -168,7 +157,7 @@ export class BlogsController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Put(':blogId/posts/:postId')
+  @Put('sa/blogs/:blogId/posts/:postId')
   @HttpCode(204)
   async updatePostForSpecialBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
@@ -191,7 +180,7 @@ export class BlogsController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Delete(':blogId/posts/:postId')
+  @Delete('sa/blogs/:blogId/posts/:postId')
   @HttpCode(204)
   async deletePostForSpecialBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
@@ -212,5 +201,50 @@ export class BlogsController {
   }
 
 
+  // public
+  @Get('blogs')
+  async getPublicAllBlogs(@Query() query: QueryParamsDto) {
+    return await this.blogsQueryRepository.getAllBlogs(query);
+  }
+
+  @Get('blogs/:blogId/posts')
+  async getPublicAllPostsForBlog(
+    @Param('blogId', ValidateObjectIdPipe) blogId: string,
+    @Query() query: QueryParamsDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const header = req.headers.authorization?.split(' ')[1];
+    const currentUser = await serviceInfoLike.getIdUserByToken(header);
+
+    const blogFound = await this.blogsQueryRepository.blogIsExist(blogId);
+
+    if (blogFound) {
+      const foundPosts =
+        await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
+          blogId,
+          query,
+          currentUser,
+        );
+
+      return res.status(200).send(foundPosts);
+    }
+    throw new NotFoundException([
+      { message: 'If specified blog is not exists', field: 'blogId' },
+    ]);
+  }
+
+  @Get('blogs/:id')
+  async getBlog(@Param('id', ValidateObjectIdPipe) id: string) {
+    const result = await this.blogsQueryRepository.findBlogById(id);
+
+    if (!result) {
+      throw new NotFoundException([
+        { message: `Blog with id ${id} not found`, field: 'blogId' },
+      ]);
+    }
+
+    return result;
+  }
 
 }

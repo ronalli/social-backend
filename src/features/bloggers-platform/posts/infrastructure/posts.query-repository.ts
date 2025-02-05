@@ -18,7 +18,22 @@ export class PostsQueryRepository {
     const defaultQueryParams =
       this.queryParamsService.createDefaultValues(queryParams);
 
-    const { searchNameTerm } = defaultQueryParams;
+    const { pageNumber, pageSize, sortBy, sortDirection } = defaultQueryParams;
+
+    const query = `SELECT * FROM public.posts ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
+        LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`
+
+    const response = await this.dataSource.query(query, [])
+
+    const items = await this.mappingsPostsService.formatingAllPostForView(response)
+
+    return {
+      pagesCount: +Math.ceil(response.length / pageSize),
+      page: +pageNumber,
+      pageSize: +pageSize,
+      totalCount: +response.length,
+      items,
+    }
 
     // try {
     //   const allPosts = await this.PostModel.find()

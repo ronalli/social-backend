@@ -14,7 +14,8 @@ import { SessionHeadersInput } from '../api/models/input/session-headers.input';
 import { SkipThrottle } from '@nestjs/throttler';
 import { randomUUID } from 'node:crypto';
 
-@SkipThrottle()
+@Injectable()
+// @SkipThrottle()
 export class SecurityService {
   constructor(private readonly securityRepository: SecurityRepository) {}
 

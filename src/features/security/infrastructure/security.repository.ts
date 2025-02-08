@@ -12,6 +12,7 @@ export class SecurityRepository {
   constructor(protected dataSource: DataSource) {}
 
   async createDeviceSession(session: DeviceSessionEntity) {
+
     const { deviceId, deviceName, iat, userId, exp, ip, id } = session;
 
     const query = `

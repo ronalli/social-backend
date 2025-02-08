@@ -128,7 +128,7 @@ export class AuthController {
   }
 
   @UseGuards(RefreshTokenGuard)
-  @SkipThrottle()
+  // @SkipThrottle()
   @Post('logout')
   async logout(@Req() req: Request, @Res() res: Response) {
     const cookie = req.cookies.refreshToken;

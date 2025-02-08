@@ -18,7 +18,7 @@ import { SecurityService } from '../application/security.service';
 import { mappingSessions } from '../../../common/utils/mappings.sessions.service';
 import { SkipThrottle } from '@nestjs/throttler';
 
-@SkipThrottle()
+// @SkipThrottle()
 @ApiTags('Security')
 @UseGuards(RefreshTokenGuard)
 @Controller('security')

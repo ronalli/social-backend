@@ -1,22 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { PostCreateModel } from '../api/models/input/create-post.input.model';
 import { PostsRepository } from '../infrastructure/posts.repository';
+import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly postsRepository: PostsRepository) {
-  }
-
-  // async createPost(post: PostCreateModel, currentUser: string) {
-  //   return await this.postsRepository.create(post, currentUser);
-  // }
-
-  // async updatePost(id: string, post: PostCreateModel) {
-  //   return await this.postsRepository.update(id, post);
-  // }
-
+  constructor(
+    private readonly postsRepository: PostsRepository,
+    private readonly postsQueryRepository: PostsQueryRepository,
+  ) {}
   async getPost(id: string, currentUser: string) {
-    return await this.postsRepository.findPostById(id, currentUser)
+    return await this.postsQueryRepository.getPostById(id);
   }
 
   async deletePost(id: string) {

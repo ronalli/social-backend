@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PostQueryDto } from '../api/models/post-query.dto';
 import { MappingsPostsService } from '../application/mappings/mapping.posts';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
@@ -20,20 +20,43 @@ export class PostsQueryRepository {
 
     const { pageNumber, pageSize, sortBy, sortDirection } = defaultQueryParams;
 
+    const query1 = `
+    WITH result AS (
+      SELECT 
+        posts.id, 
+        posts.title, 
+        posts."shortDescription", 
+        posts.content, 
+        posts."blogId", 
+        blogs.name AS "blogName", 
+        posts."createdAt" 
+     FROM 
+        posts 
+     JOIN 
+        blogs ON posts."blogId" = blogs.id
+       )
+     SELECT * FROM result
+     ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
+     LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;
+
     const query = `SELECT * FROM public.posts ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
-        LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`
+        LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;
 
-    const response = await this.dataSource.query(query, [])
+    const response = await this.dataSource.query(query1, []);
 
-    const items = await this.mappingsPostsService.formatingAllPostForView(response)
+    const totalQuery = `SELECT * FROM public.posts;`;
+    const totalCount = await this.dataSource.query(totalQuery, []);
+
+    const items =
+      await this.mappingsPostsService.formatingAllPostForView(response);
 
     return {
-      pagesCount: +Math.ceil(response.length / pageSize),
+      pagesCount: +Math.ceil(totalCount.length / pageSize),
       page: +pageNumber,
       pageSize: +pageSize,
-      totalCount: +response.length,
+      totalCount: +totalCount.length,
       items,
-    }
+    };
 
     // try {
     //   const allPosts = await this.PostModel.find()
@@ -64,6 +87,19 @@ export class PostsQueryRepository {
 
     const response = await this.dataSource.query(query, [id]);
 
-    return  await this.mappingsPostsService.formatingDataForOutputPost(response[0])
+    if (response.length === 0) {
+      throw new NotFoundException([
+        { message: 'Not found post', field: 'postId' },
+      ]);
+    }
+
+    return await this.mappingsPostsService.formatingDataForOutputPost(
+      response[0],
+    );
+
+
+    // return await this.mappingsPostsService.formatingDataForOutputPost(
+    //   response[0],
+    // );
   }
 }

@@ -164,6 +164,7 @@ export class BlogsController {
     @Param('postId', ValidateObjectIdPipe) postId: string,
     @Body() post: PostUpdateSpecialModel,
   ) {
+
     const response = await this.blogsService.updatePostBySpecialBlog(
       post,
       blogId,

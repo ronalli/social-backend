@@ -29,11 +29,11 @@ export class BlogsQueryRepository {
 
     const { sortBy, sortDirection, pageNumber, pageSize } = defaultQueryParams;
 
-    // const totalCountQuery = `SELECT * FROM public.posts WHERE "blogId" = $1;`
-    //
-    // const totalCount = await this.dataSource.query(totalCountQuery, [blogId]);
+    const totalCountQuery = `SELECT * FROM public.posts WHERE "blogId" = $1;`
 
-    // const pagesCount = Math.ceil(totalCount.length / pageSize);
+    const totalCount = await this.dataSource.query(totalCountQuery, [blogId]);
+
+    const pagesCount = Math.ceil(totalCount.length / pageSize);
 
     const query = `
     SELECT * FROM public.posts WHERE "blogId"=$1
@@ -42,7 +42,7 @@ export class BlogsQueryRepository {
         `;
 
     const result = await this.dataSource.query(query, [blogId]);
-    const pagesCount = Math.ceil(result.length / pageSize);
+    // const pagesCount = Math.ceil(result.length / pageSize);
 
     const items = await this.mappingsPostsService.formatingAllPostForView(result)
 
@@ -50,7 +50,7 @@ export class BlogsQueryRepository {
       pagesCount: +pagesCount,
       page: +pageNumber,
       pageSize: +pageSize,
-      totalCount: +result.length,
+      totalCount: +totalCount.length,
       items,
     }
 
@@ -128,6 +128,8 @@ export class BlogsQueryRepository {
   async findBlogById(blogId: string): Promise<BlogOutputModel> {
     const query = `SELECT * FROM public."blogs" WHERE id = $1;`;
     const result = await this.dataSource.query(query, [blogId]);
+
+
     return result[0];
   }
 

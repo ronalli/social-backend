@@ -59,7 +59,7 @@ export class AuthService {
             deviceId: devicedId,
             userId: String(result[0].id),
           },
-          '10s', //10s
+          '1h', //10s
         );
 
         const refreshToken = await jwtService.createdJWT(
@@ -278,7 +278,7 @@ export class AuthService {
         const deviceId = decode.deviceId;
         const accessToken = await jwtService.createdJWT(
           { deviceId, userId: currentUser.id },
-          '10s',
+          '1h', //10s
         );
         const refreshToken = await jwtService.createdJWT(
           { deviceId, userId: currentUser.id },
@@ -340,7 +340,7 @@ export class AuthService {
     const response = await this.authRepository.findByEmail(email);
 
     if (response) {
-      const dataCode = await createRecoveryCode(email, '5m');
+      const dataCode = await createRecoveryCode(email, '1h');
 
       const values = [response.id, dataCode];
 

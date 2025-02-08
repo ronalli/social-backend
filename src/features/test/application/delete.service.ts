@@ -14,7 +14,5 @@ export class DeleteService {
     const query = `TRUNCATE TABLE public."users", public.blogs, public.posts, public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`;
 
     const response = await this.dataSource.query(query);
-
-    console.log('end', response);
   }
 }

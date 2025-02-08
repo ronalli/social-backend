@@ -58,7 +58,7 @@ export class PostsController {
   //   res.status(201).send(post)
   // }
 
-  @Get(':id')
+  @Get('/:id')
   async getPost(
     @Param('id', ValidateObjectIdPipe) id: string,
     @Req() req: Request,

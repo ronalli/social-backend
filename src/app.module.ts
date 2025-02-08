@@ -62,10 +62,10 @@ const mappingsProviders: Provider[] = [
   ],
   controllers: [],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: ThrottlerGuard,
+    // },
     // ...mappingsProviders,
     // QueryParamsService,
     // MappingsUsersService,

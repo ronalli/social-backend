@@ -16,19 +16,19 @@ import { SecurityRepository } from '../security/infrastructure/security.reposito
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([
-      {
-        ttl: 10000,
-        limit: 5,
-      },
-    ]),
+    // ThrottlerModule.forRoot([
+    //   {
+    //     ttl: 10000,
+    //     limit: 5,
+    //   },
+    // ]),
     CqrsModule,
     UsersModule,
     SecurityModule,
   ],
   controllers: [AuthController],
   providers: [
-    ThrottlerGuard,
+    // ThrottlerGuard,
     AuthService,
     AuthRepository,
     AuthQueryRepository,

@@ -247,5 +247,4 @@ export class BlogsController {
 
     return result;
   }
-
 }

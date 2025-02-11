@@ -12,7 +12,6 @@ export class UsersQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async getAllUsers(queryParams: UserQueryDto) {
-
     const {
       sortDirection,
       sortBy,
@@ -21,7 +20,6 @@ export class UsersQueryRepository {
       searchLoginTerm,
       searchEmailTerm,
     } = queryParams;
-
 
     const loginPattern = searchLoginTerm ? `%${searchLoginTerm}%` : null;
 
@@ -36,7 +34,10 @@ export class UsersQueryRepository {
              (login ILIKE COALESCE($1::text, '%') OR email ILIKE COALESCE($2::text, '%'))
     `;
 
-    const totalCount = await this.dataSource.query(totalCountQuery, [loginPattern, emailPattern]);
+    const totalCount = await this.dataSource.query(totalCountQuery, [
+      loginPattern,
+      emailPattern,
+    ]);
 
     const pagesCount = Math.ceil(totalCount.length / pageSize);
 
@@ -51,88 +52,89 @@ export class UsersQueryRepository {
             LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)}
             `;
 
-    const result = await this.dataSource.query(query, [loginPattern, emailPattern]);
+    const result = await this.dataSource.query(query, [
+      loginPattern,
+      emailPattern,
+    ]);
 
     return {
       pagesCount: +pagesCount,
       page: +pageNumber,
       pageSize: +pageSize,
       totalCount: +totalCount.length,
-      items: result
-    }
+      items: result,
+    };
   }
 
   async doesExistById(id: number) {
-    const query  = `SELECT * FROM public.users WHERE id = $1`
-    const result = await this.dataSource.query(query, [id])
+    const query = `SELECT * FROM public.users WHERE id = $1`;
+    const result = await this.dataSource.query(query, [id]);
 
     // console.log(result);
 
     return result[0];
   }
-  //
-  // async findUserById(id: string) {
-  //   try {
-  //     return await this.UserModel.findOne({_id: new ObjectId(id)})
-  //   } catch (e) {
-  //     throw new InternalServerErrorException(e)
-  //   }
-  // }
-  //
+
+  async findUserById(id: string) {
+    const query = `SELECT id, login FROM public.users WHERE id = $1;`;
+
+    const response = await this.dataSource.query(query, [id]);
+
+    return response[0];
+
+  }
+
   async doesExistByLoginOrEmail(login: string, email: string) {
     // const query = `SELECT * FROM public."users" WHERE login LIKE $1 OR email LIKE $2`
 
-    const queryLogin = `SELECT * FROM public.users WHERE  login = $1`
+    const queryLogin = `SELECT * FROM public.users WHERE  login = $1`;
 
-    const queryEmail = `SELECT * FROM public.users WHERE email = $1`
+    const queryEmail = `SELECT * FROM public.users WHERE email = $1`;
 
-    const resultLogin = await this.dataSource.query(queryLogin, [login])
+    const resultLogin = await this.dataSource.query(queryLogin, [login]);
 
-    const resultEmail = await this.dataSource.query(queryEmail, [email])
+    const resultEmail = await this.dataSource.query(queryEmail, [email]);
 
-    return {resultLogin, resultEmail}
+    return { resultLogin, resultEmail };
   }
 
   async doesExistByEmail(email: string) {
-
     const query = `SELECT * FROM public."users" WHERE email = $1`;
 
     const response = await this.dataSource.query(query, [email]);
 
     return response.length != 0;
-
   }
 
   async doesExistConfirmationCode(userId: string): Promise<string> {
-    const query = `SELECT * FROM public."confirmationEmailUsers" WHERE "userId" = $1`
+    const query = `SELECT * FROM public."confirmationEmailUsers" WHERE "userId" = $1`;
 
-    const result = await this.dataSource.query(query, [userId])
+    const result = await this.dataSource.query(query, [userId]);
 
     return result[0].confirmationCode;
   }
 
   async doesExistConfirmationEmail(userId: string): Promise<string> {
-    const query = `SELECT * FROM public."confirmationEmailUsers" WHERE "userId" = $1`
+    const query = `SELECT * FROM public."confirmationEmailUsers" WHERE "userId" = $1`;
 
-    const result = await this.dataSource.query(query, [userId])
+    const result = await this.dataSource.query(query, [userId]);
 
     return result[0].isConfirmed;
   }
 
-
   //
   async findCodeConfirmation(codeConfirmation: string) {
-
     const query = `SELECT * FROM public."confirmationEmailUsers" WHERE "confirmationCode" = $1`;
 
-    const response = await this.dataSource.query(query, [codeConfirmation])
+    const response = await this.dataSource.query(query, [codeConfirmation]);
 
-    if(response.length === 0) {
+    if (response.length === 0) {
       return false;
     }
 
     return response[0];
   }
+
   //
   // _maping(users: UserDocument[]): UserOutputModel[] {
   //   return users.map(u => ({

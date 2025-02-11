@@ -29,6 +29,8 @@ import { QueryParamsDto } from '../../../../common/models/query-params.dto';
 import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdPipe';
 import { AuthJwtGuard } from '../../../../common/guards/auth.jwt.guard';
 import { LikeStatusModel } from '../../../likes/api/models/create-like.input.model';
+import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
+import { CommentsQueryRepository } from '../../comments/infrastructure/comments.query-repository';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -37,6 +39,7 @@ export class PostsController {
     private readonly postsService: PostsService,
     private readonly postsQueryRepository: PostsQueryRepository,
     private readonly commandBus: CommandBus,
+    private readonly  commentsQueryRepository: CommentsQueryRepository
   ) {}
 
   // @UseGuards(BasicAuthGuard)
@@ -110,22 +113,27 @@ export class PostsController {
   //   // return await this.postsService.deletePost(id);
   // }
   //
-  // @UseGuards(AuthJwtGuard)
-  // @Post(':postId/comments')
-  // async createCommentForSpecialPost(
-  //   @Param('postId', ValidateObjectIdPipe) postId: string,
-  //   @Body() data: CreatePostSpecialPostModel,
-  //   @Req() req: Request,
-  //   @Res() res: Response,
-  // ) {
-  //   // const userId = req.userId!;
-  //   //
-  //   // const result = await this.commandBus.execute(new CreateCommentCommand(data.content, postId, userId))
-  //   //
-  //   // if(!result) throw new BadRequestException([{message: 'Wrong', field: 'bad'}])
-  //   //
-  //   // res.status(201).send(result);
-  // }
+  @UseGuards(AuthJwtGuard)
+  @Post(':postId/comments')
+  async createCommentForSpecialPost(
+    @Param('postId', ValidateObjectIdPipe) postId: string,
+    @Body() comment: CreatePostSpecialPostModel,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const userId = req.userId!;
+
+    const result = await this.commandBus.execute(
+      new CreateCommentCommand(comment.content, postId, userId),
+    );
+
+    if (!result) throw new BadRequestException([{ message: 'Wrong', field: 'bad' }]);
+// !!!
+
+    const response = await this.commentsQueryRepository.getComment(result.id, 'dd')
+    
+    // res.status(201).send(result);
+  }
   //
   // @Get(':postId/comments')
   // async getAllCommentsForPost(

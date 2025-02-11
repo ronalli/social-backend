@@ -18,19 +18,21 @@ export class DeleteCommentHandler implements ICommandHandler<DeleteCommentComman
   ) {
   }
 
- async execute(command: DeleteCommentCommand): Promise<boolean> {
+  // :Promise<boolean>
 
-    const {commentId, userId} = command;
+  async execute(command: DeleteCommentCommand) {
 
-    const result = await this.commentsRepository.getCommentById(commentId);
-
-    if (!result) {
-      throw new NotFoundException([{message: 'Not found comment', field: 'commentId'}])
-    }
-    if (result && userId !== result.commentatorInfo.userId) {
-
-      throw new ForbiddenException([{message: 'Try edit the comment that is not your own', field: 'userId'}])
-    }
-    return await this.commentsRepository.deleteComment(commentId);
+    // const {commentId, userId} = command;
+    //
+    // const result = await this.commentsRepository.getCommentById(commentId);
+    //
+    // if (!result) {
+    //   throw new NotFoundException([{message: 'Not found comment', field: 'commentId'}])
+    // }
+    // if (result && userId !== result.commentatorInfo.userId) {
+    //
+    //   throw new ForbiddenException([{message: 'Try edit the comment that is not your own', field: 'userId'}])
+    // }
+    // return await this.commentsRepository.deleteComment(commentId);
   }
 }

@@ -1,5 +1,4 @@
 // import { Request, Response } from 'express';
-// import { ApiTags } from '@nestjs/swagger';
 // import {
 //   Body,
 //   Controller,
@@ -14,8 +13,6 @@
 //   BadRequestException,
 // } from '@nestjs/common';
 // import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
-// import { InjectModel } from '@nestjs/mongoose';
-// import { CommandBus } from '@nestjs/cqrs';
 // import { UpdateCommentCommand } from '../application/usecases/update-comment.usecase';
 // import { DeleteCommentCommand } from '../application/usecases/delete-comment.usecase';
 // import { UpdateCommentModel } from './models/input/update-comment.model';
@@ -26,14 +23,18 @@
 // import { LikeStatusModel } from '../../../likes/api/models/create-like.input.model';
 // import { UpdateLikeStatusCommand } from '../application/usecases/update-likeStatus.usecase';
 //
-// @ApiTags('Comments')
-// @Controller('comments')
-// export class CommentsController {
-//   constructor(
-//     private readonly commentsQueryRepository: CommentsQueryRepository,
-//     @InjectModel(Like.name) private LikeModel: LikeModelType,
-//     private readonly commandBus: CommandBus,
-//   ) {}
+import { CommandBus } from '@nestjs/cqrs';
+import { ApiTags } from '@nestjs/swagger';
+import { Controller } from '@nestjs/common';
+import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
+
+@ApiTags('Comments')
+@Controller('comments')
+export class CommentsController {
+  constructor(
+    private readonly commentsQueryRepository: CommentsQueryRepository,
+    private readonly commandBus: CommandBus,
+  ) {}
 //
 //   @Get(':commentId')
 //   async getComment(
@@ -138,4 +139,4 @@
 //     // res.status(HTTP_STATUSES[response.status]).send({})
 //     // return
 //   }
-// }
+}

@@ -1,12 +1,15 @@
-import { IsString } from 'class-validator';
-import { Prop } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { Trim } from '../../../../../../common/decorators/transform/trim';
 
 export class CommentCreateModel {
 
-  @Prop({type: Types.ObjectId, auto: true})
-  _id: Types.ObjectId;
+  @IsString()
+  @IsNotEmpty()
+  id:string;
+
+  @IsString()
+  @Trim()
+  content: string;
 
   @IsString()
   @Trim()
@@ -17,6 +20,7 @@ export class CommentCreateModel {
   userId: string;
 
   @IsString()
-  @Trim()
-  content: string;
+  createdAt: string;
+
+
 }

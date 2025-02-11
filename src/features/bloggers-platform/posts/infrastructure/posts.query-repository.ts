@@ -1,10 +1,14 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PostQueryDto } from '../api/models/post-query.dto';
 import { MappingsPostsService } from '../application/mappings/mapping.posts';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
-import { ResultCode } from '../../../../settings/http.status';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { PostOutputModelDB } from '../api/models/output/post.output.model';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -97,9 +101,20 @@ export class PostsQueryRepository {
       response[0],
     );
 
-
     // return await this.mappingsPostsService.formatingDataForOutputPost(
     //   response[0],
     // );
   }
+
+  async findPostById(postId: string): Promise<PostOutputModelDB> {
+    const query = `SELECT * FROM public.posts WHERE id = $1;`;
+
+    const response = await this.dataSource.query(query, [postId]);
+
+    return response[0];
+  }
+
+  // async isPostDoesExist(postId: string):  {
+  //
+  // }
 }

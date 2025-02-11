@@ -16,6 +16,12 @@ import { CreateBlogHandler } from './blogs/application/usecases/create-blog.usec
 import { UpdateBlogHandler } from './blogs/application/usecases/update-blog.usecase';
 import { PostsController } from './posts/api/posts.controller';
 import { CreatePostHandler } from './posts/application/usecases/create-post.usecase';
+import { CreateCommentHandler } from './comments/application/usecases/create-comment.usecase';
+import { MappingsCommentsService } from './comments/application/mappings/mapping.comments';
+import { CommentsRepository } from './comments/infrastructure/comments.repository';
+import { CommentsQueryRepository } from './comments/infrastructure/comments.query-repository';
+import { CommentsController } from './comments/api/comments.controller';
+import { CommentsService } from './comments/application/comments.service';
 
 @Module({
   imports: [
@@ -24,17 +30,18 @@ import { CreatePostHandler } from './posts/application/usecases/create-post.usec
     UsersModule,
   ],
 //   controllers: [CommentsController, PostsController, BlogsController],
-  controllers: [BlogsController, PostsController],
+  controllers: [BlogsController, PostsController, CommentsController],
   providers: [
-    // CommentsService,
+
     PostsService,
     PostsRepository,
     PostsQueryRepository,
     BlogsService,
     BlogsRepository,
     BlogsQueryRepository,
-//     CommentsRepository,
-//     CommentsQueryRepository,
+    CommentsService,
+    CommentsRepository,
+    CommentsQueryRepository,
 
 
     MappingBlogsService,
@@ -43,10 +50,12 @@ import { CreatePostHandler } from './posts/application/usecases/create-post.usec
     CreateBlogHandler,
     UpdateBlogHandler,
     CreatePostHandler,
-//     MappingsCommentsService, CreateCommentHandler, UpdateCommentHandler, DeleteCommentHandler, UpdateLikeStatusPostHandler, UpdateLikeStatusHandler,
+    CreateCommentHandler,
+    MappingsCommentsService,
+//      UpdateCommentHandler, DeleteCommentHandler, UpdateLikeStatusPostHandler, UpdateLikeStatusHandler,
 //     UpdatePostHandler,
   ],
-  exports: [BlogsService, BlogsQueryRepository, BlogsRepository, PostsService, PostsRepository, PostsQueryRepository]
+  exports: [BlogsService, BlogsQueryRepository, BlogsRepository, PostsService, PostsRepository, PostsQueryRepository, CommentsService, CommentsRepository, CommentsQueryRepository]
   // exports: [BlogsService, BlogsQueryRepository, BlogsRepository, PostsService, PostsRepository, PostsQueryRepository, CommentsService, CommentsRepository]
 })
 //

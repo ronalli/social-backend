@@ -106,9 +106,11 @@ export class PostsRepository {
   }
 
   async getLike(postId: string, userId: string) {
-    // return this.LikeModel.findOne({
-    //   $and: [{ userId: userId }, { parentId: postId }],
-    // });
+    const query = `SELECT * FROM public."postsLikeStatus" WHERE "postId" = $1 AND "userId" = $2;`
+
+    return await this.dataSource.query(query, [postId, userId])
+
+    // return result
   }
 
   async addStatusLike(like: LikeDocument) {

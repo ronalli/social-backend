@@ -114,7 +114,11 @@ export class PostsQueryRepository {
     return response[0];
   }
 
-  // async isPostDoesExist(postId: string):  {
-  //
-  // }
+  async isPostDoesExist(postId: string): Promise<boolean>  {
+    const query = `SELECT * FROM public.posts WHERE id = $1;`
+
+    const result = await this.dataSource.query(query, [postId]);
+
+    return result.length > 0;
+  }
 }

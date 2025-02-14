@@ -22,6 +22,7 @@ import { CommentsRepository } from './comments/infrastructure/comments.repositor
 import { CommentsQueryRepository } from './comments/infrastructure/comments.query-repository';
 import { CommentsController } from './comments/api/comments.controller';
 import { CommentsService } from './comments/application/comments.service';
+import { UpdateLikeStatusPostHandler } from './posts/application/usecases/update-likeStatus.post.usecase';
 
 @Module({
   imports: [
@@ -52,7 +53,8 @@ import { CommentsService } from './comments/application/comments.service';
     CreatePostHandler,
     CreateCommentHandler,
     MappingsCommentsService,
-//      UpdateCommentHandler, DeleteCommentHandler, UpdateLikeStatusPostHandler, UpdateLikeStatusHandler,
+    UpdateLikeStatusPostHandler,
+//      UpdateCommentHandler, DeleteCommentHandler,  UpdateLikeStatusHandler,
 //     UpdatePostHandler,
   ],
   exports: [BlogsService, BlogsQueryRepository, BlogsRepository, PostsService, PostsRepository, PostsQueryRepository, CommentsService, CommentsRepository, CommentsQueryRepository]

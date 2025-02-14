@@ -31,6 +31,7 @@ import { AuthJwtGuard } from '../../../../common/guards/auth.jwt.guard';
 import { LikeStatusModel } from '../../../likes/api/models/create-like.input.model';
 import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
 import { CommentsQueryRepository } from '../../comments/infrastructure/comments.query-repository';
+import { UpdateLikeStatusPostCommand } from '../application/usecases/update-likeStatus.post.usecase';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -131,8 +132,9 @@ export class PostsController {
 // !!!
 
     const response = await this.commentsQueryRepository.getComment(result.id, 'dd')
+
     
-    // res.status(201).send(result);
+    res.status(201).send(response);
   }
   //
   // @Get(':postId/comments')
@@ -151,19 +153,21 @@ export class PostsController {
   //   // res.status(200).send(result.data);
   // }
   //
-  // @UseGuards(AuthJwtGuard)
-  // @Put(':postId/like-status')
-  // async updateLikeStatusForSpecialPost(
-  //   @Param('postId', ValidateObjectIdPipe) commentId: string,
-  //   @Body() status: LikeStatusModel,
-  //   @Req() req: Request,
-  //   @Res() res: Response,
-  // ) {
-  //   // const userId = req.userId!;
-  //   // const login = req.login!;
-  //   //
-  //   // await this.commandBus.execute(new UpdateLikeStatusPostCommand(commentId, userId, status, login))
-  //   //
-  //   // return res.status(204).send({});
-  // }
+  @UseGuards(AuthJwtGuard)
+  @Put(':postId/like-status')
+  async updateLikeStatusForSpecialPost(
+    @Param('postId', ValidateObjectIdPipe) postId: string,
+    @Body() status: LikeStatusModel,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const userId = req.userId!;
+    const login = req.login!;
+
+    // console.log(userId, login, status.likeStatus, postId);
+
+    await this.commandBus.execute(new UpdateLikeStatusPostCommand(postId, userId, status, login))
+
+    // return res.status(204).send({});
+  }
 }

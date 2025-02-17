@@ -105,12 +105,12 @@ export class PostsRepository {
     // return this.PostModel.findOne({ _id: new ObjectId(id) });
   }
 
-  async getLike(postId: string, userId: string) {
+  async getLike(postId: string, userId: string): Promise<boolean> {
     const query = `SELECT * FROM public."postsLikeStatus" WHERE "postId" = $1 AND "userId" = $2;`
 
-    return await this.dataSource.query(query, [postId, userId])
+    const result = await this.dataSource.query(query, [postId, userId])
 
-    // return result
+    return result.length > 0;
   }
 
   async addStatusLike(like: LikeDocument) {
@@ -124,7 +124,7 @@ export class PostsRepository {
 
   async updateStatusLike(
     like: UpdateLikeStatusPostCommand,
-    post: PostDocument,
+    // post: PostDocument,
   ) {
   //   const currentStatus = await this.LikeModel.findOne({
   //     $and: [{ userId: like.userId }, { parentId: like.parentId }],

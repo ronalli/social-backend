@@ -23,6 +23,8 @@ import { CommentsQueryRepository } from './comments/infrastructure/comments.quer
 import { CommentsController } from './comments/api/comments.controller';
 import { CommentsService } from './comments/application/comments.service';
 import { UpdateLikeStatusPostHandler } from './posts/application/usecases/update-likeStatus.post.usecase';
+import { LikesModule } from '../likes/likes.module';
+import { LikesRepository } from '../likes/infrastructure/likes.repository';
 
 @Module({
   imports: [
@@ -33,7 +35,6 @@ import { UpdateLikeStatusPostHandler } from './posts/application/usecases/update
 //   controllers: [CommentsController, PostsController, BlogsController],
   controllers: [BlogsController, PostsController, CommentsController],
   providers: [
-
     PostsService,
     PostsRepository,
     PostsQueryRepository,
@@ -43,8 +44,7 @@ import { UpdateLikeStatusPostHandler } from './posts/application/usecases/update
     CommentsService,
     CommentsRepository,
     CommentsQueryRepository,
-
-
+    LikesRepository,
     MappingBlogsService,
     MappingsPostsService,
     QueryParamsService,

@@ -28,10 +28,10 @@ import { CustomValidationPipe } from '../../../../common/pipes/pipe';
 import { QueryParamsDto } from '../../../../common/models/query-params.dto';
 import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdPipe';
 import { AuthJwtGuard } from '../../../../common/guards/auth.jwt.guard';
-import { LikeStatusModel } from '../../../likes/api/models/create-like.input.model';
 import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
 import { CommentsQueryRepository } from '../../comments/infrastructure/comments.query-repository';
 import { UpdateLikeStatusPostCommand } from '../application/usecases/update-likeStatus.post.usecase';
+import { LikeStatus, LikeStatusEntity } from '../../../likes/domain/like.entity';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -157,17 +157,21 @@ export class PostsController {
   @Put(':postId/like-status')
   async updateLikeStatusForSpecialPost(
     @Param('postId', ValidateObjectIdPipe) postId: string,
-    @Body() status: LikeStatusModel,
+    @Body() data: LikeStatusEntity,
     @Req() req: Request,
     @Res() res: Response,
   ) {
     const userId = req.userId!;
     const login = req.login!;
 
-    // console.log(userId, login, status.likeStatus, postId);
+    const foundedPost = await this.postsQueryRepository.isPostDoesExist(postId);
 
-    await this.commandBus.execute(new UpdateLikeStatusPostCommand(postId, userId, status, login))
+    if(!foundedPost) {
+      throw new NotFoundException([{ message: `If post with specified postId doesn\'t exists`, field: 'postId' }])
+    }
 
-    // return res.status(204).send({});
+    await this.commandBus.execute(new UpdateLikeStatusPostCommand(postId, userId, data.likeStatus, login))
+
+    return res.status(204).send({});
   }
 }

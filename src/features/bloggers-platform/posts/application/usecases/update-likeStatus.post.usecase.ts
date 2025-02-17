@@ -1,18 +1,19 @@
-
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PostsRepository } from '../../infrastructure/posts.repository';
-import { InjectModel } from '@nestjs/mongoose';
 import { NotFoundException } from '@nestjs/common';
-import { Types } from 'mongoose';
-import { Like, LikeModelType, LikeStatus } from '../../../../likes/domain/like.entity';
-import { LikeStatusModel } from '../../../../likes/api/models/create-like.input.model';
+import { LikeStatus } from '../../../../likes/domain/like.entity';
+import {
+  LikeStatusModelForPost,
+} from '../../../../likes/api/models/create-like.input.model';
 import { PostsQueryRepository } from '../../infrastructure/posts.query-repository';
+import { randomUUID } from 'node:crypto';
+import { LikesRepository } from '../../../../likes/infrastructure/likes.repository';
 
 export class UpdateLikeStatusPostCommand {
   constructor(
     public postId: string,
     public userId: string,
-    public status: LikeStatusModel,
+    public status: LikeStatus,
     public login: string,
   ) {}
 }
@@ -23,11 +24,12 @@ export class UpdateLikeStatusPostHandler
 {
   constructor(
     private readonly postsRepository: PostsRepository,
-    private readonly postsQueryRepository: PostsQueryRepository
+    private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly likesRepository: LikesRepository,
 
   ) {}
 
-  async execute(command: UpdateLikeStatusPostCommand): Promise<any> {
+  async execute(command: UpdateLikeStatusPostCommand): Promise<boolean> {
     const { postId, userId, status, login } = command;
 
     const foundedPost = await this.postsQueryRepository.isPostDoesExist(postId);
@@ -38,41 +40,21 @@ export class UpdateLikeStatusPostHandler
         ]);
     }
 
-    const searchStatusLike = await this.postsRepository.getLike(postId, userId);
+    const statusLikeOnPost = await this.postsRepository.getLike(postId, userId);
 
-    console.log('43234', searchStatusLike);
+    if (statusLikeOnPost) {
+      return await this.likesRepository.updateStatusLikeInPost(command)
+    }
 
-    //
-    // if (searchLike) {
-    //   return await this.postsRepository.updateStatusLike(command, post);
-    // }
-    //
-    const likeStatusValue = status.likeStatus;
-    //
-    // if(likeStatusValue === LikeStatus.None) {
-    //   return true;
-    // }
+    const likeEntity: LikeStatusModelForPost =  {
+      id: randomUUID(),
+      likeStatus: status,
+      userId,
+      postId,
+      createdAt: new Date().toISOString(),
+    }
 
-    // await this.
+    return await this.likesRepository.addStatusLikeOnPost(likeEntity);
 
-    //
-    // const like = new this.LikeModel({
-    //   _id: new Types.ObjectId(),
-    //   userId,
-    //   parentId,
-    //   status: likeStatusValue,
-    //   login,
-    //   addedAt: new Date().toISOString(),
-    // });
-    //
-    // await this.postsRepository.addStatusLike(like)
-    //
-    // likeStatusValue === LikeStatus.Like
-    //   ? (post.likesCount += 1)
-    //   : (post.dislikesCount += 1);
-    //
-    // await post.save();
-    //
-    // return true;
   }
 }

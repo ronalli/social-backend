@@ -1,13 +1,13 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
-import { LikeStatusModel } from '../../../../likes/api/models/create-like.input.model';
+import { LikeStatus } from '../../../../likes/domain/like.entity';
 
 
 export class UpdateLikeStatusCommand {
   constructor(
     public parentId: string,
     public userId: string,
-    public status: LikeStatusModel,
+    public status: LikeStatus,
     public login: string,
   ) {}
 }

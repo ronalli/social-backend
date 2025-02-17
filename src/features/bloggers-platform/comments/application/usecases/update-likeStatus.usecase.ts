@@ -1,69 +1,59 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { LikeStatus } from '../../../../likes/domain/like.entity';
+import { CommentsQueryRepository } from '../../infrastructure/comments.query-repository';
+import { NotFoundException } from '@nestjs/common';
+import { LikesRepository } from '../../../../likes/infrastructure/likes.repository';
+import { randomUUID } from 'node:crypto';
+import { LikeStatusModelForComment } from '../../../../likes/api/models/create-like.input.model';
 
 
-export class UpdateLikeStatusCommand {
+export class UpdateLikeStatusCommentCommand {
   constructor(
-    public parentId: string,
+    public commentId: string,
     public userId: string,
     public status: LikeStatus,
-    public login: string,
   ) {}
 }
 
-@CommandHandler(UpdateLikeStatusCommand)
-export class UpdateLikeStatusHandler
-  implements ICommandHandler<UpdateLikeStatusCommand>
+@CommandHandler(UpdateLikeStatusCommentCommand)
+export class UpdateLikeStatusCommentHandler
+  implements ICommandHandler<UpdateLikeStatusCommentCommand>
 {
   constructor(
     private readonly commentsRepository: CommentsRepository,
+    private readonly commentsQueryRepository: CommentsQueryRepository,
+    private readonly likesRepository: LikesRepository
   ) {}
 
-  async execute(command: UpdateLikeStatusCommand): Promise<any> {
-   //  const { parentId, userId, status, login } = command;
-   //
-   //  const comment = await this.commentsRepository.getCommentById(parentId);
-   //
-   //  if (!comment)
-   //    throw new NotFoundException([
-   //      { message: 'Not found comment', field: 'commentId' },
-   //    ]);
-   //
-   //  const searchLike = await this.commentsRepository.getCurrentLike(
-   //    parentId,
-   //    userId,
-   //  );
-   //
-   //
-   //  if (searchLike) {
-   //    return await this.commentsRepository.updateStatusLike(command, comment);
-   //  }
-   //
-   //  const likeStatusValue = status.likeStatus;
-   //
-   //  if(likeStatusValue === LikeStatus.None) {
-   //    return true;
-   //  }
-   //
-   //  const like = new this.LikeModel({
-   //    _id: new Types.ObjectId(),
-   //    userId,
-   //    parentId,
-   //    status: likeStatusValue,
-   //    login,
-   //    addedAt: new Date().toISOString(),
-   //  });
-   //
-   // await this.commentsRepository.addStatusLike(like);
-   //
-   //
-   //  likeStatusValue === LikeStatus.Like
-   //    ? (comment.likesCount += 1)
-   //    : (comment.dislikesCount += 1);
-   //
-   //  await comment.save();
-   //
-   //  return true;
+  async execute(command: UpdateLikeStatusCommentCommand): Promise<any> {
+    const { commentId, userId, status,} = command;
+
+
+    const foundedComment = await this.commentsQueryRepository.isCommentDoesExist(commentId);
+
+    if (!foundedComment)
+       throw new NotFoundException([
+         { message: 'Not found comment', field: 'commentId' },
+       ]);
+
+
+    const statusLikeOnComment = await this.commentsQueryRepository.getLike(commentId, userId);
+
+    if (statusLikeOnComment) {
+
+      return await this.likesRepository.updateStatusLikeInComment(command)
+    }
+
+    const like: LikeStatusModelForComment = {
+      id: randomUUID(),
+      likeStatus: status,
+      userId,
+      commentId,
+      createdAt: new Date().toISOString(),
+    }
+
+    return await this.likesRepository.addStatusLikeOnComment(like)
+
   }
 }

@@ -1,17 +1,17 @@
-// import { Request, Response } from 'express';
-// import {
-//   Body,
-//   Controller,
-//   Delete,
-//   Get,
-//   Param,
-//   Req,
-//   Res,
-//   Put,
-//   NotFoundException,
-//   UseGuards,
-//   BadRequestException,
-// } from '@nestjs/common';
+import { Request, Response } from 'express';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Req,
+  Res,
+  Put,
+  NotFoundException,
+  UseGuards,
+  BadRequestException,
+} from '@nestjs/common';
 // import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
 // import { UpdateCommentCommand } from '../application/usecases/update-comment.usecase';
 // import { DeleteCommentCommand } from '../application/usecases/delete-comment.usecase';
@@ -25,8 +25,11 @@
 //
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
-import { Controller } from '@nestjs/common';
 import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
+import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdPipe';
+import { AuthJwtGuard } from '../../../../common/guards/auth.jwt.guard';
+import { LikeStatusEntity } from '../../../likes/domain/like.entity';
+import { UpdateLikeStatusCommentCommand } from '../application/usecases/update-likeStatus.usecase';
 
 @ApiTags('Comments')
 @Controller('comments')
@@ -35,6 +38,27 @@ export class CommentsController {
     private readonly commentsQueryRepository: CommentsQueryRepository,
     private readonly commandBus: CommandBus,
   ) {}
+
+  @UseGuards(AuthJwtGuard)
+  @Put(':commentId/like-status')
+  async updateLikeStatusForSpecialComment(
+    @Param('commentId', ValidateObjectIdPipe) commentId: string,
+    @Body() data: LikeStatusEntity,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const userId = req.userId!;
+
+    await this.commandBus.execute(
+      new UpdateLikeStatusCommentCommand(commentId, userId, data.likeStatus),
+    );
+
+    return res.status(204).send({});
+  }
+
+
+}
+
 //
 //   @Get(':commentId')
 //   async getComment(
@@ -100,43 +124,3 @@ export class CommentsController {
 //     return res.status(204).send({});
 //   }
 //
-//   @UseGuards(AuthJwtGuard)
-//   @Put(':commentId/like-status')
-//   async updateLikeStatusForSpecialComment(
-//     @Param('commentId', ValidateObjectIdPipe) commentId: string,
-//     @Body() status: LikeStatusModel,
-//     @Req() req: Request,
-//     @Res() res: Response,
-//   ) {
-//
-//     const userId = req.userId!;
-//     const login = req.login!;
-//
-//     // const dataBody: { likeStatus: LikeStatus } = req.body;
-//
-//     // const objLike: any = {
-//     //   parentId: commentId,
-//     //   userId: userId,
-//     //   status: likeStatus,
-//     //   login: login,
-//     // };
-//
-//     await this.commandBus.execute(
-//       new UpdateLikeStatusCommand(commentId, userId, status, login),
-//     );
-//
-//     return res.status(204).send({});
-//
-//     // console.log(objLike);
-//
-//     // const response = await this.commentsServices.updateLikeStatus(objLike)
-//
-//     // if(response.errorsMessages) {
-//     //   res.status(HTTP_STATUSES[response.status]).send({errorsMessages: response.errorsMessages})
-//     //   return;
-//     // }
-//     //
-//     // res.status(HTTP_STATUSES[response.status]).send({})
-//     // return
-//   }
-}

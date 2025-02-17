@@ -54,6 +54,7 @@ export class CommentsQueryRepository {
 
 
 
+
     // try {
     //   const currentComment = await this.CommentModel.findOne({
     //     _id: new ObjectId(id),
@@ -76,6 +77,23 @@ export class CommentsQueryRepository {
     //   throw new InternalServerErrorException(e);
     // }
   }
+
+  async isCommentDoesExist(commentId: string): Promise<boolean>  {
+    const query = `SELECT * FROM public."commentsPosts" WHERE id = $1;`
+
+    const result = await this.dataSource.query(query, [commentId]);
+
+    return result.length > 0;
+  }
+
+  async getLike(commentId: string, userId: string): Promise<boolean> {
+    const query = `SELECT * FROM public."commentsLikeStatus" WHERE "commentId" = $1 AND "userId" = $2;`
+
+    const result = await this.dataSource.query(query, [commentId, userId])
+
+    return result.length > 0;
+  }
+
 
   async getCommentById(id: string) {
     // try {

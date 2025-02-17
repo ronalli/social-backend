@@ -11,7 +11,7 @@ import {
   CommentModelType,
 } from '../domain/comment.entity';
 import { MappingsCommentsService } from '../application/mappings/mapping.comments';
-import { UpdateLikeStatusCommand } from '../application/usecases/update-likeStatus.usecase';
+import { UpdateLikeStatusCommentCommand} from '../application/usecases/update-likeStatus.usecase';
 import { UpdateCommentModel } from '../api/models/input/update-comment.model';
 import {
   Like,
@@ -124,7 +124,7 @@ export class CommentsRepository {
   }
 
   async updateStatusLike(
-    like: UpdateLikeStatusCommand,
+    like: UpdateLikeStatusCommentCommand,
     comment: CommentDocument,
   ) {
     // const currentStatus = await this.LikeModel.findOne({

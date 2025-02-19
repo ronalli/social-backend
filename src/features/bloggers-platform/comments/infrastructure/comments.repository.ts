@@ -62,7 +62,15 @@ export class CommentsRepository {
     // }
   }
 
-  async deleteComment(id: string) {
+  async deleteComment(id: string): Promise<boolean> {
+
+    const query = `DELETE FROM public."commentsPosts" WHERE id = $1`;
+
+    const response = await this.dataSource.query(query, [id]);
+
+    return response[1] > 0
+
+
     // try {
     //   await this.CommentModel.deleteOne({ _id: new ObjectId(id) });
     //   return true;

@@ -22,6 +22,7 @@ import { LikeStatusEntity } from '../../../likes/domain/like.entity';
 import { UpdateLikeStatusCommentCommand } from '../application/usecases/update-likeStatus.usecase';
 import { UpdateCommentModel } from './models/input/update-comment.model';
 import { UpdateCommentCommand } from '../application/usecases/update-comment.usecase';
+import { DeleteCommentCommand } from '../application/usecases/delete-comment.usecase';
 
 @ApiTags('Comments')
 @Controller('comments')
@@ -69,6 +70,22 @@ export class CommentsController {
 
     return res.status(204).send({});
   }
+
+  @UseGuards(AuthJwtGuard)
+  @Delete(':commentId')
+  async deleteComment(
+    @Param('commentId') commentId: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const userId = req.userId!;
+
+    await this.commandBus.execute(new DeleteCommentCommand(commentId, userId));
+
+    return res.status(204).send({});
+  }
+
+
 }
 
 //
@@ -99,20 +116,3 @@ export class CommentsController {
 //
 //     return res.status(200).send(result);
 //   }
-//
-
-//
-//   @UseGuards(AuthJwtGuard)
-//   @Delete(':commentId')
-//   async deleteComment(
-//     @Param('commentId') commentId: string,
-//     @Req() req: Request,
-//     @Res() res: Response,
-//   ) {
-//     const userId = req.userId!;
-//
-//     await this.commandBus.execute(new DeleteCommentCommand(commentId, userId));
-//
-//     return res.status(204).send({});
-//   }
-//

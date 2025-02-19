@@ -11,7 +11,7 @@ import {
   CommentModelType,
 } from '../domain/comment.entity';
 import { MappingsCommentsService } from '../application/mappings/mapping.comments';
-import { UpdateLikeStatusCommentCommand} from '../application/usecases/update-likeStatus.usecase';
+import { UpdateLikeStatusCommentCommand } from '../application/usecases/update-likeStatus.usecase';
 import { UpdateCommentModel } from '../api/models/input/update-comment.model';
 import {
   Like,
@@ -39,7 +39,14 @@ export class CommentsRepository {
     private readonly mappingsCommentsService: MappingsCommentsService,
   ) {}
 
-  async updateComment(id: string, contentUpdate: UpdateCommentModel) {
+  async updateComment(id: string, contentUpdate: UpdateCommentModel): Promise<boolean> {
+    const query = `UPDATE public."commentsPosts" SET content = $1 WHERE id = $2;`;
+
+    const response = await this.dataSource.query(query, [contentUpdate.content, id]);
+
+   return response[1] > 0
+
+
     // try {
     //   const findComment = await this.CommentModel.findOne({
     //     _id: new ObjectId(id),

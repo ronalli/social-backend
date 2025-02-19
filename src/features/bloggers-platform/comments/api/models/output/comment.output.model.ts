@@ -16,3 +16,12 @@ export interface ILikesInfoViewModel {
   dislikesCount: number
   myStatus: string
 }
+
+
+export class CommentOutputModelDB {
+  id: string
+  content: string
+  postId: string
+  userId: string
+  createdAt: string
+}

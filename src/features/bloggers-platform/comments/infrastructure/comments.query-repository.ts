@@ -6,6 +6,7 @@ import { ResultCode } from '../../../../settings/http.status';
 import { LikeInfoOutputModel } from '../../../likes/api/models/like.info.output.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { CommentOutputModelDB } from '../api/models/output/comment.output.model';
 
 @Injectable()
 export class CommentsQueryRepository {
@@ -95,7 +96,14 @@ export class CommentsQueryRepository {
   }
 
 
-  async getCommentById(id: string) {
+  async getCommentById(id: string): Promise<CommentOutputModelDB> {
+
+    const query = `SELECT * FROM "commentsPosts" WHERE id = $1;`
+
+    const result = await this.dataSource.query(query, [id]);
+
+    return result[0]
+
     // try {
     //   const findComment = await this.CommentModel.findOne({
     //     _id: new ObjectId(id),

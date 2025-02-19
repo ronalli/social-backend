@@ -26,6 +26,7 @@ import { UpdateLikeStatusPostHandler } from './posts/application/usecases/update
 import { LikesModule } from '../likes/likes.module';
 import { LikesRepository } from '../likes/infrastructure/likes.repository';
 import { UpdateLikeStatusCommentHandler } from './comments/application/usecases/update-likeStatus.usecase';
+import { UpdateCommentHandler } from './comments/application/usecases/update-comment.usecase';
 
 @Module({
   imports: [
@@ -56,7 +57,8 @@ import { UpdateLikeStatusCommentHandler } from './comments/application/usecases/
     MappingsCommentsService,
     UpdateLikeStatusPostHandler,
     UpdateLikeStatusCommentHandler,
-//      UpdateCommentHandler, DeleteCommentHandler,  UpdateLikeStatusHandler,
+    UpdateCommentHandler
+//     DeleteCommentHandler,  UpdateLikeStatusHandler,
 //     UpdatePostHandler,
   ],
   exports: [BlogsService, BlogsQueryRepository, BlogsRepository, PostsService, PostsRepository, PostsQueryRepository, CommentsService, CommentsRepository, CommentsQueryRepository]

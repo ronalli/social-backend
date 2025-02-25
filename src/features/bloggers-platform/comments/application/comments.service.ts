@@ -30,14 +30,6 @@ export class CommentsService {
 
     return this.mappingsCommentsService.formatingCommentForView(currentComment);
 
-    // {
-    //   id: '8c185332-b8b6-46fd-ba28-8e5c1cadf65f',
-    //   content: '66666666666666666666666666666666666666666',
-    //   postId: 'ed5310ca-a727-49cc-b4ec-3a77806f4397',
-    //   userId: '236e918e-cd09-49f5-85f7-44c1fd785038',
-    //   createdAt: '2025-02-11T18:48:48.099Z'
-    // }
-
 
   }
 
@@ -83,10 +75,23 @@ export class CommentsService {
   // }
 
   async findAllComments(
+    token: string,
     postId: string,
     queryParams: QueryParamsDto,
-    currentUser: string | null,
   ) {
+
+    const currentUserId = await jwtService.getUserIdByToken(token)
+
+    const allComments = await this.commentsQueryRepository.getAllCommentsFormSpecialPost(currentUserId, postId, queryParams)
+
+    const items = await this.mappingsCommentsService.formatDataAllCommentsForView(allComments.items)
+
+    return {
+      ...allComments,
+      items: items
+    }
+
+
     // const result = await this.postsQueryRepository.getPostById(postId);
     //
     // if (result) {

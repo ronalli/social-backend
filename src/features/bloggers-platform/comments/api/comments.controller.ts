@@ -8,14 +8,12 @@ import {
   Req,
   Res,
   Put,
-  NotFoundException,
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
 
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
-import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
 import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdPipe';
 import { AuthJwtGuard } from '../../../../common/guards/auth.jwt.guard';
 import { LikeStatusEntity } from '../../../likes/domain/like.entity';
@@ -23,18 +21,13 @@ import { UpdateLikeStatusCommentCommand } from '../application/usecases/update-l
 import { UpdateCommentModel } from './models/input/update-comment.model';
 import { UpdateCommentCommand } from '../application/usecases/update-comment.usecase';
 import { DeleteCommentCommand } from '../application/usecases/delete-comment.usecase';
-import { serviceInfoLike } from '../../../../common/services/initialization.status.like';
-import { LikesService } from '../../../likes/application/likes.service';
-import { jwtService } from '../../../../common/services/jwt.service';
 import { CommentsService } from '../application/comments.service';
 
 @ApiTags('Comments')
 @Controller('comments')
 export class CommentsController {
   constructor(
-    private readonly commentsQueryRepository: CommentsQueryRepository,
     private readonly commandBus: CommandBus,
-    private readonly likesService: LikesService,
     private readonly commentService: CommentsService,
   ) {}
 
@@ -99,12 +92,8 @@ export class CommentsController {
   ) {
     const token = req.headers?.authorization?.split(' ')[1] || '';
 
-    const response = await this.commentService.getOneComment(token, commentId)
+    const response = await this.commentService.getOneComment(token, commentId);
 
     return res.status(200).send(response);
   }
-
 }
-
-
-

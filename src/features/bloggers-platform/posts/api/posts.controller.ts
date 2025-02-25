@@ -30,7 +30,10 @@ import { AuthJwtGuard } from '../../../../common/guards/auth.jwt.guard';
 import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
 import { CommentsQueryRepository } from '../../comments/infrastructure/comments.query-repository';
 import { UpdateLikeStatusPostCommand } from '../application/usecases/update-likeStatus.post.usecase';
-import { LikeStatus, LikeStatusEntity } from '../../../likes/domain/like.entity';
+import {
+  LikeStatus,
+  LikeStatusEntity,
+} from '../../../likes/domain/like.entity';
 import { serviceInfoLike } from '../../../../common/services/initialization.status.like';
 
 @ApiTags('Posts')
@@ -40,7 +43,8 @@ export class PostsController {
     private readonly postsService: PostsService,
     private readonly postsQueryRepository: PostsQueryRepository,
     private readonly commandBus: CommandBus,
-    private readonly  commentsQueryRepository: CommentsQueryRepository
+    private readonly commentsQueryRepository: CommentsQueryRepository,
+    private readonly commentsService: CommentsService,
   ) {}
 
   // @UseGuards(BasicAuthGuard)
@@ -71,9 +75,11 @@ export class PostsController {
     const result = await this.postsService.getPost(id, null);
 
     if (!result) {
-      throw new NotFoundException([{message: 'Not found post', field: 'postId'}])
+      throw new NotFoundException([
+        { message: 'Not found post', field: 'postId' },
+      ]);
     }
-    res.status(200).send(result)
+    res.status(200).send(result);
   }
 
   @Get()
@@ -128,31 +134,34 @@ export class PostsController {
       new CreateCommentCommand(comment.content, postId, userId),
     );
 
-    if (!result) throw new BadRequestException([{ message: 'Wrong', field: 'bad' }]);
-// !!!
+    if (!result)
+      throw new BadRequestException([{ message: 'Wrong', field: 'bad' }]);
+    // !!!
 
-    const response = await this.commentsQueryRepository.getComment(result.id, 'dd',)
+    const response = await this.commentsQueryRepository.getComment(
+      result.id,
+      'dd',
+    );
 
-    
     res.status(201).send(response);
   }
-  //
-  // @Get(':postId/comments')
-  // async getAllCommentsForPost(
-  //   @Param('postId', ValidateObjectIdPipe) postId: string,
-  //   @Query() query: QueryParamsDto,
-  //   @Req() req: Request,
-  //   @Res() res: Response,
-  // ) {
-  //   // const token = req.headers.authorization?.split(' ')[1];
-  //   //
-  //   // const currentUser = await serviceInfoLike.getIdUserByToken(token);
-  //   //
-  //   // const result = await this.commentsService.findAllComments(postId, query, currentUser);
-  //   //
-  //   // res.status(200).send(result.data);
-  // }
-  //
+
+  @Get(':postId/comments')
+  async getAllCommentsForPost(
+    @Param('postId', ValidateObjectIdPipe) postId: string,
+    @Query() query: QueryParamsDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const token = req.headers.authorization?.split(' ')[1];
+    const result = await this.commentsService.findAllComments(
+      token,
+      postId,
+      query,
+    );
+    res.status(200).send(result);
+  }
+
   @UseGuards(AuthJwtGuard)
   @Put(':postId/like-status')
   async updateLikeStatusForSpecialPost(
@@ -166,11 +175,18 @@ export class PostsController {
 
     const foundedPost = await this.postsQueryRepository.isPostDoesExist(postId);
 
-    if(!foundedPost) {
-      throw new NotFoundException([{ message: `If post with specified postId doesn\'t exists`, field: 'postId' }])
+    if (!foundedPost) {
+      throw new NotFoundException([
+        {
+          message: `If post with specified postId doesn\'t exists`,
+          field: 'postId',
+        },
+      ]);
     }
 
-    await this.commandBus.execute(new UpdateLikeStatusPostCommand(postId, userId, data.likeStatus, login))
+    await this.commandBus.execute(
+      new UpdateLikeStatusPostCommand(postId, userId, data.likeStatus, login),
+    );
 
     return res.status(204).send({});
   }

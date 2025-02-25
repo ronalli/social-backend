@@ -38,33 +38,13 @@ export class MappingsCommentsService {
 // }
 
 
-  formatDataCommentForView(comment: CommentDocument): Omit<CommentOutputModel, 'likesInfo'> {
-    return {
-      id: String(comment._id),
-      commentatorInfo: {
-        userId: comment.commentatorInfo.userId,
-        userLogin: comment.commentatorInfo.userLogin,
-      },
-      createdAt: comment.createdAt,
-      content: comment.content,
-    };
-  }
-
-  async formatDataAllCommentsForView(comments: CommentDocument[], currentUser: string | null, LikeModel: LikeModelType): Promise<CommentOutputModel[]> {
+  async formatDataAllCommentsForView(comments: any) {
 
     const result: CommentOutputModel[] = [];
 
     for (const comment of comments) {
 
-      const currentStatus = await LikeModel.findOne({ $and: [{ parentId: comment._id }, { userId: currentUser }] });
-
-      const likesInfo: LikeInfoOutputModel = {
-        likesCount: comment.likesCount,
-        dislikesCount: comment.dislikesCount,
-        myStatus: currentStatus?.status ? currentStatus.status : 'None',
-      };
-
-      result.push(this.formatCommentForView(comment, likesInfo));
+      result.push(this.formatingCommentForView(comment));
     }
     return result;
   }

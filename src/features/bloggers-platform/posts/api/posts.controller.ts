@@ -22,7 +22,6 @@ import { CommentsService } from '../../comments/application/comments.service';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreatePostCommand } from '../application/usecases/create-post.usecase';
 import { CreatePostSpecialPostModel } from './models/input/create-post.special.post.model';
-import { serviceInfoLike } from '../../../../common/services/initialization.status.like';
 import { BasicAuthGuard } from '../../../../common/guards/auth.basic.guard';
 import { CustomValidationPipe } from '../../../../common/pipes/pipe';
 import { QueryParamsDto } from '../../../../common/models/query-params.dto';
@@ -32,6 +31,7 @@ import { CreateCommentCommand } from '../../comments/application/usecases/create
 import { CommentsQueryRepository } from '../../comments/infrastructure/comments.query-repository';
 import { UpdateLikeStatusPostCommand } from '../application/usecases/update-likeStatus.post.usecase';
 import { LikeStatus, LikeStatusEntity } from '../../../likes/domain/like.entity';
+import { serviceInfoLike } from '../../../../common/services/initialization.status.like';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -131,7 +131,7 @@ export class PostsController {
     if (!result) throw new BadRequestException([{ message: 'Wrong', field: 'bad' }]);
 // !!!
 
-    const response = await this.commentsQueryRepository.getComment(result.id, 'dd')
+    const response = await this.commentsQueryRepository.getComment(result.id, 'dd',)
 
     
     res.status(201).send(response);

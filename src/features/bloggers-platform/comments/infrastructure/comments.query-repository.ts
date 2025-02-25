@@ -15,33 +15,33 @@ export class CommentsQueryRepository {
     @InjectDataSource() protected dataSource: DataSource,
   ) {}
 
-  async getComment(id: string, status: string) {
-
-    const query = `SELECT * FROM public."commentsPosts" WHERE id = $1;`
-
-    const response = await this.dataSource.query(query, [id]);
-
-    console.log(response);
+  async getComment(id: string, userId: string) {
+    // const query = `SELECT * FROM public."commentsPosts" WHERE id = $1;`;
+    //
+    // const response = await this.dataSource.query(query, [id]);
+    //
+    // console.log(status);
 
     const query1 = `
       SELECT 
         c.id,
         c.content,
-        c."postId",
         c."userId",
         c."createdAt",
         u.login AS "userLogin",
-        s."likeStatus" as "myStatus"
+        COALESCE(s."likeStatus", 'None') AS "myStatus",
+        (SELECT COUNT(*) FROM public."commentsLikeStatus" WHERE "commentId" = c.id AND "likeStatus" = 'Like') AS "likesCount",
+        (SELECT COUNT(*) FROM public."commentsLikeStatus" WHERE "commentId" = c.id AND "likeStatus" = 'Dislike') AS "dislikesCount"
       FROM public."commentsPosts" c 
       JOIN public.users u ON u.id = c."userId"
-      JOIN public."postsLikeStatus" s ON s."postId" = c."postId" AND s."userId" = c."userId"
-      WHERE c.id = $1
+      LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id AND s."userId" = $1
+      WHERE c.id = $2
       ;
-    `
+    `;
 
-    const result = await this.dataSource.query(query1, [id])
+    const result = await this.dataSource.query(query1, [userId, id]);
 
-    console.log(result);
+    return result[0];
 
     // [
     //   {
@@ -52,9 +52,6 @@ export class CommentsQueryRepository {
     //     createdAt: '2025-02-14T19:58:22.761Z'
     //   }
     // ]
-
-
-
 
     // try {
     //   const currentComment = await this.CommentModel.findOne({
@@ -79,8 +76,8 @@ export class CommentsQueryRepository {
     // }
   }
 
-  async isCommentDoesExist(commentId: string): Promise<boolean>  {
-    const query = `SELECT * FROM public."commentsPosts" WHERE id = $1;`
+  async isCommentDoesExist(commentId: string): Promise<boolean> {
+    const query = `SELECT * FROM public."commentsPosts" WHERE id = $1;`;
 
     const result = await this.dataSource.query(query, [commentId]);
 
@@ -88,21 +85,19 @@ export class CommentsQueryRepository {
   }
 
   async getLike(commentId: string, userId: string): Promise<boolean> {
-    const query = `SELECT * FROM public."commentsLikeStatus" WHERE "commentId" = $1 AND "userId" = $2;`
+    const query = `SELECT * FROM public."commentsLikeStatus" WHERE "commentId" = $1 AND "userId" = $2;`;
 
-    const result = await this.dataSource.query(query, [commentId, userId])
+    const result = await this.dataSource.query(query, [commentId, userId]);
 
     return result.length > 0;
   }
 
-
   async getCommentById(id: string): Promise<CommentOutputModelDB> {
-
-    const query = `SELECT * FROM "commentsPosts" WHERE id = $1;`
+    const query = `SELECT * FROM "commentsPosts" WHERE id = $1;`;
 
     const result = await this.dataSource.query(query, [id]);
 
-    return result[0]
+    return result[0];
 
     // try {
     //   const findComment = await this.CommentModel.findOne({

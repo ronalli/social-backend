@@ -28,6 +28,8 @@ import { LikesRepository } from '../likes/infrastructure/likes.repository';
 import { UpdateLikeStatusCommentHandler } from './comments/application/usecases/update-likeStatus.usecase';
 import { UpdateCommentHandler } from './comments/application/usecases/update-comment.usecase';
 import { DeleteCommentHandler } from './comments/application/usecases/delete-comment.usecase';
+import { LikesService } from '../likes/application/likes.service';
+import { LikesQueryRepository } from '../likes/infrastructure/likes.query-repository';
 
 @Module({
   imports: [
@@ -48,6 +50,8 @@ import { DeleteCommentHandler } from './comments/application/usecases/delete-com
     CommentsRepository,
     CommentsQueryRepository,
     LikesRepository,
+    LikesService,
+    LikesQueryRepository,
     MappingBlogsService,
     MappingsPostsService,
     QueryParamsService,

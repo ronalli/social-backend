@@ -2,10 +2,43 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-repository';
 import { CommentsRepository } from '../infrastructure/comments.repository';
 import { QueryParamsDto } from '../../../../common/models/query-params.dto';
+import { jwtService } from '../../../../common/services/jwt.service';
+import { LikesService } from '../../../likes/application/likes.service';
+import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
+import { MappingsCommentsService } from './mappings/mapping.comments';
 
 @Injectable()
 export class CommentsService {
-  constructor(private readonly commentsRepository: CommentsRepository, private readonly postsQueryRepository: PostsQueryRepository) {
+  constructor(
+    private readonly commentsRepository: CommentsRepository,
+    private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly commentsQueryRepository: CommentsQueryRepository,
+    private readonly likesService: LikesService,
+    private readonly mappingsCommentsService: MappingsCommentsService,
+  ) {}
+
+  async getOneComment(token: string, commentId: string) {
+
+    // const likeStatus = await this.likesService.getCurrentLikeStatus(
+    //   token,
+    //   commentId,
+    // );
+
+    const currentUserId = await jwtService.getUserIdByToken(token)
+
+    const currentComment = await this.commentsQueryRepository.getComment(commentId, currentUserId)
+
+    return this.mappingsCommentsService.formatingCommentForView(currentComment);
+
+    // {
+    //   id: '8c185332-b8b6-46fd-ba28-8e5c1cadf65f',
+    //   content: '66666666666666666666666666666666666666666',
+    //   postId: 'ed5310ca-a727-49cc-b4ec-3a77806f4397',
+    //   userId: '236e918e-cd09-49f5-85f7-44c1fd785038',
+    //   createdAt: '2025-02-11T18:48:48.099Z'
+    // }
+
+
   }
 
   // async update(id: string, content: string, userId: string) {
@@ -49,8 +82,11 @@ export class CommentsService {
   //   return this.commentsRepository.addComment(data);
   // }
 
-  async findAllComments(postId: string, queryParams: QueryParamsDto, currentUser: string | null) {
-
+  async findAllComments(
+    postId: string,
+    queryParams: QueryParamsDto,
+    currentUser: string | null,
+  ) {
     // const result = await this.postsQueryRepository.getPostById(postId);
     //
     // if (result) {

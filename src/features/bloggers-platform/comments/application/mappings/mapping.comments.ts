@@ -6,6 +6,38 @@ import { LikeInfoOutputModel } from '../../../../likes/api/models/like.info.outp
 
 @Injectable()
 export class MappingsCommentsService {
+
+  formatingCommentForView(comment: any) {
+
+      return {
+        id: comment.id,
+        content: comment.content,
+        commentatorInfo: {
+          userId: comment.userId,
+          userLogin: comment.userLogin,
+        },
+        createdAt: comment.createdAt,
+        likesInfo: {
+          likesCount: +comment.likesCount,
+          dislikesCount: +comment.dislikesCount,
+          myStatus: comment.myStatus
+        }
+      }
+
+  }
+
+// {
+//   id: '8c185332-b8b6-46fd-ba28-8e5c1cadf65f',
+//   content: '66666666666666666666666666666666666666666',
+//   userId: '236e918e-cd09-49f5-85f7-44c1fd785038',
+//   createdAt: '2025-02-11T18:48:48.099Z',
+//   userLogin: 'nikita',
+//   myStatus: 'None',
+//   likesCount: '1',
+//   dislikesCount: '0'
+// }
+
+
   formatDataCommentForView(comment: CommentDocument): Omit<CommentOutputModel, 'likesInfo'> {
     return {
       id: String(comment._id),

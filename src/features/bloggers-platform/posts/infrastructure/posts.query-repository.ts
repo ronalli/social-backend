@@ -18,7 +18,7 @@ export class PostsQueryRepository {
     @InjectDataSource() protected dataSource: DataSource,
   ) {}
 
-  async getPosts(queryParams: PostQueryDto, currentUser: string | null) {
+  async getPosts(queryParams: PostQueryDto, userId: string) {
     const defaultQueryParams =
       this.queryParamsService.createDefaultValues(queryParams);
 
@@ -27,17 +27,33 @@ export class PostsQueryRepository {
     const query1 = `
     WITH result AS (
       SELECT 
-        posts.id, 
-        posts.title, 
-        posts."shortDescription", 
-        posts.content, 
-        posts."blogId", 
+        p.id, 
+        p.title, 
+        p."shortDescription", 
+        p.content, 
+        p."blogId", 
         blogs.name AS "blogName", 
-        posts."createdAt" 
-     FROM 
-        posts 
-     JOIN 
-        blogs ON posts."blogId" = blogs.id
+        p."createdAt",
+        COALESCE(s."likeStatus", 'None') AS "myStatus",
+        (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Like') AS "likesCount",
+        (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Dislike') AS "dislikesCount",
+     (
+       SELECT json_agg(likes)
+       FROM (
+         SELECT 
+            pls."userId",
+            u.login,
+            pls."createdAt" as "addedAt"
+         FROM public."postsLikeStatus" pls
+         JOIN public.users u ON u.id = pls."userId"
+         WHERE pls."postId" = p.id AND pls."likeStatus" = 'Like'
+         ORDER BY pls."createdAt"::TIMESTAMP DESC
+         LIMIT 3  
+         ) likes
+       ) as "newestLikes"
+     FROM posts p
+     JOIN blogs ON p."blogId" = blogs.id
+     LEFT JOIN public."postsLikeStatus" s ON s."postId" = p.id AND s."userId" = $1
        )
      SELECT * FROM result
      ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
@@ -46,44 +62,18 @@ export class PostsQueryRepository {
     const query = `SELECT * FROM public.posts ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
         LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;
 
-    const response = await this.dataSource.query(query1, []);
+    const response = await this.dataSource.query(query1, [userId]);
 
     const totalQuery = `SELECT * FROM public.posts;`;
     const totalCount = await this.dataSource.query(totalQuery, []);
-
-    const items =
-      await this.mappingsPostsService.formatingAllPostForView(response);
 
     return {
       pagesCount: +Math.ceil(totalCount.length / pageSize),
       page: +pageNumber,
       pageSize: +pageSize,
       totalCount: +totalCount.length,
-      items,
+      items: response
     };
-
-    // try {
-    //   const allPosts = await this.PostModel.find()
-    //     .sort({ [query.sortBy]: query.sortDirection })
-    //     .skip((query.pageNumber - 1) * query.pageSize)
-    //     .limit(query.pageSize);
-    //
-    //   const totalCount = await this.PostModel.countDocuments();
-    //
-    //   return {
-    //     status: ResultCode.Success,
-    //     data: {
-    //       pagesCount: Math.ceil(totalCount / query.pageSize),
-    //       page: query.pageNumber,
-    //       pageSize: query.pageSize,
-    //       totalCount,
-    //       items: await this.mappingsPostsService.formatingAllPostForView(allPosts, currentUser, this.LikeModel),
-    //     },
-    //   };
-    //
-    // } catch (e) {
-    //   throw new InternalServerErrorException(e)
-    // }
   }
 
   async getPostById(id: string) {
@@ -122,3 +112,25 @@ export class PostsQueryRepository {
     return result.length > 0;
   }
 }
+
+// const query1 = `
+//     WITH result AS (
+//       SELECT
+//         posts.id,
+//         posts.title,
+//         posts."shortDescription",
+//         posts.content,
+//         posts."blogId",
+//         blogs.name AS "blogName",
+//         posts."createdAt"
+//      FROM
+//         posts
+//      JOIN
+//         blogs ON posts."blogId" = blogs.id
+//        )
+//      SELECT * FROM result
+//      ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
+//      LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;
+//
+// const query = `SELECT * FROM public.posts ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
+//         LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;

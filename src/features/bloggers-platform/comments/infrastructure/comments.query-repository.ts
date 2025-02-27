@@ -65,7 +65,7 @@ export class CommentsQueryRepository {
           (SELECT COUNT(*) FROM public."commentsLikeStatus" WHERE "commentId" = c.id AND "likeStatus" = 'Dislike') AS "dislikesCount"
           FROM public."commentsPosts" c
           JOIN public.users u ON u.id = c."userId"
-           LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id AND s."userId" = $1
+          LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id AND s."userId" = $1
           WHERE "postId" = $2 
           ) 
         SELECT * FROM result

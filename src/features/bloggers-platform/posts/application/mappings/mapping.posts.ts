@@ -17,7 +17,7 @@ export class MappingsPostsService {
     @Inject(forwardRef(() => BlogsQueryRepository)) private readonly blogsQueryRepository: BlogsQueryRepository,
   ) {}
 
-  async formatingAllPostForView(posts: PostOutputModelDB[]) {
+  async formatingAllPostForView(posts: any) {
     const result: PostOutputModel[] = [];
     for (const post of posts) {
       const viewPost = await this.formatingDataForOutputPost(post);
@@ -27,11 +27,9 @@ export class MappingsPostsService {
   }
 
   async formatingDataForOutputPost(
-    post: PostOutputModelDB,
-  ): Promise<PostOutputModel> {
-    const { id, title, shortDescription, content, createdAt, blogId } = post;
-
-    const currentBlog = await this.blogsQueryRepository.findBlogById(blogId);
+    post: any,
+  ) {
+    const { id, title, shortDescription, content, createdAt, blogId, blogName, myStatus, likesCount, dislikesCount, newestLikes  } = post;
 
     return {
       id,
@@ -39,13 +37,13 @@ export class MappingsPostsService {
       shortDescription,
       content,
       blogId,
-      blogName: currentBlog.name,
+      blogName,
       createdAt,
       extendedLikesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: 'None',
-        newestLikes: [],
+        likesCount,
+        dislikesCount,
+        myStatus,
+        newestLikes,
       },
     };
   }

@@ -89,8 +89,7 @@ export class PostsController {
     @Res() res: Response,
   ) {
     const token = req.headers.authorization?.split(' ')[1];
-    const currentUser = await serviceInfoLike.getIdUserByToken(token);
-    const result = await this.postsQueryRepository.getPosts(query, currentUser);
+    const result = await this.postsService.getAllPosts(token, query);
 
     res.status(200).send(result);
   }

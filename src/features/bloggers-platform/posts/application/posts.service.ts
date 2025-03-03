@@ -13,7 +13,10 @@ export class PostsService {
     private readonly mappingsPostsService: MappingsPostsService
   ) {}
   async getPost(id: string, currentUser: string) {
-    return await this.postsQueryRepository.getPostById(id);
+
+    const result = await this.postsQueryRepository.getPost(id, currentUser);
+
+    return await this.mappingsPostsService.formatingDataForOutputPost(result);
   }
 
   async deletePost(id: string) {

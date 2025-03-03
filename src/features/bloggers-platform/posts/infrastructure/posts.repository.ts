@@ -55,6 +55,19 @@ export class PostsRepository {
     // );
   }
 
+
+  async updateCurrentPost(post: any) {
+
+    let query = `UPDATE public.posts SET title = $1, "shortDescription" = $2, content = $3, "blogId" = $4 WHERE id = $5 RETURNING *;`;
+
+    const values = [post.title, post.shortDescription, post.content, post.blogId, post.id]
+
+    const response = await this.dataSource.query(query, values)
+
+    return response[0]
+
+  }
+
   // async update(id: string, updatePost: PostCreateModel) {
   //
   //   const {content, blogId, shortDescription, title} = updatePost;

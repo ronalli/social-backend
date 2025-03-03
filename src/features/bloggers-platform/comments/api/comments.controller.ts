@@ -9,7 +9,7 @@ import {
   Res,
   Put,
   UseGuards,
-  BadRequestException,
+  BadRequestException, NotFoundException,
 } from '@nestjs/common';
 
 import { CommandBus } from '@nestjs/cqrs';
@@ -22,13 +22,16 @@ import { UpdateCommentModel } from './models/input/update-comment.model';
 import { UpdateCommentCommand } from '../application/usecases/update-comment.usecase';
 import { DeleteCommentCommand } from '../application/usecases/delete-comment.usecase';
 import { CommentsService } from '../application/comments.service';
+import { jwtService } from '../../../../common/services/jwt.service';
+import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
 
 @ApiTags('Comments')
 @Controller('comments')
 export class CommentsController {
   constructor(
     private readonly commandBus: CommandBus,
-    private readonly commentService: CommentsService,
+    private readonly commentsService: CommentsService,
+    private readonly commentsQueryRepository: CommentsQueryRepository,
   ) {}
 
   @UseGuards(AuthJwtGuard)
@@ -90,9 +93,24 @@ export class CommentsController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
+
+    const foundedComment = await this.commentsQueryRepository.isCommentDoesExist(commentId)
+
+    if(!foundedComment) {
+      throw new NotFoundException([
+        {
+          message: `If comment with specified postId doesn\'t exists`,
+          field: 'commentId',
+        },
+      ]);
+
+    }
+
     const token = req.headers?.authorization?.split(' ')[1] || '';
 
-    const response = await this.commentService.getOneComment(token, commentId);
+    const userId = await jwtService.getUserIdByToken(token)
+
+    const response = await this.commentsService.getOneComment(userId, commentId);
 
     return res.status(200).send(response);
   }

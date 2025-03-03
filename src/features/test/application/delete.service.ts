@@ -11,7 +11,7 @@ export class DeleteService {
   }
 
   async deleteAll() {
-    const query = `TRUNCATE TABLE public."users", public.blogs, public.posts, public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`;
+    const query = `TRUNCATE TABLE public."users", public.blogs,  public.posts, public."commentsPosts", public."commentsLikeStatus", public."postsLikeStatus", public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`;
 
     const response = await this.dataSource.query(query);
   }

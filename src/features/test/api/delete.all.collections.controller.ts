@@ -1,5 +1,4 @@
 import { Controller, Delete, HttpCode, Req, Res } from '@nestjs/common';
-import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { DeleteService } from '../application/delete.service';
 

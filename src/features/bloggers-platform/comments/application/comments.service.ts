@@ -17,19 +17,13 @@ export class CommentsService {
     private readonly mappingsCommentsService: MappingsCommentsService,
   ) {}
 
-  async getOneComment(token: string, commentId: string) {
+  async getOneComment(userId: string, commentId: string) {
 
-    // const likeStatus = await this.likesService.getCurrentLikeStatus(
-    //   token,
-    //   commentId,
-    // );
+    const currentComment = await this.commentsQueryRepository.getComment(commentId, userId)
 
-    const currentUserId = await jwtService.getUserIdByToken(token)
-
-    const currentComment = await this.commentsQueryRepository.getComment(commentId, currentUserId)
+    // console.log('567', currentComment);
 
     return this.mappingsCommentsService.formatingCommentForView(currentComment);
-
 
   }
 

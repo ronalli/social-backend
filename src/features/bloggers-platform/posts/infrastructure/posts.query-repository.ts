@@ -76,6 +76,38 @@ export class PostsQueryRepository {
     };
   }
 
+
+  async getPost(postId: string, userId: string) {
+
+    console.log(postId, userId);
+
+    const query = `
+      SELECT 
+        p.id,
+        p.title,
+        p."shortDescription",
+        p.content,
+        p."blogId",
+        b.name AS "blogName",
+        p."createdAt",
+        COALESCE(s."likeStatus", 'None') AS "myStatus",
+        (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Like') AS "likesCount",
+        (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Dislike') AS "dislikesCount"
+        FROM public.posts p
+        JOIN public.blogs b ON b.id = p."blogId"
+        LEFT JOIN public."postsLikeStatus" s ON s."postId" = p.id AND s."userId" = $1
+        WHERE p.id = $2;
+    `;
+
+    const response = await this.dataSource.query(query, [userId, postId])
+
+
+    console.log('45436', response);
+
+    return response[0];
+
+  }
+
   async getPostById(id: string) {
     const query = `SELECT * FROM public.posts WHERE id = $1;`;
 
@@ -91,9 +123,6 @@ export class PostsQueryRepository {
       response[0],
     );
 
-    // return await this.mappingsPostsService.formatingDataForOutputPost(
-    //   response[0],
-    // );
   }
 
   async findPostById(postId: string): Promise<PostOutputModelDB> {

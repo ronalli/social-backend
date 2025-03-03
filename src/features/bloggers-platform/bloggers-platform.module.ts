@@ -30,6 +30,7 @@ import { UpdateCommentHandler } from './comments/application/usecases/update-com
 import { DeleteCommentHandler } from './comments/application/usecases/delete-comment.usecase';
 import { LikesService } from '../likes/application/likes.service';
 import { LikesQueryRepository } from '../likes/infrastructure/likes.query-repository';
+import { UpdatePostHandler } from './posts/application/usecases/update-post.usecase';
 
 @Module({
   imports: [
@@ -63,9 +64,10 @@ import { LikesQueryRepository } from '../likes/infrastructure/likes.query-reposi
     UpdateLikeStatusPostHandler,
     UpdateLikeStatusCommentHandler,
     UpdateCommentHandler,
-    DeleteCommentHandler
+    DeleteCommentHandler,
+    UpdatePostHandler
 //     ,  UpdateLikeStatusHandler,
-//     UpdatePostHandler,
+
   ],
   exports: [BlogsService, BlogsQueryRepository, BlogsRepository, PostsService, PostsRepository, PostsQueryRepository, CommentsService, CommentsRepository, CommentsQueryRepository]
   // exports: [BlogsService, BlogsQueryRepository, BlogsRepository, PostsService, PostsRepository, PostsQueryRepository, CommentsService, CommentsRepository]

@@ -18,7 +18,8 @@ export class CommentsQueryRepository {
     @InjectDataSource() protected dataSource: DataSource,
   ) {}
 
-  async getComment(id: string, userId: string) {
+  async getComment(commentId: string, userId: string) {
+
     const query1 = `
       SELECT 
         c.id,
@@ -36,7 +37,8 @@ export class CommentsQueryRepository {
       ;
     `;
 
-    const result = await this.dataSource.query(query1, [userId, id]);
+    const result = await this.dataSource.query(query1, [userId, commentId]);
+
     return result[0];
   }
 

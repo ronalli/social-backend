@@ -1,6 +1,4 @@
-import { MappingBlogsService } from '../application/mappings/mapping.blogs';
 import {
-  Inject,
   Injectable,
 } from '@nestjs/common';
 import { MappingsPostsService } from '../../posts/application/mappings/mapping.posts';
@@ -22,7 +20,7 @@ export class BlogsQueryRepository {
   async getAndSortPostsSpecialBlog(
     blogId: string,
     queryParams: BlogQueryDto,
-    currentUser: string | null,
+    userId: string,
   ) {
     const defaultQueryParams =
       this.queryParamsService.createDefaultValuesQueryParams(queryParams);
@@ -35,14 +33,45 @@ export class BlogsQueryRepository {
 
     const pagesCount = Math.ceil(totalCount.length / pageSize);
 
-    const query = `
-    SELECT * FROM public.posts WHERE "blogId"=$1
-        ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
-        LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};
-        `;
+    const values = userId !== 'None' ? [blogId, userId] : [blogId]
 
-    const result = await this.dataSource.query(query, [blogId]);
-    // const pagesCount = Math.ceil(result.length / pageSize);
+    const query1 = `
+    WITH result AS (
+      SELECT 
+        p.id, 
+        p.title, 
+        p."shortDescription", 
+        p.content, 
+        p."blogId", 
+        b.name AS "blogName", 
+        p."createdAt",
+        COALESCE(s."likeStatus", 'None') AS "myStatus",
+        (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Like') AS "likesCount",
+        (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Dislike') AS "dislikesCount",
+     (
+       SELECT json_agg(likes)
+       FROM (
+         SELECT 
+            pls."userId",
+            u.login,
+            pls."createdAt" as "addedAt"
+         FROM public."postsLikeStatus" pls
+         JOIN public.users u ON u.id = pls."userId"
+         WHERE pls."postId" = p.id AND pls."likeStatus" = 'Like'
+         ORDER BY pls."createdAt"::TIMESTAMP DESC
+         LIMIT 3  
+         ) likes
+       ) as "newestLikes"
+     FROM posts p
+     JOIN blogs b ON p."blogId" = b.id
+     LEFT JOIN public."postsLikeStatus" s ON s."postId" = p.id ${userId !== "None" ? `AND s."userId" = $2` : ``} 
+       )
+     SELECT * FROM result
+     WHERE "blogId" = $1
+     ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
+     LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;
+
+    const result = await this.dataSource.query(query1, values);
 
     const items = await this.mappingsPostsService.formatingAllPostForView(result)
 
@@ -53,40 +82,6 @@ export class BlogsQueryRepository {
       totalCount: +totalCount.length,
       items,
     }
-
-    //
-    // const search = query.searchNameTerm ?
-    //   { title: { $regex: query.searchNameTerm, $options: 'i' } } : {};
-    //
-    // const filter = {
-    //   blogId,
-    //   ...search,
-    // };
-    //
-    // try {
-    //   const allPosts = await this.PostModel
-    //     .find(filter)
-    //     .sort({ [query.sortBy]: query.sortDirection })
-    //     .skip((query.pageNumber - 1) * query.pageSize)
-    //     .limit(query.pageSize);
-    //
-    //
-    //   const totalCount = await this.PostModel.countDocuments(filter);
-    //
-    //   return {
-    //     status: ResultCode.Success,
-    //     data: {
-    //       pagesCount: Math.ceil(totalCount / query.pageSize),
-    //       page: query.pageNumber,
-    //       pageSize: query.pageSize,
-    //       totalCount,
-    //       items: await this.mappingsPostsService.formatingAllPostForView(allPosts, currentUser, this.LikeModel),
-    //     },
-    //   };
-    //
-    // } catch (e) {
-    //   throw new InternalServerErrorException(e)
-    // }
   }
 
   async getAllBlogs(queryParams: BlogQueryDto) {
@@ -138,8 +133,5 @@ export class BlogsQueryRepository {
     const result = await this.dataSource.query(query, [blogId]);
 
     return !!result[0];
-
-    // return !!(await this.BlogModel.countDocuments({_id: new ObjectId(blogId)}))
-    // return this.BlogModel.findOne({ _id: new ObjectId(blogId) });
   }
 }

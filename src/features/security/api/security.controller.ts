@@ -48,6 +48,18 @@ export class SecurityController {
   }
 
   @UseGuards(RefreshTokenGuard)
+  @Delete('devices')
+  async deleteAllDevices(@Req() req: Request, @Res() res: Response) {
+    const refreshToken = req.cookies.refreshToken;
+
+    const response = await this.securityService.deleteDevices(refreshToken);
+
+    if (response) return res.status(204).send({});
+
+    throw new UnauthorizedException();
+  }
+
+  @UseGuards(RefreshTokenGuard)
   @Delete('devices/:deviceId')
   async deleteDeviceById(
     @Param('deviceId') deviceId: string,
@@ -69,19 +81,4 @@ export class SecurityController {
     }
     throw new UnauthorizedException();
   }
-
-  @UseGuards(RefreshTokenGuard)
-  @Delete('devices')
-  async deleteAllDevices(@Req() req: Request, @Res() res: Response) {
-    const refreshToken = req.cookies.refreshToken;
-
-    const response = await this.securityService.deleteDevices(refreshToken)
-
-    if(response)
-      return res.status(204).send({})
-
-    throw new UnauthorizedException();
-  }
 }
-
-

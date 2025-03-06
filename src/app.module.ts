@@ -39,17 +39,31 @@ const mappingsProviders: Provider[] = [
   MappingsPostsService,
 ];
 
+
+// TypeOrmModule.forRoot({
+//   type: 'postgres',
+//   host: 'localhost',
+//   port: 5432,
+//   username: 'postgres',
+//   password: 'sa',
+//   entities: [User],
+//   database: 'SocialBD',
+//   synchronize: true,
+//   logging: true
+//
+// }),
+
 @Module({
   imports: [
     // MongooseModule.forRoot(appSettings.api.MONGO_CONNECTION_URI),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
+      host: '192.168.3.93',
       port: 5432,
-      username: 'postgres',
+      username: 'admin',
       password: 'sa',
       entities: [User],
-      database: 'SocialBD',
+      database: 'SocialDB',
       synchronize: true,
       logging: true
 

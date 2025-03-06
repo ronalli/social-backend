@@ -114,19 +114,6 @@ export class AuthController {
     res.json();
   }
 
-  @HttpCode(200)
-  @UseGuards(AuthJwtGuard)
-  @Get('me')
-  async me(@Req() req: Request, @Res() res: Response) {
-    const userId = req['userId'];
-    if (userId !== null) {
-      const result = await this.usersService.findUser(userId);
-      if (result) {
-        res.json(this.mappingsUsersService.formatViewModel(result));
-      }
-    }
-  }
-
   @UseGuards(RefreshTokenGuard)
   // @SkipThrottle()
   @Post('logout')
@@ -147,22 +134,16 @@ export class AuthController {
     throw new UnauthorizedException();
   }
 
-  @UseGuards(RefreshTokenGuard)
-  @Post('refresh-token')
-  async refreshToken(@Req() req: Request, @Res() res: Response) {
-    const cookie = req.cookies.refreshToken;
-
-    const response = await this.authService.refreshToken(cookie);
-
-    if (response.data) {
-      res.cookie('refreshToken', response.data.refreshToken, {
-        httpOnly: true,
-        secure: true,
-      });
-
-      return res.status(200).send({ accessToken: response.data.accessToken });
+  @HttpCode(200)
+  @UseGuards(AuthJwtGuard)
+  @Get('me')
+  async me(@Req() req: Request, @Res() res: Response) {
+    const userId = req['userId'];
+    if (userId !== null) {
+      const result = await this.usersService.findUser(userId);
+      if (result) {
+        res.json(this.mappingsUsersService.formatViewModel(result));
+      }
     }
-
-    throw new UnauthorizedException();
   }
 }

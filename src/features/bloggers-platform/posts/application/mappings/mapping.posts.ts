@@ -1,4 +1,5 @@
 import {
+  PostDB,
   PostOutputModel,
   PostOutputModelDB,
 } from '../../api/models/output/post.output.model';
@@ -8,16 +9,14 @@ import {
   LikeModelType,
 } from '../../../../likes/domain/like.entity';
 import { BlogsQueryRepository } from '../../../blogs/infrastructure/blogs.query-repository';
-import { PostsRepository } from '../../infrastructure/posts.repository';
 
 @Injectable()
 export class MappingsPostsService {
   constructor(
-    // private readonly postsRepository: PostsRepository,
     @Inject(forwardRef(() => BlogsQueryRepository)) private readonly blogsQueryRepository: BlogsQueryRepository,
   ) {}
 
-  async formatingAllPostForView(posts: any) {
+  async formatingAllPostForView(posts: PostDB[]) {
     const result: PostOutputModel[] = [];
     for (const post of posts) {
       const viewPost = await this.formatingDataForOutputPost(post);
@@ -27,8 +26,8 @@ export class MappingsPostsService {
   }
 
   async formatingDataForOutputPost(
-    post: any,
-  ) {
+    post: PostDB,
+  ): Promise<PostOutputModel> {
     const { id, title, shortDescription, content, createdAt, blogId, blogName, myStatus, likesCount, dislikesCount, newestLikes  } = post;
 
     return {
@@ -40,10 +39,10 @@ export class MappingsPostsService {
       blogName,
       createdAt,
       extendedLikesInfo: {
-        likesCount,
-        dislikesCount,
+        likesCount: +likesCount,
+        dislikesCount: +dislikesCount,
         myStatus,
-        newestLikes,
+        newestLikes: newestLikes || []
       },
     };
   }
@@ -79,13 +78,13 @@ export class MappingsPostsService {
   //
   // }
 
-  formatViewNewestLikes(data: LikeDocument[]) {
-    return data.map((d) => {
-      return {
-        userId: d.userId,
-        login: d.login,
-        addedAt: d.addedAt,
-      };
-    });
-  }
+  // formatViewNewestLikes(data: LikeDocument[]) {
+  //   return data.map((d) => {
+  //     return {
+  //       userId: d.userId,
+  //       login: d.login,
+  //       addedAt: d.addedAt,
+  //     };
+  //   });
+  // }
 }

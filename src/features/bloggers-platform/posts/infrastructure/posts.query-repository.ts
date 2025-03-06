@@ -1,6 +1,5 @@
 import {
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { PostQueryDto } from '../api/models/post-query.dto';
@@ -8,7 +7,7 @@ import { MappingsPostsService } from '../application/mappings/mapping.posts';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { PostOutputModelDB } from '../api/models/output/post.output.model';
+import { PostDB, PostOutputModelDB } from '../api/models/output/post.output.model';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -32,7 +31,7 @@ export class PostsQueryRepository {
         p."shortDescription", 
         p.content, 
         p."blogId", 
-        blogs.name AS "blogName", 
+        b.name AS "blogName", 
         p."createdAt",
         COALESCE(s."likeStatus", 'None') AS "myStatus",
         (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Like') AS "likesCount",
@@ -52,7 +51,7 @@ export class PostsQueryRepository {
          ) likes
        ) as "newestLikes"
      FROM posts p
-     JOIN blogs ON p."blogId" = blogs.id
+     JOIN blogs b ON p."blogId" = b.id
      LEFT JOIN public."postsLikeStatus" s ON s."postId" = p.id AND s."userId" = $1
        )
      SELECT * FROM result
@@ -65,6 +64,7 @@ export class PostsQueryRepository {
     const response = await this.dataSource.query(query1, [userId]);
 
     const totalQuery = `SELECT * FROM public.posts;`;
+
     const totalCount = await this.dataSource.query(totalQuery, []);
 
     return {
@@ -77,9 +77,7 @@ export class PostsQueryRepository {
   }
 
 
-  async getPost(postId: string, userId: string) {
-
-    console.log(postId, userId);
+  async getPost(postId: string, userId: string): Promise<PostDB> {
 
     const query = `
       SELECT 
@@ -92,7 +90,21 @@ export class PostsQueryRepository {
         p."createdAt",
         COALESCE(s."likeStatus", 'None') AS "myStatus",
         (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Like') AS "likesCount",
-        (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Dislike') AS "dislikesCount"
+        (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Dislike') AS "dislikesCount",
+        (
+       SELECT json_agg(likes)
+       FROM (
+         SELECT
+            pls."createdAt" as "addedAt",
+            pls."userId",
+            u.login
+         FROM public."postsLikeStatus" pls
+         JOIN public.users u ON u.id = pls."userId"
+         WHERE pls."postId" = p.id AND pls."likeStatus" = 'Like'
+         ORDER BY pls."createdAt"::TIMESTAMP DESC
+         LIMIT 3  
+         ) likes
+       ) as "newestLikes"
         FROM public.posts p
         JOIN public.blogs b ON b.id = p."blogId"
         LEFT JOIN public."postsLikeStatus" s ON s."postId" = p.id AND s."userId" = $1
@@ -100,9 +112,6 @@ export class PostsQueryRepository {
     `;
 
     const response = await this.dataSource.query(query, [userId, postId])
-
-
-    console.log('45436', response);
 
     return response[0];
 

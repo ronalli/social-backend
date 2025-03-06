@@ -1,9 +1,5 @@
-import { ObjectId } from 'mongodb';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Comment, CommentModelType } from '../domain/comment.entity';
+import { Injectable } from '@nestjs/common';
 import { MappingsCommentsService } from '../application/mappings/mapping.comments';
-import { ResultCode } from '../../../../settings/http.status';
-import { LikeInfoOutputModel } from '../../../likes/api/models/like.info.output.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CommentOutputModelDB } from '../api/models/output/comment.output.model';
@@ -20,6 +16,10 @@ export class CommentsQueryRepository {
 
   async getComment(commentId: string, userId: string) {
 
+    console.log(userId);
+
+    const values = userId ? [commentId, userId] : [commentId];
+
     const query1 = `
       SELECT 
         c.id,
@@ -32,12 +32,14 @@ export class CommentsQueryRepository {
         (SELECT COUNT(*) FROM public."commentsLikeStatus" WHERE "commentId" = c.id AND "likeStatus" = 'Dislike') AS "dislikesCount"
       FROM public."commentsPosts" c 
       JOIN public.users u ON u.id = c."userId"
-      LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id AND s."userId" = $1
-      WHERE c.id = $2
+      LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id ${userId ? `AND s."userId" = $2` : ``}
+      WHERE c.id = $1
       ;
     `;
 
-    const result = await this.dataSource.query(query1, [userId, commentId]);
+    // LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id AND s."userId" = $1
+
+    const result = await this.dataSource.query(query1, values);
 
     return result[0];
   }

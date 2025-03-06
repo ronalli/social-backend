@@ -39,13 +39,18 @@ export class CommentsRepository {
     private readonly mappingsCommentsService: MappingsCommentsService,
   ) {}
 
-  async updateComment(id: string, contentUpdate: UpdateCommentModel): Promise<boolean> {
+  async updateComment(
+    id: string,
+    contentUpdate: UpdateCommentModel,
+  ): Promise<boolean> {
     const query = `UPDATE public."commentsPosts" SET content = $1 WHERE id = $2;`;
 
-    const response = await this.dataSource.query(query, [contentUpdate.content, id]);
+    const response = await this.dataSource.query(query, [
+      contentUpdate.content,
+      id,
+    ]);
 
-   return response[1] > 0
-
+    return response[1] > 0;
 
     // try {
     //   const findComment = await this.CommentModel.findOne({
@@ -63,20 +68,11 @@ export class CommentsRepository {
   }
 
   async deleteComment(id: string): Promise<boolean> {
-
     const query = `DELETE FROM public."commentsPosts" WHERE id = $1`;
 
     const response = await this.dataSource.query(query, [id]);
 
-    return response[1] > 0
-
-
-    // try {
-    //   await this.CommentModel.deleteOne({ _id: new ObjectId(id) });
-    //   return true;
-    // } catch (e) {
-    //   throw new InternalServerErrorException(e);
-    // }
+    return response[1] > 0;
   }
 
   async createComment(comment: CommentCreateModel) {

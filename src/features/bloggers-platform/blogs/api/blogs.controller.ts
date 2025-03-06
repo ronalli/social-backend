@@ -32,11 +32,8 @@ import { CreatePostCommand } from '../../posts/application/usecases/create-post.
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-repository';
 import { PostUpdateSpecialModel } from '../../posts/api/models/input/update-post.special.blog.model';
 
-// @Inject(PostsService) private readonly  postsService: PostsService,
-
 @ApiTags('Blogs')
 @Controller('')
-// @UseGuards(BasicAuthGuard)
 export class BlogsController {
   constructor(
     @Inject(BlogsService) private readonly blogsService: BlogsService,
@@ -45,7 +42,14 @@ export class BlogsController {
     @Inject(PostsQueryRepository)
     private readonly postsQueryRepository: PostsQueryRepository,
     private readonly commandBus: CommandBus,
+    private readonly postsService: PostsService,
   ) {}
+
+  @UseGuards(BasicAuthGuard)
+  @Get('sa/blogs')
+  async getBlogs(@Query() query: QueryParamsDto) {
+    return await this.blogsQueryRepository.getAllBlogs(query);
+  }
 
   @UseGuards(BasicAuthGuard)
   @Post('sa/blogs')
@@ -56,12 +60,6 @@ export class BlogsController {
     );
 
     return await this.blogsQueryRepository.findBlogById(createdBlogId);
-  }
-
-  @UseGuards(BasicAuthGuard)
-  @Get('sa/blogs')
-  async getBlogs(@Query() query: QueryParamsDto) {
-    return await this.blogsQueryRepository.getAllBlogs(query);
   }
 
   @UseGuards(BasicAuthGuard)
@@ -94,34 +92,6 @@ export class BlogsController {
     return await this.blogsService.deleteBlog(blogId);
   }
 
-  @UseGuards(BasicAuthGuard)
-  @Get('sa/blogs/:blogId/posts')
-  async getAllPostsForBlog(
-    @Param('blogId', ValidateObjectIdPipe) blogId: string,
-    @Query() query: QueryParamsDto,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
-    const header = req.headers.authorization?.split(' ')[1];
-    const currentUser = await serviceInfoLike.getIdUserByToken(header);
-
-    const blogFound = await this.blogsQueryRepository.blogIsExist(blogId);
-
-    if (blogFound) {
-      const foundPosts =
-        await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
-          blogId,
-          query,
-          currentUser,
-        );
-
-      return res.status(200).send(foundPosts);
-    }
-
-    throw new NotFoundException([
-      { message: 'If specified blog is not exists', field: 'blogId' },
-    ]);
-  }
 
   @UseGuards(BasicAuthGuard)
   @Post('sa/blogs/:blogId/posts')
@@ -134,7 +104,8 @@ export class BlogsController {
     const token = req.headers.authorization?.split(' ')[1] || 'unknown';
     const currentUser = await serviceInfoLike.getIdUserByToken(token);
     const { title, shortDescription, content } = post;
-    const result = await this.blogsQueryRepository.findBlogById(blogId);
+
+    const result = await this.blogsQueryRepository.blogIsExist(blogId);
 
     if (!result)
       throw new NotFoundException([
@@ -151,9 +122,37 @@ export class BlogsController {
       ),
     );
 
-    const newPost = await this.postsQueryRepository.getPostById(idCreatedPost);
+    const newPost = await this.postsService.getPost(idCreatedPost, currentUser);
 
     return res.status(201).send(newPost);
+  }
+
+  @UseGuards(BasicAuthGuard)
+  @Get('sa/blogs/:blogId/posts')
+  async getAllPostsForBlog(
+    @Param('blogId', ValidateObjectIdPipe) blogId: string,
+    @Query() query: QueryParamsDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const header = req.headers.authorization?.split(' ')[1];
+    const currentUser = await serviceInfoLike.getIdUserByToken(header);
+
+    const blogFound = await this.blogsQueryRepository.blogIsExist(blogId);
+
+    if (!blogFound) {
+      throw new NotFoundException([
+        { message: 'Not found blog', field: 'blogId' },
+      ]);
+    }
+    const foundPosts =
+      await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
+        blogId,
+        query,
+        currentUser,
+      );
+
+    return res.status(200).send(foundPosts);
   }
 
   @UseGuards(BasicAuthGuard)
@@ -164,7 +163,6 @@ export class BlogsController {
     @Param('postId', ValidateObjectIdPipe) postId: string,
     @Body() post: PostUpdateSpecialModel,
   ) {
-
     const response = await this.blogsService.updatePostBySpecialBlog(
       post,
       blogId,
@@ -197,7 +195,6 @@ export class BlogsController {
         { message: 'Not found post', field: 'postId or blogId' },
       ]);
     }
-
     return;
   }
 
@@ -244,7 +241,6 @@ export class BlogsController {
         { message: `Blog with id ${id} not found`, field: 'blogId' },
       ]);
     }
-
     return result;
   }
 }

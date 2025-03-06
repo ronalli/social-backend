@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-repository';
 import { CommentsRepository } from '../infrastructure/comments.repository';
 import { QueryParamsDto } from '../../../../common/models/query-params.dto';
@@ -18,13 +18,12 @@ export class CommentsService {
   ) {}
 
   async getOneComment(userId: string, commentId: string) {
-
-    const currentComment = await this.commentsQueryRepository.getComment(commentId, userId)
-
-    // console.log('567', currentComment);
+    const currentComment = await this.commentsQueryRepository.getComment(
+      commentId,
+      userId,
+    );
 
     return this.mappingsCommentsService.formatingCommentForView(currentComment);
-
   }
 
   // async update(id: string, content: string, userId: string) {
@@ -73,18 +72,24 @@ export class CommentsService {
     postId: string,
     queryParams: QueryParamsDto,
   ) {
+    const currentUserId = await jwtService.getUserIdByToken(token);
 
-    const currentUserId = await jwtService.getUserIdByToken(token)
+    const allComments =
+      await this.commentsQueryRepository.getAllCommentsFormSpecialPost(
+        currentUserId,
+        postId,
+        queryParams,
+      );
 
-    const allComments = await this.commentsQueryRepository.getAllCommentsFormSpecialPost(currentUserId, postId, queryParams)
-
-    const items = await this.mappingsCommentsService.formatDataAllCommentsForView(allComments.items)
+    const items =
+      await this.mappingsCommentsService.formatDataAllCommentsForView(
+        allComments.items,
+      );
 
     return {
       ...allComments,
-      items: items
-    }
-
+      items: items,
+    };
 
     // const result = await this.postsQueryRepository.getPostById(postId);
     //

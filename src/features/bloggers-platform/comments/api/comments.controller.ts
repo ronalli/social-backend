@@ -9,7 +9,8 @@ import {
   Res,
   Put,
   UseGuards,
-  BadRequestException, NotFoundException,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 
 import { CommandBus } from '@nestjs/cqrs';
@@ -93,24 +94,26 @@ export class CommentsController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
+    const foundedComment =
+      await this.commentsQueryRepository.isCommentDoesExist(commentId);
 
-    const foundedComment = await this.commentsQueryRepository.isCommentDoesExist(commentId)
-
-    if(!foundedComment) {
+    if (!foundedComment) {
       throw new NotFoundException([
         {
           message: `If comment with specified postId doesn\'t exists`,
           field: 'commentId',
         },
       ]);
-
     }
 
     const token = req.headers?.authorization?.split(' ')[1] || '';
 
-    const userId = await jwtService.getUserIdByToken(token)
+    const userId = await jwtService.getUserIdByToken(token);
 
-    const response = await this.commentsService.getOneComment(userId, commentId);
+    const response = await this.commentsService.getOneComment(
+      userId,
+      commentId,
+    );
 
     return res.status(200).send(response);
   }

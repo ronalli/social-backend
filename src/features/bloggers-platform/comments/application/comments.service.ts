@@ -10,10 +10,7 @@ import { MappingsCommentsService } from './mappings/mapping.comments';
 @Injectable()
 export class CommentsService {
   constructor(
-    private readonly commentsRepository: CommentsRepository,
-    private readonly postsQueryRepository: PostsQueryRepository,
     private readonly commentsQueryRepository: CommentsQueryRepository,
-    private readonly likesService: LikesService,
     private readonly mappingsCommentsService: MappingsCommentsService,
   ) {}
 

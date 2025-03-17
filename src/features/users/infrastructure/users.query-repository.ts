@@ -75,14 +75,14 @@ export class UsersQueryRepository {
     return result[0];
   }
 
-  async findUserById(id: string) {
-    const query = `SELECT id, login FROM public.users WHERE id = $1;`;
-
-    const response = await this.dataSource.query(query, [id]);
-
-    return response[0];
-
-  }
+  // async findUserById(id: string) {
+  //   const query = `SELECT id, login FROM public.users WHERE id = $1;`;
+  //
+  //   const response = await this.dataSource.query(query, [id]);
+  //
+  //   return response[0];
+  //
+  // }
 
   async doesExistByLoginOrEmail(login: string, email: string) {
     // const query = `SELECT * FROM public."users" WHERE login LIKE $1 OR email LIKE $2`

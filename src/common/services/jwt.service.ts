@@ -15,7 +15,7 @@ export const jwtService = {
       const result: any = jwt.verify(token, process.env.SECRET_PASSWORD!);
       return result.userId
     } catch (e) {
-      return null
+      return null;
     }
   },
   decodeToken: async (token: string) => {

@@ -16,9 +16,9 @@ export class CommentsQueryRepository {
 
   async getComment(commentId: string, userId: string) {
 
-    console.log(userId);
+    const hasUserId = userId !== null && userId !== undefined;
 
-    const values = userId ? [commentId, userId] : [commentId];
+    const values = hasUserId ? [commentId, userId] : [commentId];
 
     const query1 = `
       SELECT 
@@ -27,15 +27,27 @@ export class CommentsQueryRepository {
         c."userId",
         c."createdAt",
         u.login AS "userLogin",
-        COALESCE(s."likeStatus", 'None') AS "myStatus",
+        COALESCE( ${hasUserId ? `s."likeStatus"` : `'None'`},
+          'None'
+          ) AS "myStatus",
         (SELECT COUNT(*) FROM public."commentsLikeStatus" WHERE "commentId" = c.id AND "likeStatus" = 'Like') AS "likesCount",
         (SELECT COUNT(*) FROM public."commentsLikeStatus" WHERE "commentId" = c.id AND "likeStatus" = 'Dislike') AS "dislikesCount"
       FROM public."commentsPosts" c 
       JOIN public.users u ON u.id = c."userId"
-      LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id ${userId ? `AND s."userId" = $2` : ``}
+      LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id ${hasUserId ? `AND s."userId" = $2` : `` }
       WHERE c.id = $1
       ;
     `;
+
+  //   COALESCE(
+  //     CASE
+  //   WHEN $2 IS NULL THEN 'None'
+  //   ELSE s."likeStatus"
+  //   END,
+  //     'None'
+  // ) AS "myStatus",
+
+    // LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id AND (s."userId" = $2 OR $2 IS NULL)
 
     // LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id AND s."userId" = $1
 

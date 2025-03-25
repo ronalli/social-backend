@@ -32,6 +32,9 @@ import { BloggersPlatformModule } from './features/bloggers-platform/bloggers-pl
 import { MappingsPostsService } from './features/bloggers-platform/posts/application/mappings/mapping.posts';
 import { MappingBlogsService } from './features/bloggers-platform/blogs/application/mappings/mapping.blogs';
 import { MappingsCommentsService } from './features/bloggers-platform/comments/application/mappings/mapping.comments';
+import { ConfigModule } from '@nestjs/config';
+import * as process from 'node:process';
+import { configModule } from './dynamic-config-module';
 
 const mappingsProviders: Provider[] = [
   MappingBlogsService,
@@ -39,34 +42,32 @@ const mappingsProviders: Provider[] = [
   MappingsPostsService,
 ];
 
-
 // TypeOrmModule.forRoot({
 //   type: 'postgres',
-//   host: 'localhost',
+//   host: '192.168.3.93',
 //   port: 5432,
-//   username: 'postgres',
+//   username: 'admin',
 //   password: 'sa',
 //   entities: [User],
-//   database: 'SocialBD',
+//   database: 'SocialDB',
 //   synchronize: true,
 //   logging: true
 //
-// }),
+// })
 
 @Module({
   imports: [
-    // MongooseModule.forRoot(appSettings.api.MONGO_CONNECTION_URI),
+    configModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: '192.168.3.93',
+      host: 'localhost',
       port: 5432,
-      username: 'admin',
+      username: 'postgres',
       password: 'sa',
       entities: [User],
-      database: 'SocialDB',
+      database: 'SocialBD',
       synchronize: true,
       logging: true
-
     }),
     UsersModule,
     AuthModule,
@@ -94,6 +95,4 @@ const mappingsProviders: Provider[] = [
   ],
 })
 export class AppModule {
-  // constructor(private dataSource: DataSource) {
-  // }
 }

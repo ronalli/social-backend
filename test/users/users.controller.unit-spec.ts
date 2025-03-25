@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersQueryRepository } from '../src/features/users/infrastructure/users.query-repository';
-import { UsersController } from '../src/features/users/api/users.controller';
-import { BasicAuthGuard } from '../src/common/guards/auth.basic.guard';
-import { UsersService } from '../src/features/users/application/users.service';
+import { UsersController } from '../../src/features/users/api/users.controller';
+import { UsersQueryRepository } from '../../src/features/users/infrastructure/users.query-repository';
+import { UsersService } from '../../src/features/users/application/users.service';
 import { CommandBus } from '@nestjs/cqrs';
-import { UserQueryDto } from '../src/features/users/api/models/user-query.dto';
+import { BasicAuthGuard } from '../../src/common/guards/auth.basic.guard';
+import { UserQueryDto } from '../../src/features/users/api/models/user-query.dto';
 
 
 const commandBusMock = {

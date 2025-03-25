@@ -8,7 +8,7 @@ async function bootstrap() {
 
   applyAppSettings(app);
 
-  await app.listen(appSettings.api.APP_PORT);
+  await app.listen(appSettings.api.APP_PORT ?? 3000);
 }
 
 bootstrap();

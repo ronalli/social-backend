@@ -4,13 +4,13 @@ import { AppModule } from '../../src/app.module';
 import { applyAppSettings } from '../../src/settings/apply.app.setting';
 import { DataSource } from 'typeorm';
 import request from 'supertest';
-import { ConfigService } from '@nestjs/config';
 import * as process from 'node:process';
+import { customRequest } from '../utils/custom-request';
 
 describe('Users e2e Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
-  let configService: ConfigService;
+  let firstUserId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -25,34 +25,95 @@ describe('Users e2e Tests', () => {
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
 
-    await dataSource.query(`TRUNCATE TABLE public."users", public.blogs,  public.posts, public."commentsPosts", public."commentsLikeStatus", public."postsLikeStatus", public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`)
-
-
+    await dataSource.query(
+      `TRUNCATE TABLE public."users", public.blogs,  public.posts, public."commentsPosts", public."commentsLikeStatus", public."postsLikeStatus", public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`,
+    );
   });
   afterAll(async () => {
     await dataSource.destroy();
     await app.close();
   });
 
-
   it('should connect DB', async () => {
     const res = await dataSource.query('SELECT 1 + 1 AS result');
     expect(res[0].result).toBe(2);
-  })
+  });
 
   it('should correct add user', async () => {
+    const res = await customRequest(app)
+      .post('sa/users')
+      .set('Authorization', process.env.AUTH_HEADER)
+      .send({
+        login: 'bob',
+        email: 'bob@example.com',
+        password: '12345678',
+      })
+      .expect(201);
+    expect(res.body.login).toBe('bob');
+    expect(res.body.email).toBe('bob@example.com');
+    expect(res.body.createdAt).toBeDefined();
+
+    firstUserId = res.body.id;
+
+    const allUsers = await customRequest(app)
+      .get('sa/users')
+      .set('Authorization', process.env.AUTH_HEADER)
+      .expect(200);
+    expect(allUsers.body.items[0].id).toBe(firstUserId);
+  });
+
+  it('should correct delete user', async () => {
+    const secondUser = await customRequest(app)
+      .post('sa/users')
+      .set('Authorization', process.env.AUTH_HEADER)
+      .send({
+        login: 'alex',
+        email: 'alex@example.com',
+        password: '12345678',
+      })
+      .expect(201);
+
+    const res = await customRequest(app)
+      .delete(`sa/users/${firstUserId}`)
+      .set('Authorization', process.env.AUTH_HEADER)
+      .expect(204);
+
+    const allUsers = await customRequest(app)
+      .get('sa/users')
+      .set('Authorization', process.env.AUTH_HEADER)
+      .expect(200);
+
+    expect(allUsers.body.items.length).toBe(1);
+    expect(allUsers.body.items[0].id).toBe(secondUser.body.id);
+  });
+
+  it('should return unauthorized', async () => {
+    await customRequest(app).get('sa/users').expect(401);
+
+    await customRequest(app)
+      .post('sa/users')
+      .send({
+        login: 'bob',
+        email: 'bob@gmail.com',
+        password: '12345678',
+      })
+      .expect(401);
+
+    await customRequest(app).delete(`sa/users/${firstUserId}`).expect(401);
+  });
 
 
-    // console.log(a);
+  it('should return 400 by incorrect add user', async () => {
 
-    const res = await request(app.getHttpServer()).post('/api/sa/users').set('Authorization', process.env.AUTH_HEADER).send({
-      "login": "bob",
-      "email": "bob@example.com",
-      "password": "12345678",
+    const res = await customRequest(app).post('sa/users').set('Authorization', process.env.AUTH_HEADER).send({
+      login: 'a',
+      email: 'a.gmail.com',
+      password: '12345678',
+    }).expect(400);
 
-    })
-
-    // console.log(res);
+    expect(res.body.errorsMessages.length).toBe(2);
+    expect(res.body.errorsMessages[0].field).toEqual('login')
+    expect(res.body.errorsMessages[1].field).toEqual('email')
 
   })
 

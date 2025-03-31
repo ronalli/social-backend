@@ -101,9 +101,6 @@ export class BlogsController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-
-    console.log('ft5yu78');
-
     const token = req.headers.authorization?.split(' ')[1] || 'unknown';
     const currentUser = await serviceInfoLike.getIdUserByToken(token);
     const { title, shortDescription, content } = post;

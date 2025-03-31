@@ -3,9 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { applyAppSettings } from '../../src/settings/apply.app.setting';
 import { DataSource } from 'typeorm';
-import request from 'supertest';
-import * as process from 'node:process';
 import { customRequest } from '../utils/custom-request';
+import { randomUUID } from 'node:crypto';
 
 describe('Users e2e Tests', () => {
   let app: INestApplication;
@@ -87,7 +86,7 @@ describe('Users e2e Tests', () => {
     expect(allUsers.body.items[0].id).toBe(secondUser.body.id);
   });
 
-  it('should return unauthorized', async () => {
+  it('should return 401 unauthorized', async () => {
     await customRequest(app).get('sa/users').expect(401);
 
     await customRequest(app)
@@ -114,6 +113,17 @@ describe('Users e2e Tests', () => {
     expect(res.body.errorsMessages.length).toBe(2);
     expect(res.body.errorsMessages[0].field).toEqual('login')
     expect(res.body.errorsMessages[1].field).toEqual('email')
+
+  })
+
+  it('should be return 401 by incorrect auth header', async () => {
+    await customRequest(app).get('sa/users').set('Authorization', process.env.AUTH_HEADER_FAIL).expect(401);
+  })
+
+  it(`'should be return Not Found 404 by don't search id user`, async () => {
+
+    const randomId = randomUUID();
+    await customRequest(app).delete(`sa/users/${randomId}`).set('Authorization', process.env.AUTH_HEADER).expect(404);
 
   })
 

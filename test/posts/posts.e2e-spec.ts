@@ -112,22 +112,82 @@ describe('Posts e2e Tests', () => {
     expect(respPost.body).toEqual(resp.body);
   });
 
-  it('should correct update post',  async () => {
-
-    const {postId, blogId} = await servicePost.createPost(app)
+  it('should correct update post', async () => {
+    const { postId, blogId } = await servicePost.createPost(app);
 
     const post = await customRequest(app).get(`posts/${postId}`).expect(200);
 
-    const resp = await customRequest(app).put(`sa/blogs/${blogId}/posts/${postId}`).set('Authorization', process.env.AUTH_HEADER).send({
-      title: 'new post 1',
-      shortDescription: 'new description post 1',
-      content: 'new content post 1'
-    }).expect(204)
+    await customRequest(app)
+      .put(`sa/blogs/${blogId}/posts/${postId}`)
+      .set('Authorization', process.env.AUTH_HEADER)
+      .send({
+        title: 'new post 1',
+        shortDescription: 'new description post 1',
+        content: 'new content post 1',
+      })
+      .expect(204);
 
-    expect(post.body).not.toEqual(resp.body)
+    const updatedPost = await customRequest(app)
+      .get(`posts/${postId}`)
+      .expect(200);
 
-
+    expect(post.body).not.toEqual(updatedPost.body);
+    expect(post.body.blogId).toBe(updatedPost.body.blogId);
+    expect(post.body.createdAt).toBe(updatedPost.body.createdAt);
   });
 
+  it('should be return 404, because post therewith  id not found', async () => {
+    const blogId = await serviceBlogs.createBlog(app);
+    const resp = await customRequest(app)
+      .put(`sa/blogs/${blogId}/posts/${randomUUID()}`)
+      .set('Authorization', process.env.AUTH_HEADER)
+      .send({
+        title: 'custom post',
+        shortDescription: 'custom description post',
+        content: 'custom content post',
+      })
+      .expect(404);
+  });
 
+  it('should be correct delete post for special blog', async () => {
+    const { postId, blogId } = await servicePost.createPost(app);
+
+    await customRequest(app)
+      .delete(`sa/blogs/${blogId}/posts/${postId}`)
+      .set('Authorization', process.env.AUTH_HEADER_FAIL)
+      .expect(401);
+
+    await customRequest(app)
+      .delete(`sa/blogs/${blogId}/posts/${postId}`)
+      .set('Authorization', process.env.AUTH_HEADER)
+      .expect(204);
+
+    await customRequest(app)
+      .delete(`sa/blogs/${blogId}/posts/${postId}`)
+      .set('Authorization', process.env.AUTH_HEADER)
+      .expect(404);
+  });
+
+  it('should be correct return all posts', async () => {
+    await servicePost.createPosts(app, 6);
+
+    const resp = await customRequest(app).get('posts').expect(200);
+
+    expect(resp.body.totalCount).toBe(6);
+    expect(resp.body.items[0].title).toEqual('post 6');
+    expect(resp.body.pagesCount).toBe(1);
+    expect(resp.body.page).toBe(1);
+
+    expect(resp.body.pageSize).toBe(10);
+
+    const resp1 = await customRequest(app)
+      .get('posts?pageSize=2&sortDirection=asc')
+      .expect(200);
+
+    expect(resp1.body.items).toHaveLength(2);
+    expect(resp1.body.pagesCount).toBe(3);
+    expect(resp1.body.pageSize).toBe(2);
+    expect(resp1.body.totalCount).toBe(6);
+    expect(resp1.body.items[0].title).toEqual('post 1');
+  });
 });

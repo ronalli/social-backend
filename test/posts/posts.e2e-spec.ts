@@ -173,7 +173,7 @@ describe('Posts e2e Tests', () => {
 
     const resp = await customRequest(app).get('posts').expect(200);
 
-    expect(resp.body.totalCount).toBe(6);
+    expect(resp.body.totalCount).toBe(8);
     expect(resp.body.items[0].title).toEqual('post 6');
     expect(resp.body.pagesCount).toBe(1);
     expect(resp.body.page).toBe(1);
@@ -185,9 +185,11 @@ describe('Posts e2e Tests', () => {
       .expect(200);
 
     expect(resp1.body.items).toHaveLength(2);
-    expect(resp1.body.pagesCount).toBe(3);
+    expect(resp1.body.pagesCount).toBe(4);
     expect(resp1.body.pageSize).toBe(2);
-    expect(resp1.body.totalCount).toBe(6);
+    expect(resp1.body.totalCount).toBe(8);
     expect(resp1.body.items[0].title).toEqual('post 1');
   });
+
+
 });

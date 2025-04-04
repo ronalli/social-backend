@@ -37,15 +37,21 @@ lerna-debug.log*
 
 # dotenv environment variable files
 .env
+.env.local
+
 .env.development
 .env.development.local
+
 .env.staging
 .env.staging.local
+
 .env.testing
 .env.testing.local
+
 .env.production
 .env.production.local
-.env.local
+
+
 
 # temp directory
 .temp

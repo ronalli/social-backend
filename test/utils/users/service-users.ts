@@ -3,17 +3,17 @@ import { customRequest } from '../custom-request';
 
 export const serviceUsers = {
 
-  authorizationUser: async (app: INestApplication) => {
+  authorizationUser: async (app: INestApplication, name: string = 'test'): Promise<{accessToken: string}> => {
 
    await customRequest(app).post(`sa/users`).set('Authorization', process.env.AUTH_HEADER).send({
-        login: 'test-1',
+        login: `${name}-1`,
         password: '12345678',
-        email: 'test1@test.com',
+        email: `${name}@test.com`,
     }).expect(201);
 
 
     const resp = await customRequest(app).post(`auth/login`).send({
-      loginOrEmail: 'test-1',
+      loginOrEmail: `${name}-1`,
       password: '12345678',
     }).expect(200)
 

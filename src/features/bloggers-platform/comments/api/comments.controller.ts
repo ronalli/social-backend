@@ -82,9 +82,7 @@ export class CommentsController {
     @Res() res: Response,
   ) {
     const userId = req.userId!;
-
     await this.commandBus.execute(new DeleteCommentCommand(commentId, userId));
-
     return res.status(204).send({});
   }
 

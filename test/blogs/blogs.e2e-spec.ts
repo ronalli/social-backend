@@ -7,6 +7,7 @@ import { customRequest } from '../utils/custom-request';
 import * as process from 'node:process';
 import { serviceBlogs } from '../utils/blogs/service-blogs';
 import { randomUUID } from 'node:crypto';
+import { initAppAndClearDB } from '../utils/base.init-settings';
 
 describe('Blogs e2e Tests', () => {
   let app: INestApplication;
@@ -14,21 +15,9 @@ describe('Blogs e2e Tests', () => {
   let blogId: string;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    applyAppSettings(app);
-
-    await app.init();
-
-    dataSource = moduleFixture.get<DataSource>(DataSource);
-
-    await dataSource.query(
-      `TRUNCATE TABLE public."users", public.blogs,  public.posts, public."commentsPosts", public."commentsLikeStatus", public."postsLikeStatus", public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`,
-    );
+    const setup = await initAppAndClearDB();
+    app = setup.app;
+    dataSource = setup.dataSource;
   });
 
   afterAll(async () => {
@@ -147,6 +136,9 @@ describe('Blogs e2e Tests', () => {
     await customRequest(app).get(`blogs/${randomId}`).expect(404);
     await customRequest(app).get(`blogs/42sd5fsd3fsd45`).expect(400);
 
-    await customRequest(app).delete(`sa/blogs/${randomId}`).set('Authorization', process.env.AUTH_HEADER).expect(404)
+    await customRequest(app)
+      .delete(`sa/blogs/${randomId}`)
+      .set('Authorization', process.env.AUTH_HEADER)
+      .expect(404);
   });
 });

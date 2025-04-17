@@ -1,52 +1,35 @@
-// import { Test, TestingModuleBuilder } from '@nestjs/testing';
-// import { applyAppSettings } from '../../src/settings/apply.app.setting';
-// import { appSettings } from '../../src/settings/app-settings';
-// import { AppModule } from '../../src/app.module';
-// import { Connection } from 'mongoose';
-// import { getConnectionToken } from '@nestjs/mongoose';
-// import { deleteAllData } from './delete-all-data';
-// import { BlogsService } from '../../src/features/bloggers-platform/blogs/application/blogs.service';
-// import { BlogsTestManager } from './blogs-test-manager';
-// import { BlogsServiceMockObject } from '../mock/blogs.service.mock';
-//
-// export const initBaseSettings = async (
-//   providersToOverride: {
-//     provider: any;
-//     useValue: any;
-//   }[] = [],
-//   addSettingsToModuleBuilder?: (moduleBuilder: TestingModuleBuilder) => void,
-// ) => {
-//   console.log('in tests ENV: ', appSettings.env.getEnv());
-//   const testingModuleBuilder: TestingModuleBuilder = Test.createTestingModule({
-//     imports: [AppModule],
-//   })
-//
-//   providersToOverride.forEach(({provider, useValue}) => {
-//     testingModuleBuilder.overrideProvider(provider).useValue(useValue);
-//   })
-//
-//   if (addSettingsToModuleBuilder) {
-//     addSettingsToModuleBuilder(testingModuleBuilder);
-//   }
-//
-//   const testingAppModule = await testingModuleBuilder.compile();
-//
-//   const app = testingAppModule.createNestApplication();
-//
-//   applyAppSettings(app);
-//
-//   await app.init();
-//
-//   const databaseConnection = app.get<Connection>(getConnectionToken());
-//   const httpServer = app.getHttpServer();
-//   // const blogsTestManger = new BlogsTestManager(app);
-//
-//   await deleteAllData(databaseConnection);
-//
-//   return {
-//     app,
-//     databaseConnection,
-//     httpServer,
-//     // blogsTestManger,
-//   };
-// };
+import { INestApplication } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppModule } from '../../src/app.module';
+import { applyAppSettings } from '../../src/settings/apply.app.setting';
+
+export async function initAppAndClearDB(): Promise<{
+  app: INestApplication;
+  dataSource: DataSource;
+}> {
+  const moduleFixture: TestingModule = await Test.createTestingModule({
+    imports: [AppModule],
+  }).compile();
+
+  const app = moduleFixture.createNestApplication();
+
+  applyAppSettings(app);
+
+  await app.init();
+
+  const dataSource = moduleFixture.get<DataSource>(DataSource);
+
+  await clearDataBase(dataSource);
+
+  return {
+    app,
+    dataSource,
+  };
+}
+
+export async function clearDataBase(dataSource: DataSource): Promise<void> {
+  await dataSource.query(
+    `TRUNCATE TABLE public."users", public.blogs,  public.posts, public."commentsPosts", public."commentsLikeStatus", public."postsLikeStatus", public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`,
+  );
+}

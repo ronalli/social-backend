@@ -1,10 +1,8 @@
 import { INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { applyAppSettings } from '../../src/settings/apply.app.setting';
 import { DataSource } from 'typeorm';
 import { customRequest } from '../utils/custom-request';
 import { randomUUID } from 'node:crypto';
+import { initAppAndClearDB } from '../utils/base.init-settings';
 
 describe('Users e2e Tests', () => {
   let app: INestApplication;
@@ -12,22 +10,11 @@ describe('Users e2e Tests', () => {
   let firstUserId: string;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    applyAppSettings(app);
-
-    await app.init();
-
-    dataSource = moduleFixture.get<DataSource>(DataSource);
-
-    await dataSource.query(
-      `TRUNCATE TABLE public."users", public.blogs,  public.posts, public."commentsPosts", public."commentsLikeStatus", public."postsLikeStatus", public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`,
-    );
+    const setup = await initAppAndClearDB();
+    app = setup.app;
+    dataSource = setup.dataSource;
   });
+
   afterAll(async () => {
     await dataSource.destroy();
     await app.close();
@@ -101,30 +88,34 @@ describe('Users e2e Tests', () => {
     await customRequest(app).delete(`sa/users/${firstUserId}`).expect(401);
   });
 
-
   it('should return 400 by incorrect add user', async () => {
-
-    const res = await customRequest(app).post('sa/users').set('Authorization', process.env.AUTH_HEADER).send({
-      login: 'a',
-      email: 'a.gmail.com',
-      password: '12345678',
-    }).expect(400);
+    const res = await customRequest(app)
+      .post('sa/users')
+      .set('Authorization', process.env.AUTH_HEADER)
+      .send({
+        login: 'a',
+        email: 'a.gmail.com',
+        password: '12345678',
+      })
+      .expect(400);
 
     expect(res.body.errorsMessages.length).toBe(2);
-    expect(res.body.errorsMessages[0].field).toEqual('login')
-    expect(res.body.errorsMessages[1].field).toEqual('email')
-
-  })
+    expect(res.body.errorsMessages[0].field).toEqual('login');
+    expect(res.body.errorsMessages[1].field).toEqual('email');
+  });
 
   it('should be return 401 by incorrect auth header', async () => {
-    await customRequest(app).get('sa/users').set('Authorization', process.env.AUTH_HEADER_FAIL).expect(401);
-  })
+    await customRequest(app)
+      .get('sa/users')
+      .set('Authorization', process.env.AUTH_HEADER_FAIL)
+      .expect(401);
+  });
 
   it(`'should be return Not Found 404 by don't search id user`, async () => {
-
     const randomId = randomUUID();
-    await customRequest(app).delete(`sa/users/${randomId}`).set('Authorization', process.env.AUTH_HEADER).expect(404);
-
-  })
-
+    await customRequest(app)
+      .delete(`sa/users/${randomId}`)
+      .set('Authorization', process.env.AUTH_HEADER)
+      .expect(404);
+  });
 });

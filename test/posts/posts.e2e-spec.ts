@@ -1,13 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { applyAppSettings } from '../../src/settings/apply.app.setting';
 import { randomUUID } from 'node:crypto';
 import { customRequest } from '../utils/custom-request';
 import * as process from 'node:process';
 import { serviceBlogs } from '../utils/blogs/service-blogs';
 import { servicePost } from '../utils/posts/service-post';
+import { initAppAndClearDB } from '../utils/base.init-settings';
 
 describe('Posts e2e Tests', () => {
   let app: INestApplication;
@@ -15,21 +13,9 @@ describe('Posts e2e Tests', () => {
   let postId: string;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    applyAppSettings(app);
-
-    await app.init();
-
-    dataSource = moduleFixture.get<DataSource>(DataSource);
-
-    await dataSource.query(
-      `TRUNCATE TABLE public."users", public.blogs,  public.posts, public."commentsPosts", public."commentsLikeStatus", public."postsLikeStatus", public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`,
-    );
+    const setup = await initAppAndClearDB();
+    app = setup.app;
+    dataSource = setup.dataSource;
   });
 
   afterAll(async () => {

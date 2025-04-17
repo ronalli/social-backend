@@ -1,14 +1,12 @@
 import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { applyAppSettings } from '../../src/settings/apply.app.setting';
 import { customRequest } from '../utils/custom-request';
 import { randomUUID } from 'node:crypto';
 import { serviceUsers } from '../utils/users/service-users';
 import { servicePost } from '../utils/posts/service-post';
 import { serviceComments } from '../utils/comments/service-comments';
 import { jwtService } from '../../src/common/services/jwt.service';
+import { initAppAndClearDB } from '../utils/base.init-settings';
 
 describe('Comments e2e Tests', () => {
   let app: INestApplication;
@@ -16,21 +14,9 @@ describe('Comments e2e Tests', () => {
   let commendId: string;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    applyAppSettings(app);
-
-    await app.init();
-
-    dataSource = moduleFixture.get<DataSource>(DataSource);
-
-    await dataSource.query(
-      `TRUNCATE TABLE public."users", public.blogs,  public.posts, public."commentsPosts", public."commentsLikeStatus", public."postsLikeStatus", public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`,
-    );
+    const setup = await initAppAndClearDB();
+    app = setup.app;
+    dataSource = setup.dataSource;
   });
 
   afterAll(async () => {
@@ -68,7 +54,6 @@ describe('Comments e2e Tests', () => {
       .expect(200);
 
     expect(resp.body.id).toEqual(commendId);
-
     expect(resp.body).toHaveProperty('commentatorInfo');
     expect(resp.body).toHaveProperty('likesInfo');
     expect(resp.body).toHaveProperty('createdAt');
@@ -118,42 +103,42 @@ describe('Comments e2e Tests', () => {
   });
 
   it(`shouldn't create new comment`, async () => {
-    const { accessToken } = await serviceUsers.authorizationUser(
-      app,
-      'alex',
-    );
+    const { accessToken } = await serviceUsers.authorizationUser(app, 'alex');
 
-    const {postId, blogId} = await servicePost.createPost(app);
+    const { postId, blogId } = await servicePost.createPost(app);
 
-    const resp = await customRequest(app).post(`posts/${postId}/comments`).set('Authorization', `Bearer ${accessToken}`).send({
-      text: 'this is a comment not my',
-    }).expect(400);
+    const resp = await customRequest(app)
+      .post(`posts/${postId}/comments`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        text: 'this is a comment not my',
+      })
+      .expect(400);
 
-    expect(resp.body).toHaveProperty('errorsMessages')
-    expect(resp.body.errorsMessages[0].message).toEqual(expect.any(String))
-
+    expect(resp.body).toHaveProperty('errorsMessages');
+    expect(resp.body.errorsMessages[0].message).toEqual(expect.any(String));
   });
 
   it('should be correct return all comments with using parameters', async () => {
+    const { postId } = await serviceComments.createComments(app, 6);
 
-    const {postId} = await serviceComments.createComments(app, 6);
+    const resp = await customRequest(app)
+      .get(`posts/${postId}/comments`)
+      .expect(200);
 
-    const resp = await customRequest(app).get(`posts/${postId}/comments`).expect(200);
-
-    expect(resp.body.pagesCount).toEqual(1)
+    expect(resp.body.pagesCount).toEqual(1);
     expect(resp.body.totalCount).toEqual(6);
     expect(resp.body.pageSize).toEqual(10);
     expect(resp.body.items.length).toEqual(6);
-    expect(resp.body.items[0].content).toMatch(/^test 6/)
+    expect(resp.body.items[0].content).toMatch(/^test 6/);
 
-
-    const resp1 = await customRequest(app).get(`posts/${postId}/comments?pageSize=2&sortDirection=asc`).expect(200);
-
+    const resp1 = await customRequest(app)
+      .get(`posts/${postId}/comments?pageSize=2&sortDirection=asc`)
+      .expect(200);
 
     expect(resp1.body.totalCount).toEqual(6);
     expect(resp1.body.items).toHaveLength(2);
     expect(resp1.body.pagesCount).toBe(3);
     expect(resp1.body.items[0].content).toMatch(/^test 1/);
-
-  })
+  });
 });

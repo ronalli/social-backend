@@ -6,7 +6,7 @@ import { serviceUsers } from '../utils/users/service-users';
 import { customRequest } from '../utils/custom-request';
 import { randomUUID } from 'node:crypto';
 
-describe('Likes e2e Test', () => {
+describe('Likes e2e Test by Posts', () => {
   let app: INestApplication;
   let dataSource: DataSource;
 
@@ -121,4 +121,104 @@ describe('Likes e2e Test', () => {
     expect(resp3.extendedLikesInfo.dislikesCount).toBe(1);
     expect(resp3.extendedLikesInfo.myStatus).toBe('Dislike');
   });
+
+  it('correct update like status by `none`', async () => {
+    const { postId, blogId } = await servicePost.createPost(app);
+    const {accessToken } = await serviceUsers.authorizationUser(app, 'july');
+
+    const resp = await customRequest(app).put(`posts/${postId}/like-status`).set('Authorization', `Bearer ${accessToken}`).send({
+      likeStatus: 'Like',
+    }).expect(204);
+
+    const {body: post} = await customRequest(app).get(`posts/${postId}`).expect(200);
+
+    expect(post.extendedLikesInfo.likesCount).toBe(1);
+    expect(post.extendedLikesInfo.myStatus).toBe('None');
+    expect(post.extendedLikesInfo.newestLikes[0].login).toEqual('july-1');
+
+    await customRequest(app).put(`posts/${postId}/like-status`).set('Authorization', `Bearer ${accessToken}`).send({
+      likeStatus: 'None',
+    }).expect(204);
+
+    const {body: post1} = await customRequest(app).get(`posts/${postId}`).set('Authorization', `Bearer ${accessToken}`).expect(200);
+
+    expect(post1.extendedLikesInfo.likesCount).toBe(0);
+    expect(post1.extendedLikesInfo.myStatus).toBe('None');
+    expect(post1.extendedLikesInfo.newestLikes.length).toEqual(0);
+
+  })
+
+  it('should correct return information about posts for different users', async () => {
+    const {postId, blogId} = await servicePost.createPost(app);
+    const {accessToken} = await serviceUsers.authorizationUser(app, 'greg')
+    const {accessToken: at1} = await serviceUsers.authorizationUser(app, 'bob')
+    const {accessToken: at2} = await serviceUsers.authorizationUser(app, 'nick')
+    const {accessToken: at3} = await serviceUsers.authorizationUser(app, 'tron')
+    const {accessToken: at4} = await serviceUsers.authorizationUser(app, 'marta')
+
+    await customRequest(app).put(`posts/${postId}/like-status`).set('Authorization', `Bearer ${accessToken}`).send({
+      likeStatus: 'Like'
+    }).expect(204)
+
+    await customRequest(app).put(`posts/${postId}/like-status`).set('Authorization', `Bearer ${at1}`).send({
+      likeStatus: 'Dislike'
+    }).expect(204)
+
+    await customRequest(app).put(`posts/${postId}/like-status`).set('Authorization', `Bearer ${at2}`).send({
+      likeStatus: 'Like'
+    }).expect(204)
+
+    await customRequest(app).put(`posts/${postId}/like-status`).set('Authorization', `Bearer ${at3}`).send({
+      likeStatus: 'Dislike'
+    }).expect(204)
+
+    const {body: post} = await customRequest(app).get(`posts/${postId}`).expect(200)
+
+    expect(post.extendedLikesInfo.likesCount).toBe(2)
+    expect(post.extendedLikesInfo.dislikesCount).toBe(2)
+    expect(post.extendedLikesInfo.newestLikes.length).toBe(2)
+
+    expect(post.extendedLikesInfo.newestLikes[0].login).toBe('nick-1')
+    expect(post.extendedLikesInfo.newestLikes[1].login).toBe('greg-1')
+
+    await customRequest(app).put(`posts/${postId}/like-status`).set('Authorization', `Bearer ${at3}`).send({
+      likeStatus: 'Like'
+    }).expect(204)
+
+    const {body: post1} = await customRequest(app).get(`posts/${postId}`).expect(200)
+
+    expect(post1.extendedLikesInfo.likesCount).toBe(3)
+    expect(post1.extendedLikesInfo.dislikesCount).toBe(1)
+    expect(post1.extendedLikesInfo.newestLikes.length).toBe(3)
+
+    expect(post1.extendedLikesInfo.newestLikes[0].login).toBe('tron-1')
+    expect(post1.extendedLikesInfo.newestLikes[1].login).toBe('nick-1')
+    expect(post1.extendedLikesInfo.newestLikes[2].login).toBe('greg-1')
+
+    await customRequest(app).put(`posts/${postId}/like-status`).set('Authorization', `Bearer ${at4}`).send({
+      likeStatus: 'Dislike'
+    }).expect(204)
+
+    const {body: post2} = await customRequest(app).get(`posts/${postId}`).set('Authorization', `Bearer ${at4}`).expect(200)
+
+    expect(post2.extendedLikesInfo.likesCount).toBe(3)
+    expect(post2.extendedLikesInfo.dislikesCount).toBe(2)
+    expect(post2.extendedLikesInfo.newestLikes.length).toBe(3)
+    expect(post2.extendedLikesInfo.myStatus).toBe('Dislike')
+
+    await customRequest(app).put(`posts/${postId}/like-status`).set('Authorization', `Bearer ${accessToken}`).send({
+      likeStatus: 'None'
+    }).expect(204)
+
+    const {body: post3} = await customRequest(app).get(`posts/${postId}`).set('Authorization', `Bearer ${accessToken}`).expect(200)
+
+    expect(post3.extendedLikesInfo.likesCount).toBe(2)
+    expect(post3.extendedLikesInfo.dislikesCount).toBe(2)
+    expect(post3.extendedLikesInfo.newestLikes.length).toBe(2)
+    expect(post3.extendedLikesInfo.myStatus).toBe('None')
+
+    expect(post3.extendedLikesInfo.newestLikes[0].login).toBe('tron-1')
+    expect(post3.extendedLikesInfo.newestLikes[1].login).toBe('nick-1')
+  })
+
 });

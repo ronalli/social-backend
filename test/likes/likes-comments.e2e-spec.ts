@@ -5,6 +5,7 @@ import { serviceUsers } from '../utils/users/service-users';
 import { customRequest } from '../utils/custom-request';
 import { randomUUID } from 'node:crypto';
 import { serviceComments } from '../utils/comments/service-comments';
+import { servicePost } from '../utils/posts/service-post';
 
 describe('Likes e2e Test by Comments', () => {
   let app: INestApplication;
@@ -25,6 +26,34 @@ describe('Likes e2e Test by Comments', () => {
     const { accessToken, comment } = await serviceComments.createComment(app);
     await customRequest(app)
       .put(`comments/${comment.id}/like-status`)
+      .expect(401);
+  });
+
+  it('should handle expired access token correctly', async () => {
+    const { postId, blogId } = await servicePost.createPost(app);
+    const expiredToken = 'expired.access.token';
+
+    await customRequest(app)
+      .put(`posts/${postId}/like-status`)
+      .set('Authorization', `Bearer ${expiredToken}`)
+      .send({ likeStatus: 'Like' })
+      .expect(401);
+  });
+
+  it('should handle malformed authorization header', async () => {
+    const { postId } = await servicePost.createPost(app);
+    const { accessToken } = await serviceUsers.authorizationUser(app);
+
+    await customRequest(app)
+      .put(`posts/${postId}/like-status`)
+      .set('Authorization', accessToken)
+      .send({ likeStatus: 'Like' })
+      .expect(401);
+
+    await customRequest(app)
+      .put(`posts/${postId}/like-status`)
+      .set('Authorization', `Basic ${accessToken}`)
+      .send({ likeStatus: 'Like' })
       .expect(401);
   });
 

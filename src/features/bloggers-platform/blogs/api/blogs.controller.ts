@@ -31,6 +31,7 @@ import { serviceInfoLike } from '../../../../common/services/initialization.stat
 import { CreatePostCommand } from '../../posts/application/usecases/create-post.usecase';
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-repository';
 import { PostUpdateSpecialModel } from '../../posts/api/models/input/update-post.special.blog.model';
+import { HTTP_STATUSES } from '../../../../settings/http.status';
 
 @ApiTags('Blogs')
 @Controller('')
@@ -40,7 +41,6 @@ export class BlogsController {
     @Inject(BlogsQueryRepository)
     private readonly blogsQueryRepository: BlogsQueryRepository,
     @Inject(PostsQueryRepository)
-    private readonly postsQueryRepository: PostsQueryRepository,
     private readonly commandBus: CommandBus,
     private readonly postsService: PostsService,
   ) {}
@@ -64,7 +64,7 @@ export class BlogsController {
 
   @UseGuards(BasicAuthGuard)
   @Put('sa/blogs/:blogId')
-  @HttpCode(204)
+  @HttpCode(HTTP_STATUSES.NotContent)
   async update(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Body() updateBlog: BlogCreateModel,
@@ -75,23 +75,19 @@ export class BlogsController {
       new UpdateBlogCommand(name, description, websiteUrl, blogId),
     );
 
-    if (!result)
-      throw new NotFoundException([
-        { message: 'Not found blog', field: 'blogId' },
-      ]);
+    if (!result) this.throwBlogNotFoundException(blogId);
 
     return;
   }
 
   @UseGuards(BasicAuthGuard)
   @Delete('sa/blogs/:blogId')
-  @HttpCode(204)
+  @HttpCode(HTTP_STATUSES.NotContent)
   async delete(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
   ): Promise<boolean> {
     return await this.blogsService.deleteBlog(blogId);
   }
-
 
   @UseGuards(BasicAuthGuard)
   @Post('sa/blogs/:blogId/posts')
@@ -107,10 +103,7 @@ export class BlogsController {
 
     const result = await this.blogsQueryRepository.blogIsExist(blogId);
 
-    if (!result)
-      throw new NotFoundException([
-        { message: 'Not found blog', field: 'blogId' },
-      ]);
+    if (!result) this.throwBlogNotFoundException(blogId);
 
     const idCreatedPost = await this.commandBus.execute(
       new CreatePostCommand(
@@ -124,7 +117,7 @@ export class BlogsController {
 
     const newPost = await this.postsService.getPost(idCreatedPost, currentUser);
 
-    return res.status(201).send(newPost);
+    return res.status(HTTP_STATUSES.Created).send(newPost);
   }
 
   @UseGuards(BasicAuthGuard)
@@ -140,11 +133,8 @@ export class BlogsController {
 
     const blogFound = await this.blogsQueryRepository.blogIsExist(blogId);
 
-    if (!blogFound) {
-      throw new NotFoundException([
-        { message: 'Not found blog', field: 'blogId' },
-      ]);
-    }
+    if (!blogFound) this.throwBlogNotFoundException(blogId);
+
     const foundPosts =
       await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
         blogId,
@@ -152,12 +142,12 @@ export class BlogsController {
         currentUser,
       );
 
-    return res.status(200).send(foundPosts);
+    return res.status(HTTP_STATUSES.Success).send(foundPosts);
   }
 
   @UseGuards(BasicAuthGuard)
   @Put('sa/blogs/:blogId/posts/:postId')
-  @HttpCode(204)
+  @HttpCode(HTTP_STATUSES.NotContent)
   async updatePostForSpecialBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Param('postId', ValidateObjectIdPipe) postId: string,
@@ -169,18 +159,14 @@ export class BlogsController {
       postId,
     );
 
-    if (!response) {
-      throw new NotFoundException([
-        { message: 'Not found post', field: 'postId or blogId' },
-      ]);
-    }
+    if (!response) this.throwPostNotFoundException();
 
     return;
   }
 
   @UseGuards(BasicAuthGuard)
   @Delete('sa/blogs/:blogId/posts/:postId')
-  @HttpCode(204)
+  @HttpCode(HTTP_STATUSES.NotContent)
   async deletePostForSpecialBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Param('postId', ValidateObjectIdPipe) postId: string,
@@ -190,14 +176,10 @@ export class BlogsController {
       postId,
     );
 
-    if (!response) {
-      throw new NotFoundException([
-        { message: 'Not found post', field: 'postId or blogId' },
-      ]);
-    }
+    if (!response) this.throwPostNotFoundException();
+
     return;
   }
-
 
   // public
   @Get('blogs')
@@ -227,20 +209,28 @@ export class BlogsController {
 
       return res.status(200).send(foundPosts);
     }
+
+    this.throwBlogNotFoundException(blogId);
+  }
+
+  @Get('blogs/:blogId')
+  async getBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
+    const result = await this.blogsQueryRepository.findBlogById(blogId);
+
+    if (!result) this.throwBlogNotFoundException(blogId);
+
+    return result;
+  }
+
+  private throwBlogNotFoundException(blogId: string): never {
     throw new NotFoundException([
-      { message: 'If specified blog is not exists', field: 'blogId' },
+      { message: 'Not found blog', field: 'blogId' },
     ]);
   }
 
-  @Get('blogs/:id')
-  async getBlog(@Param('id', ValidateObjectIdPipe) id: string) {
-    const result = await this.blogsQueryRepository.findBlogById(id);
-
-    if (!result) {
-      throw new NotFoundException([
-        { message: `Blog with id ${id} not found`, field: 'blogId' },
-      ]);
-    }
-    return result;
+  private throwPostNotFoundException(): never {
+    throw new NotFoundException([
+      { message: 'Not found post', field: 'postId or blogId' },
+    ]);
   }
 }

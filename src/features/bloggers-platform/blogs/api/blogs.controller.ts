@@ -6,7 +6,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  Inject,
   NotFoundException,
   Param,
   Post,
@@ -29,7 +28,6 @@ import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdP
 import { QueryParamsDto } from '../../../../common/models/query-params.dto';
 import { serviceInfoLike } from '../../../../common/services/initialization.status.like';
 import { CreatePostCommand } from '../../posts/application/usecases/create-post.usecase';
-import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-repository';
 import { PostUpdateSpecialModel } from '../../posts/api/models/input/update-post.special.blog.model';
 import { HTTP_STATUSES } from '../../../../settings/http.status';
 
@@ -37,13 +35,12 @@ import { HTTP_STATUSES } from '../../../../settings/http.status';
 @Controller('')
 export class BlogsController {
   constructor(
-    @Inject(BlogsService) private readonly blogsService: BlogsService,
-    @Inject(BlogsQueryRepository)
+    private readonly blogsService: BlogsService,
     private readonly blogsQueryRepository: BlogsQueryRepository,
-    @Inject(PostsQueryRepository)
     private readonly commandBus: CommandBus,
     private readonly postsService: PostsService,
-  ) {}
+  ) {
+  }
 
   @UseGuards(BasicAuthGuard)
   @Get('sa/blogs')
@@ -207,7 +204,7 @@ export class BlogsController {
           currentUser,
         );
 
-      return res.status(200).send(foundPosts);
+      return res.status(HTTP_STATUSES.Success).send(foundPosts);
     }
 
     this.throwBlogNotFoundException(blogId);

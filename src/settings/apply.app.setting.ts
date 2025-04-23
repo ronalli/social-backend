@@ -22,6 +22,7 @@ export const applyAppSettings = (app: INestApplication) => {
   setAppExceptionsFilters(app);
 
   // setCors(app)
+
 };
 
 const setAppPipes = (app: INestApplication) => {

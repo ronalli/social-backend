@@ -5,6 +5,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  NotFoundException,
   Post,
   Req,
   Res,
@@ -23,6 +24,12 @@ import { RefreshTokenGuard } from '../../../common/guards/refreshToken.guard';
 import { MappingsRequestHeadersService } from '../../../common/utils/mappings.request.headers';
 
 import { SkipThrottle } from '@nestjs/throttler';
+import { HTTP_STATUSES } from '../../../settings/http.status';
+
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: true,
+} as const;
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -34,7 +41,7 @@ export class AuthController {
     private readonly mappingsRequestHeadersService: MappingsRequestHeadersService,
   ) {}
 
-  @HttpCode(200)
+  @HttpCode(HTTP_STATUSES.Success)
   @Post('login')
   async login(
     @Body() loginModel: LoginInputModel,
@@ -46,15 +53,12 @@ export class AuthController {
 
     const result = await this.authService.login(loginModel, dataSession);
 
-    res.cookie('refreshToken', result.data.refreshToken, {
-      httpOnly: true,
-      secure: true,
-    });
+    res.cookie('refreshToken', result.data.refreshToken, COOKIE_OPTIONS);
 
     res.json({ accessToken: result.data.accessToken });
   }
 
-  @HttpCode(204)
+  @HttpCode(HTTP_STATUSES.NotContent)
   @Post('password-recovery')
   async passwordRecovery(
     @Body('email') email: string,
@@ -65,7 +69,7 @@ export class AuthController {
     res.json();
   }
 
-  @HttpCode(204)
+  @HttpCode(HTTP_STATUSES.NotContent)
   @Post('new-password')
   async setNewPassword(
     @Body() query: SetNewPasswordModel,
@@ -82,7 +86,7 @@ export class AuthController {
     res.json();
   }
 
-  @HttpCode(204)
+  @HttpCode(HTTP_STATUSES.NotContent)
   @Post('registration-confirmation')
   async confirmationEmail(
     @Body('code') code: string,
@@ -93,7 +97,7 @@ export class AuthController {
     res.json();
   }
 
-  @HttpCode(204)
+  @HttpCode(HTTP_STATUSES.NotContent)
   @Post('registration')
   async registration(
     @Body() registerModel: UserCreateModel,
@@ -104,7 +108,7 @@ export class AuthController {
     res.json();
   }
 
-  @HttpCode(204)
+  @HttpCode(HTTP_STATUSES.NotContent)
   @Post('registration-email-resending')
   async resendConfirmationCode(
     @Body('email') email: string,
@@ -127,23 +131,25 @@ export class AuthController {
     const response = await this.authService.logout(cookie);
 
     if (response) {
-      res.clearCookie('refreshToken', { httpOnly: true, secure: true });
-      return res.status(204).send({});
+      res.clearCookie('refreshToken', COOKIE_OPTIONS);
+      return res.status(HTTP_STATUSES.NotContent).send({});
     }
 
     throw new UnauthorizedException();
   }
 
-  @HttpCode(200)
+  @HttpCode(HTTP_STATUSES.Success)
   @UseGuards(AuthJwtGuard)
   @Get('me')
   async me(@Req() req: Request, @Res() res: Response) {
     const userId = req['userId'];
-    if (userId !== null) {
-      const result = await this.usersService.findUser(userId);
-      if (result) {
-        res.json(this.mappingsUsersService.formatViewModel(result));
-      }
-    }
+
+    if (!userId) throw new UnauthorizedException();
+
+    const result = await this.usersService.findUser(userId);
+
+    if (!result) throw new NotFoundException('User not found');
+
+    return this.mappingsUsersService.formatViewModel(result);
   }
 }

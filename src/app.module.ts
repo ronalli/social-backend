@@ -35,6 +35,7 @@ import { MappingsCommentsService } from './features/bloggers-platform/comments/a
 import { ConfigModule } from '@nestjs/config';
 import * as process from 'node:process';
 import { configModule } from './dynamic-config-module';
+import { CqrsModule } from '@nestjs/cqrs';
 
 const mappingsProviders: Provider[] = [
   MappingBlogsService,
@@ -58,6 +59,7 @@ const mappingsProviders: Provider[] = [
 @Module({
   imports: [
     configModule,
+    CqrsModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -74,6 +76,7 @@ const mappingsProviders: Provider[] = [
     BloggersPlatformModule,
     SecurityModule,
     DeleteModule,
+
   ],
   controllers: [],
   providers: [

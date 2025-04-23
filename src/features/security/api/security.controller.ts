@@ -17,6 +17,7 @@ import { SecurityQueryRepository } from '../infrastructure/security-query.reposi
 import { SecurityService } from '../application/security.service';
 import { mappingSessions } from '../../../common/utils/mappings.sessions.service';
 import { SkipThrottle } from '@nestjs/throttler';
+import { HTTP_STATUSES } from '../../../settings/http.status';
 
 // @SkipThrottle()
 @ApiTags('Security')
@@ -54,7 +55,7 @@ export class SecurityController {
 
     const response = await this.securityService.deleteDevices(refreshToken);
 
-    if (response) return res.status(204).send({});
+    if (response) return res.status(HTTP_STATUSES.NotContent).send({});
 
     throw new UnauthorizedException();
   }
@@ -77,7 +78,7 @@ export class SecurityController {
     if (decode) {
       await this.securityService.deleteAuthSessionWithParam(decode, deviceId);
 
-      return res.status(204).send({});
+      return res.status(HTTP_STATUSES.NotContent).send({});
     }
     throw new UnauthorizedException();
   }

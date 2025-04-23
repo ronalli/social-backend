@@ -1,4 +1,4 @@
-import { Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserOutputModel } from '../api/models/output/user.output.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -25,7 +25,7 @@ export class UsersRepository {
       confirmation.confirmationCode,
     ];
 
-    let query = `INSERT INTO public."users" (id, login, email, hash, "createdAt") VALUES($1, $2, $3, $4, $5) RETURNING *`;
+    const query = `INSERT INTO public."users" (id, login, email, hash, "createdAt") VALUES($1, $2, $3, $4, $5) RETURNING *`;
 
     const result = await this.dataSource.query(query, values);
 
@@ -44,7 +44,7 @@ export class UsersRepository {
 
   async findUserById(id: string): Promise<UserOutputModel> {
     const values = [id];
-    let query = `SELECT id, login, email, "createdAt" FROM public."users" WHERE id = $1`;
+    const query = `SELECT id, login, email, "createdAt" FROM public."users" WHERE id = $1`;
 
     const response = await this.dataSource.query(query, values);
 

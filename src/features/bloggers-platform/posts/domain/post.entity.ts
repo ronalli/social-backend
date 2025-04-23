@@ -4,8 +4,8 @@ import { BlogSchema } from '../../blogs/domain/blog.entity';
 
 @Schema()
 export class Post {
-  @Prop({type: Types.ObjectId, auto: true})
-  _id: Types.ObjectId
+  @Prop({ type: Types.ObjectId, auto: true })
+  _id: Types.ObjectId;
 
   @Prop()
   title: string;
@@ -32,8 +32,8 @@ export class Post {
   dislikesCount: number;
 }
 
-export const PostSchema = SchemaFactory.createForClass(Post)
-BlogSchema.loadClass(Post)
+export const PostSchema = SchemaFactory.createForClass(Post);
+BlogSchema.loadClass(Post);
 
-export type PostDocument = HydratedDocument<Post>
-export type PostModelType = Model<PostDocument>
+export type PostDocument = HydratedDocument<Post>;
+export type PostModelType = Model<PostDocument>;

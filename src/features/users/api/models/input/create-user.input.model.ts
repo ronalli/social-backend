@@ -4,7 +4,6 @@ import { Trim } from '../../../../../common/decorators/transform/trim';
 // import { EmailIsExist } from '../../../../../common/decorators/validate/email-is-exist.decorator';
 
 export class UserCreateModel {
-
   @IsString()
   @Trim()
   @IsNotEmpty()

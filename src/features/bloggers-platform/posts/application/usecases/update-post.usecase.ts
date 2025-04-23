@@ -14,11 +14,14 @@ export class UpdatePostCommand {
 
 @CommandHandler(UpdatePostCommand)
 export class UpdatePostHandler implements ICommandHandler<UpdatePostCommand> {
-  constructor(private readonly blogsQueryRepository: BlogsQueryRepository, private readonly postsRepository: PostsRepository) {}
+  constructor(
+    private readonly blogsQueryRepository: BlogsQueryRepository,
+    private readonly postsRepository: PostsRepository,
+  ) {}
 
   async execute(command: UpdatePostCommand) {
-    const response = await this.postsRepository.updateCurrentPost(command)
+    const response = await this.postsRepository.updateCurrentPost(command);
 
-    return response.length > 0
+    return response.length > 0;
   }
 }

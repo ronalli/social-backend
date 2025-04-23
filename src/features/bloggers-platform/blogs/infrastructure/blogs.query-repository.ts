@@ -1,6 +1,4 @@
-import {
-  Injectable,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MappingsPostsService } from '../../posts/application/mappings/mapping.posts';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
 import { BlogQueryDto } from '../api/models/blog-query.dto';
@@ -27,13 +25,13 @@ export class BlogsQueryRepository {
 
     const { sortBy, sortDirection, pageNumber, pageSize } = defaultQueryParams;
 
-    const totalCountQuery = `SELECT * FROM public.posts WHERE "blogId" = $1;`
+    const totalCountQuery = `SELECT * FROM public.posts WHERE "blogId" = $1;`;
 
     const totalCount = await this.dataSource.query(totalCountQuery, [blogId]);
 
     const pagesCount = Math.ceil(totalCount.length / pageSize);
 
-    const values = userId !== 'None' ? [blogId, userId] : [blogId]
+    const values = userId !== 'None' ? [blogId, userId] : [blogId];
 
     const query1 = `
     WITH result AS (
@@ -64,7 +62,7 @@ export class BlogsQueryRepository {
        ) as "newestLikes"
      FROM posts p
      JOIN blogs b ON p."blogId" = b.id
-     LEFT JOIN public."postsLikeStatus" s ON s."postId" = p.id ${userId !== "None" ? `AND s."userId" = $2` : ``} 
+     LEFT JOIN public."postsLikeStatus" s ON s."postId" = p.id ${userId !== 'None' ? `AND s."userId" = $2` : ``} 
        )
      SELECT * FROM result
      WHERE "blogId" = $1
@@ -73,7 +71,8 @@ export class BlogsQueryRepository {
 
     const result = await this.dataSource.query(query1, values);
 
-    const items = await this.mappingsPostsService.formatingAllPostForView(result)
+    const items =
+      await this.mappingsPostsService.formatingAllPostForView(result);
 
     return {
       pagesCount: +pagesCount,
@@ -81,7 +80,7 @@ export class BlogsQueryRepository {
       pageSize: +pageSize,
       totalCount: +totalCount.length,
       items,
-    }
+    };
   }
 
   async getAllBlogs(queryParams: BlogQueryDto) {
@@ -123,7 +122,6 @@ export class BlogsQueryRepository {
   async findBlogById(blogId: string): Promise<BlogOutputModel> {
     const query = `SELECT * FROM public."blogs" WHERE id = $1;`;
     const result = await this.dataSource.query(query, [blogId]);
-
 
     return result[0];
   }

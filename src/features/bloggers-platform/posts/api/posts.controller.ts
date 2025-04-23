@@ -206,5 +206,4 @@ export class PostsController {
   // async deletePost(@Param('id', ValidateObjectIdPipe) id: string) {
   //   return await this.postsService.deletePost(id);
   // }
-
 }

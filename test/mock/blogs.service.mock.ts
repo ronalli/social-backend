@@ -2,11 +2,10 @@ import { BlogsService } from '../../src/features/bloggers-platform/blogs/applica
 import { BlogsRepository } from '../../src/features/bloggers-platform/blogs/infrastructure/blogs.repository';
 
 export const BlogsServiceMockObject = {
-  create(){
-    return Promise.resolve('123')
+  create() {
+    return Promise.resolve('123');
   },
 };
-
 
 export class BlogsServiceMock extends BlogsService {
   constructor(blogsRepository: BlogsRepository) {

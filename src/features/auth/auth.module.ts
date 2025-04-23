@@ -37,7 +37,7 @@ import { SecurityRepository } from '../security/infrastructure/security.reposito
     SecurityService,
     SecurityQueryRepository,
     SecurityRepository,
-    MappingsRequestHeadersService
+    MappingsRequestHeadersService,
   ],
   exports: [AuthService],
 })

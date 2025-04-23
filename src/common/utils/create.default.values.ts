@@ -4,27 +4,39 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class QueryParamsService {
-  createDefaultValues(query: QueryParamsDto){
+  createDefaultValues(query: QueryParamsDto) {
     return {
       pageNumber: query.pageNumber ? +query.pageNumber : 1,
-      pageSize: query.pageSize !== undefined ? +query.pageSize > 50 ? 50 : +query.pageSize : 10,
+      pageSize:
+        query.pageSize !== undefined
+          ? +query.pageSize > 50
+            ? 50
+            : +query.pageSize
+          : 10,
       sortBy: query.sortBy ? query.sortBy : 'createdAt',
-      sortDirection: query.sortDirection ? query.sortDirection as SortDirection : 'desc',
+      sortDirection: query.sortDirection
+        ? (query.sortDirection as SortDirection)
+        : 'desc',
       searchNameTerm: query.searchNameTerm ? query.searchNameTerm : null,
     };
-  };
+  }
 
   createDefaultValuesQueryParams = (query: QueryParamsDto) => {
     return {
       pageNumber: query.pageNumber ? +query.pageNumber : 1,
-      pageSize: query.pageSize !== undefined ? +query.pageSize > 50 ? 50 : +query.pageSize : 10,
+      pageSize:
+        query.pageSize !== undefined
+          ? +query.pageSize > 50
+            ? 50
+            : +query.pageSize
+          : 10,
       sortBy: query.sortBy ? query.sortBy : 'createdAt',
-      sortDirection: query.sortDirection ? query.sortDirection as SortDirection : 'desc',
+      sortDirection: query.sortDirection
+        ? (query.sortDirection as SortDirection)
+        : 'desc',
     };
   };
-
 }
-
 
 // export const createDefaultValues = (query: QueryParamsDto) => {
 //   return {

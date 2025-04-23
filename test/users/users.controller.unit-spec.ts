@@ -6,10 +6,9 @@ import { CommandBus } from '@nestjs/cqrs';
 import { BasicAuthGuard } from '../../src/common/guards/auth.basic.guard';
 import { UserQueryDto } from '../../src/features/users/api/models/user-query.dto';
 
-
 const commandBusMock = {
   execute: jest.fn().mockResolvedValue('1'),
-}
+};
 
 const mockUsers = [
   {

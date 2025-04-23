@@ -1,9 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PostsQueryRepository } from '../../../posts/infrastructure/posts.query-repository';
+import { NotFoundException } from '@nestjs/common';
 import {
-  NotFoundException,
-} from '@nestjs/common';
-import { CommentsRepository, ILikesInfoViewModel } from '../../infrastructure/comments.repository';
+  CommentsRepository,
+  ILikesInfoViewModel,
+} from '../../infrastructure/comments.repository';
 import { randomUUID } from 'node:crypto';
 import { CommentCreateModel } from '../../api/models/input/create-comment.model';
 
@@ -29,7 +30,6 @@ export class CreateCommentHandler
   async execute(command: CreateCommentCommand): Promise<any> {
     const { content, postId, userId } = command;
 
-
     const findPost = await this.postsQueryRepository.findPostById(postId);
 
     if (!findPost) {
@@ -46,10 +46,9 @@ export class CreateCommentHandler
       postId,
       userId,
       createdAt: new Date().toISOString(),
-    }
+    };
 
-    return await this.commentsRepository.createComment(newComment)
-
+    return await this.commentsRepository.createComment(newComment);
 
     // try {
     //   const newComment = new this.CommentModel({

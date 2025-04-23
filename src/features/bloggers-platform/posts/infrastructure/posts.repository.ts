@@ -1,6 +1,4 @@
-import {
-  Injectable,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { PostCreateDBModel } from '../../blogs/api/models/input/create-blog.db.model';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -8,35 +6,39 @@ import { DataSource } from 'typeorm';
 
 @Injectable()
 export class PostsRepository {
-  constructor(
-    @InjectDataSource() protected dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async create(post: PostCreateDBModel, currentUser: string) {
-
-    const {id, title, shortDescription, content,blogId, createdAt, } = post;
+    const { id, title, shortDescription, content, blogId, createdAt } = post;
 
     const query = `INSERT INTO public.posts (id, title, "shortDescription", content, "createdAt", "blogId") VALUES($1, $2, $3, $4, $5, $6) RETURNING *;`;
 
     const result = await this.dataSource.query(query, [
-      id, title, shortDescription, content, createdAt, blogId
+      id,
+      title,
+      shortDescription,
+      content,
+      createdAt,
+      blogId,
     ]);
 
     return result[0].id;
-
   }
 
-
   async updateCurrentPost(post: any) {
+    const query = `UPDATE public.posts SET title = $1, "shortDescription" = $2, content = $3, "blogId" = $4 WHERE id = $5 RETURNING *;`;
 
-    let query = `UPDATE public.posts SET title = $1, "shortDescription" = $2, content = $3, "blogId" = $4 WHERE id = $5 RETURNING *;`;
+    const values = [
+      post.title,
+      post.shortDescription,
+      post.content,
+      post.blogId,
+      post.id,
+    ];
 
-    const values = [post.title, post.shortDescription, post.content, post.blogId, post.id]
+    const response = await this.dataSource.query(query, values);
 
-    const response = await this.dataSource.query(query, values)
-
-    return response[0]
-
+    return response[0];
   }
 
   // async update(id: string, updatePost: PostCreateModel) {
@@ -64,27 +66,25 @@ export class PostsRepository {
   // }
 
   async delete(id: string) {
-    let query = `DELETE FROM public.posts WHERE id = $1 RETURNING *;`;
+    const query = `DELETE FROM public.posts WHERE id = $1 RETURNING *;`;
 
-    const result = await this.dataSource.query(query, [id])
+    const result = await this.dataSource.query(query, [id]);
 
     return result[1] === 1;
   }
 
   async findPostById(id: string, currentUser: string) {
-
     const query = `SELECT * FROM public.posts WHERE id = $1;`;
 
     const result = await this.dataSource.query(query, [id]);
 
-    return result[0]
-
+    return result[0];
   }
 
   async getLike(postId: string, userId: string): Promise<boolean> {
-    const query = `SELECT * FROM public."postsLikeStatus" WHERE "postId" = $1 AND "userId" = $2;`
+    const query = `SELECT * FROM public."postsLikeStatus" WHERE "postId" = $1 AND "userId" = $2;`;
 
-    const result = await this.dataSource.query(query, [postId, userId])
+    const result = await this.dataSource.query(query, [postId, userId]);
 
     return result.length > 0;
   }
@@ -148,18 +148,18 @@ export class PostsRepository {
   // }
 
   // async findPostById(id: string, currentUser: string) {
-    // try {
-    //   const foundPost = await this.PostModel.findOne({ _id: new ObjectId(id) });
-    //   if (foundPost) {
-    //     return await this.mappingsPostsService.formatingDataForOutputPost(
-    //       foundPost,
-    //       currentUser,
-    //       this.LikeModel,
-    //     );
-    //   }
-    //   return false;
-    // } catch (e) {
-    //   throw new InternalServerErrorException(e);
-    // }
+  // try {
+  //   const foundPost = await this.PostModel.findOne({ _id: new ObjectId(id) });
+  //   if (foundPost) {
+  //     return await this.mappingsPostsService.formatingDataForOutputPost(
+  //       foundPost,
+  //       currentUser,
+  //       this.LikeModel,
+  //     );
+  //   }
+  //   return false;
+  // } catch (e) {
+  //   throw new InternalServerErrorException(e);
+  // }
   // }
 }

@@ -1,4 +1,10 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 // @Entity()
 // export class EmailConfirmation {
@@ -20,16 +26,16 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({type: String, length: 10})
+  @Column({ type: String, length: 10 })
   login: string;
 
-  @Column({type: String, length: 20})
+  @Column({ type: String, length: 20 })
   email: string;
 
-  @Column({type: String, length: 100})
+  @Column({ type: String, length: 100 })
   hash: string;
 
-  @Column({type: String, length: 100})
+  @Column({ type: String, length: 100 })
   createdAt: string;
 
   // @OneToOne(() => EmailConfirmation )

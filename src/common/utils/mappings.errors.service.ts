@@ -4,10 +4,12 @@ export class MapingErrorsService {
   outputResponse(data: ErrorModel): OutputModelErrors {
     const { message, field } = data;
     return {
-      errorsMessages: [{
-        message,
-        field,
-      }],
+      errorsMessages: [
+        {
+          message,
+          field,
+        },
+      ],
     };
   }
 }

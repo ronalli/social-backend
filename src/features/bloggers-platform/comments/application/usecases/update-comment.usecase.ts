@@ -8,32 +8,38 @@ export class UpdateCommentCommand {
   constructor(
     public commentId: string,
     public content: UpdateCommentModel,
-    public userId: string
-
-  ) {
-  }
+    public userId: string,
+  ) {}
 }
 
 @CommandHandler(UpdateCommentCommand)
-export class UpdateCommentHandler implements ICommandHandler<UpdateCommentCommand> {
-  constructor(private readonly commentsRepository: CommentsRepository,
-              private readonly commentsQueryRepository: CommentsQueryRepository,) {
-  }
+export class UpdateCommentHandler
+  implements ICommandHandler<UpdateCommentCommand>
+{
+  constructor(
+    private readonly commentsRepository: CommentsRepository,
+    private readonly commentsQueryRepository: CommentsQueryRepository,
+  ) {}
 
   async execute(command: UpdateCommentCommand): Promise<any> {
-
-    const {commentId, content, userId} = command;
+    const { commentId, content, userId } = command;
 
     const result = await this.commentsQueryRepository.getCommentById(commentId);
 
+    if (!result)
+      throw new NotFoundException([
+        { message: 'Not found comment', field: 'commentId' },
+      ]);
 
-    if(!result) throw new NotFoundException([{message: 'Not found comment', field: 'commentId'}])
-
-    if(result && userId !== result.userId) {
-      throw new ForbiddenException([{message: 'Try edit the comment that is not your own', field: 'userId'}])
-
+    if (result && userId !== result.userId) {
+      throw new ForbiddenException([
+        {
+          message: 'Try edit the comment that is not your own',
+          field: 'userId',
+        },
+      ]);
     }
 
-    return await this.commentsRepository.updateComment(commentId, content)
+    return await this.commentsRepository.updateComment(commentId, content);
   }
 }

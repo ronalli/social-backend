@@ -1,4 +1,4 @@
-import { HydratedDocument, Model, Types} from 'mongoose';
+import { HydratedDocument, Model, Types } from 'mongoose';
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 
 @Schema()
@@ -12,7 +12,7 @@ export class CommentatorInfo {
 
 @Schema()
 export class Comment {
-  @Prop({type: Types.ObjectId, auto: true})
+  @Prop({ type: Types.ObjectId, auto: true })
   _id: Types.ObjectId;
 
   @Prop()
@@ -24,18 +24,18 @@ export class Comment {
   @Prop()
   postId: string;
 
-  @Prop({type: CommentatorInfo})
-  commentatorInfo: CommentatorInfo
+  @Prop({ type: CommentatorInfo })
+  commentatorInfo: CommentatorInfo;
 
   @Prop()
-  likesCount: number
+  likesCount: number;
 
   @Prop()
-  dislikesCount: number
+  dislikesCount: number;
 }
 
-export const CommentSchema = SchemaFactory.createForClass(Comment)
-CommentSchema.loadClass(Comment)
+export const CommentSchema = SchemaFactory.createForClass(Comment);
+CommentSchema.loadClass(Comment);
 
-export type CommentDocument = HydratedDocument<Comment>
-export type CommentModelType = Model<CommentDocument>
+export type CommentDocument = HydratedDocument<Comment>;
+export type CommentModelType = Model<CommentDocument>;

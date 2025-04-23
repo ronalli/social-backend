@@ -7,8 +7,8 @@ export const HTTP_STATUSES = {
   NotContent: 204,
   Created: 201,
   InternalServerError: 500,
-  TooManyRequests: 429
-}
+  TooManyRequests: 429,
+};
 
 export enum ResultCode {
   Success = 'Success',

@@ -1,8 +1,8 @@
 export class ErrorModel {
-  message: string
-  field: string
+  message: string;
+  field: string;
 }
 
 export class OutputModelErrors {
-  errorsMessages: ErrorModel[]
+  errorsMessages: ErrorModel[];
 }

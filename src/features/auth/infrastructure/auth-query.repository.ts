@@ -3,13 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 
-
 @Injectable()
 export class AuthQueryRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {
-  }
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
   async findOneOldRefreshToken(token: string) {
-
     const query = `
         SELECT id, "refreshToken" 
         FROM public."oldRefreshTokens"
@@ -20,7 +17,7 @@ export class AuthQueryRepository {
     return result[0];
   }
 
-  async findByEmail(email: string){
+  async findByEmail(email: string) {
     // try {
     //   const user = await this.UserModel.findOne({email: email})
     //   if (user) return {

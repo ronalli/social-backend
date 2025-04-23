@@ -2,7 +2,6 @@ import { IsString } from 'class-validator';
 // import { UserDocument } from '../../../domain/user.entity';
 
 export class UserOutputModel {
-
   @IsString()
   id: string;
 

@@ -1,13 +1,13 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PostQueryDto } from '../api/models/post-query.dto';
 import { MappingsPostsService } from '../application/mappings/mapping.posts';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { PostDB, PostOutputModelDB } from '../api/models/output/post.output.model';
+import {
+  PostDB,
+  PostOutputModelDB,
+} from '../api/models/output/post.output.model';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -72,13 +72,11 @@ export class PostsQueryRepository {
       page: +pageNumber,
       pageSize: +pageSize,
       totalCount: +totalCount.length,
-      items: response
+      items: response,
     };
   }
 
-
   async getPost(postId: string, userId: string): Promise<PostDB> {
-
     const query = `
       SELECT 
         p.id,
@@ -111,10 +109,9 @@ export class PostsQueryRepository {
         WHERE p.id = $2;
     `;
 
-    const response = await this.dataSource.query(query, [userId, postId])
+    const response = await this.dataSource.query(query, [userId, postId]);
 
     return response[0];
-
   }
 
   async getPostById(id: string) {
@@ -131,7 +128,6 @@ export class PostsQueryRepository {
     return await this.mappingsPostsService.formatingDataForOutputPost(
       response[0],
     );
-
   }
 
   async findPostById(postId: string): Promise<PostOutputModelDB> {
@@ -142,8 +138,8 @@ export class PostsQueryRepository {
     return response[0];
   }
 
-  async isPostDoesExist(postId: string): Promise<boolean>  {
-    const query = `SELECT * FROM public.posts WHERE id = $1;`
+  async isPostDoesExist(postId: string): Promise<boolean> {
+    const query = `SELECT * FROM public.posts WHERE id = $1;`;
 
     const result = await this.dataSource.query(query, [postId]);
 

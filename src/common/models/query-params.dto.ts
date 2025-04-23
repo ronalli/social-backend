@@ -1,11 +1,9 @@
 // import { SortDirection } from 'mongodb';
 import { IsOptional, IsString } from 'class-validator';
 
-
-export type SortDirection  = 'asc' | 'desc'
+export type SortDirection = 'asc' | 'desc';
 
 export class QueryParamsDto {
-
   @IsOptional()
   @IsString()
   searchNameTerm?: string = null;
@@ -21,6 +19,4 @@ export class QueryParamsDto {
 
   @IsOptional()
   pageNumber?: number = 1;
-
 }
-

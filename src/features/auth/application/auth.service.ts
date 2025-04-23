@@ -2,7 +2,8 @@ import { ResultCode } from '../../../settings/http.status';
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException, NotFoundException,
+  InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
@@ -26,7 +27,7 @@ import { decodeToken } from '../../../common/services/decode.token';
 import { SecurityService } from '../../security/application/security.service';
 import { HeaderSessionModel } from '../../../common/models/header.session.model';
 import { UsersService } from '../../users/application/users.service';
-import {validate as isValidUUID} from 'uuid'
+import { validate as isValidUUID } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -107,12 +108,10 @@ export class AuthService {
 
     console.log('e45346', new Date().toISOString());
 
-
     const hash = await bcryptService.generateHash(password);
     const createdAt = new Date().toISOString();
     const id = randomUUID();
     const confirmation = new ConfirmationInfoEmail(id);
-
 
     const userId = await this.authRepository.createUser(
       { id, login, email, hash, createdAt },
@@ -133,11 +132,10 @@ export class AuthService {
   }
 
   async confirmEmail(code: string) {
-
-    if(!isValidUUID(code)) {
+    if (!isValidUUID(code)) {
       throw new BadRequestException([
         { message: 'The code is not valid', field: 'code' },
-      ])
+      ]);
     }
 
     const isFindCode =
@@ -166,7 +164,7 @@ export class AuthService {
     if (isFindCode && foundUser) {
       const query = `UPDATE public."confirmationEmailUsers" SET "isConfirmed" = $1, "expirationDate" = $2, "confirmationCode" = $3 WHERE "userId" = $4 RETURNING *;`;
 
-      await this.dataSource.query(query, [true, null, null,isFindCode.userId]);
+      await this.dataSource.query(query, [true, null, null, isFindCode.userId]);
     }
     return true;
   }
@@ -236,8 +234,7 @@ export class AuthService {
       console.log('1', data);
 
       if (data) {
-
-        await this.securityService.deleteCurrentSession(data)
+        await this.securityService.deleteCurrentSession(data);
 
         return true;
       }

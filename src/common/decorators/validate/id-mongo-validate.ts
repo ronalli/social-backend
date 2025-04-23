@@ -8,7 +8,6 @@ import {
 import { Injectable } from '@nestjs/common';
 import mongoose from 'mongoose';
 
-
 @ValidatorConstraint({ name: 'IdMongoValidate' })
 @Injectable()
 export class IdMongoValidateConstraint implements ValidatorConstraintInterface {

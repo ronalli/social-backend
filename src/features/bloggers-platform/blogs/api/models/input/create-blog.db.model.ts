@@ -2,10 +2,9 @@ import { IsNotEmpty, IsString, Length } from 'class-validator';
 import { Trim } from '../../../../../../common/decorators/transform/trim';
 
 export class PostCreateDBModel {
-
   @IsString()
   @IsNotEmpty()
-  id: string
+  id: string;
 
   @IsString()
   @IsNotEmpty()
@@ -31,6 +30,5 @@ export class PostCreateDBModel {
 
   @IsString()
   @IsNotEmpty()
-  createdAt: string
-
+  createdAt: string;
 }

@@ -4,14 +4,12 @@ export class NewLike {
   login: string;
 }
 
-
 export class PostExtendedLikesInfo {
   likesCount: number;
   dislikesCount: number;
   myStatus: string;
   newestLikes: NewLike[];
 }
-
 
 export class PostOutputModel {
   id: string;
@@ -21,7 +19,7 @@ export class PostOutputModel {
   blogId: string;
   blogName: string;
   createdAt: string;
-  extendedLikesInfo: PostExtendedLikesInfo
+  extendedLikesInfo: PostExtendedLikesInfo;
 }
 
 export class PostOutputModelDB {

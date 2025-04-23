@@ -7,7 +7,6 @@ import { LikesRepository } from '../../../../likes/infrastructure/likes.reposito
 import { randomUUID } from 'node:crypto';
 import { LikeStatusModelForComment } from '../../../../likes/api/models/create-like.input.model';
 
-
 export class UpdateLikeStatusCommentCommand {
   constructor(
     public commentId: string,
@@ -23,26 +22,27 @@ export class UpdateLikeStatusCommentHandler
   constructor(
     private readonly commentsRepository: CommentsRepository,
     private readonly commentsQueryRepository: CommentsQueryRepository,
-    private readonly likesRepository: LikesRepository
+    private readonly likesRepository: LikesRepository,
   ) {}
 
   async execute(command: UpdateLikeStatusCommentCommand): Promise<any> {
-    const { commentId, userId, status,} = command;
+    const { commentId, userId, status } = command;
 
-
-    const foundedComment = await this.commentsQueryRepository.isCommentDoesExist(commentId);
+    const foundedComment =
+      await this.commentsQueryRepository.isCommentDoesExist(commentId);
 
     if (!foundedComment)
-       throw new NotFoundException([
-         { message: 'Not found comment', field: 'commentId' },
-       ]);
+      throw new NotFoundException([
+        { message: 'Not found comment', field: 'commentId' },
+      ]);
 
-
-    const statusLikeOnComment = await this.commentsQueryRepository.getLike(commentId, userId);
+    const statusLikeOnComment = await this.commentsQueryRepository.getLike(
+      commentId,
+      userId,
+    );
 
     if (statusLikeOnComment) {
-
-      return await this.likesRepository.updateStatusLikeInComment(command)
+      return await this.likesRepository.updateStatusLikeInComment(command);
     }
 
     const like: LikeStatusModelForComment = {
@@ -51,9 +51,8 @@ export class UpdateLikeStatusCommentHandler
       userId,
       commentId,
       createdAt: new Date().toISOString(),
-    }
+    };
 
-    return await this.likesRepository.addStatusLikeOnComment(like)
-
+    return await this.likesRepository.addStatusLikeOnComment(like);
   }
 }

@@ -10,10 +10,9 @@ export class PostsService {
   constructor(
     private readonly postsRepository: PostsRepository,
     private readonly postsQueryRepository: PostsQueryRepository,
-    private readonly mappingsPostsService: MappingsPostsService
+    private readonly mappingsPostsService: MappingsPostsService,
   ) {}
   async getPost(id: string, currentUser: string) {
-
     const result = await this.postsQueryRepository.getPost(id, currentUser);
 
     return await this.mappingsPostsService.formatingDataForOutputPost(result);
@@ -24,22 +23,22 @@ export class PostsService {
   }
 
   async getAllPosts(token: string, query: PostQueryDto) {
-
     const currentUserId = await jwtService.getUserIdByToken(token);
 
-   const allPosts = await this.postsQueryRepository.getPosts(query, currentUserId);
+    const allPosts = await this.postsQueryRepository.getPosts(
+      query,
+      currentUserId,
+    );
 
-   const items = await this.mappingsPostsService.formatingAllPostForView(allPosts.items);
+    const items = await this.mappingsPostsService.formatingAllPostForView(
+      allPosts.items,
+    );
 
-
-   return {
-     ...allPosts,
-     items,
-   }
-
-
+    return {
+      ...allPosts,
+      items,
+    };
   }
-
 
   // async updateLikeStatus(data: Omit<ILikeTypeDB, 'addedAt'>) {
   //

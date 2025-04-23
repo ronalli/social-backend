@@ -67,7 +67,7 @@ const mappingsProviders: Provider[] = [
       entities: [User],
       database: 'SocialBD',
       synchronize: true,
-      logging: true
+      logging: true,
     }),
     UsersModule,
     AuthModule,
@@ -94,5 +94,4 @@ const mappingsProviders: Provider[] = [
     // BlogIsExistConstraint,
   ],
 })
-export class AppModule {
-}
+export class AppModule {}

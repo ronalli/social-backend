@@ -9,6 +9,8 @@ async function bootstrap() {
   applyAppSettings(app);
 
   await app.listen(appSettings.api.APP_PORT ?? 3000);
+
+  console.log(`Server running on ${await app.getUrl()}`);
 }
 
 bootstrap();

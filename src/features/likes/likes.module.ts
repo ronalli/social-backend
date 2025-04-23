@@ -9,8 +9,7 @@ import { LikesQueryRepository } from './infrastructure/likes.query-repository';
 @Module({
   imports: [PostsQueryRepository, PostsRepository],
   controllers: [LikesController],
-  providers: [LikesRepository, LikesQueryRepository, LikesService ],
-  exports: [LikesRepository, LikesService, LikesQueryRepository]
+  providers: [LikesRepository, LikesQueryRepository, LikesService],
+  exports: [LikesRepository, LikesService, LikesQueryRepository],
 })
-
 export class LikesModule {}

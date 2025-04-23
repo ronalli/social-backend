@@ -2,10 +2,9 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import { Trim } from '../../../../../../common/decorators/transform/trim';
 
 export class CommentCreateModel {
-
   @IsString()
   @IsNotEmpty()
-  id:string;
+  id: string;
 
   @IsString()
   @Trim()
@@ -21,6 +20,4 @@ export class CommentCreateModel {
 
   @IsString()
   createdAt: string;
-
-
 }

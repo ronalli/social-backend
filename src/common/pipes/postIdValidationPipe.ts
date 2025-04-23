@@ -1,4 +1,9 @@
-import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
+import {
+  ArgumentMetadata,
+  BadRequestException,
+  Injectable,
+  PipeTransform,
+} from '@nestjs/common';
 import mongoose from 'mongoose';
 import { PostsQueryRepository } from '../../features/bloggers-platform/posts/infrastructure/posts.query-repository';
 
@@ -7,7 +12,6 @@ export class PostIdValidationPipe implements PipeTransform {
   constructor(private readonly postsQueryRepository: PostsQueryRepository) {}
 
   async transform(value: any, metadata: ArgumentMetadata) {
-
     // const errors = [];
     //
     // if(!mongoose.Types.ObjectId.isValid(value)) {
@@ -32,7 +36,5 @@ export class PostIdValidationPipe implements PipeTransform {
     // }
     //
     // return value;
-
   }
-
 }

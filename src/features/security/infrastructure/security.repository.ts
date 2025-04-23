@@ -12,7 +12,6 @@ export class SecurityRepository {
   constructor(protected dataSource: DataSource) {}
 
   async createDeviceSession(session: DeviceSessionEntity) {
-
     const { deviceId, deviceName, iat, userId, exp, ip, id } = session;
 
     const query = `
@@ -60,12 +59,16 @@ export class SecurityRepository {
   async updateDevice(data: IDecodeRefreshToken) {
     const { iat, deviceId, userId, exp } = data;
 
-
     const query = `UPDATE public."deviceSessions" SET iat = $1, exp = $2 WHERE "deviceId" = $3 AND "userId" = $4;`;
 
-    const response = await this.dataSource.query(query, [iat, exp, deviceId, userId]);
+    const response = await this.dataSource.query(query, [
+      iat,
+      exp,
+      deviceId,
+      userId,
+    ]);
 
-    if(response[1] === 0) {
+    if (response[1] === 0) {
       throw new UnauthorizedException();
     }
 

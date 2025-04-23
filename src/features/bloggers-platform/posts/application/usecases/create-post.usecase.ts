@@ -24,7 +24,9 @@ export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {
   async execute(command: CreatePostCommand): Promise<string> {
     const { currentUser, ...post } = command;
 
-    const findBlog = await this.blogsQueryRepository.blogIsExist(command.blogId);
+    const findBlog = await this.blogsQueryRepository.blogIsExist(
+      command.blogId,
+    );
 
     if (!findBlog)
       throw new BadRequestException([

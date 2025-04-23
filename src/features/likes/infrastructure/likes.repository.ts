@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { LikeStatusModelForComment, LikeStatusModelForPost } from '../api/models/create-like.input.model';
+import {
+  LikeStatusModelForComment,
+  LikeStatusModelForPost,
+} from '../api/models/create-like.input.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UpdateLikeStatusPostCommand } from '../../bloggers-platform/posts/application/usecases/update-likeStatus.post.usecase';
@@ -76,6 +79,4 @@ export class LikesRepository {
 
     return result.length > 0;
   }
-
-
 }

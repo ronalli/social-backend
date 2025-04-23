@@ -176,6 +176,4 @@ describe('Posts e2e Tests', () => {
     expect(resp1.body.totalCount).toBe(8);
     expect(resp1.body.items[0].title).toEqual('post 1');
   });
-
-
 });

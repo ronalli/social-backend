@@ -72,7 +72,6 @@ export class AuthRepository {
   }
 
   async addOverdueRefreshToken(token: string) {
-
     const id = randomUUID();
 
     const query = `
@@ -81,7 +80,5 @@ export class AuthRepository {
     const result = await this.dataSource.query(query, [id, token]);
 
     return result[0];
-
   }
-
 }

@@ -1,7 +1,6 @@
 import { IsString } from 'class-validator';
 
 export class DeviceSessionEntity {
-
   @IsString()
   id: string;
 
@@ -23,5 +22,3 @@ export class DeviceSessionEntity {
   @IsString()
   userId: string;
 }
-
-

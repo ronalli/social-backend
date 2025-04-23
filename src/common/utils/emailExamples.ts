@@ -5,7 +5,7 @@ export const emailExamples = {
                <p>To finish registration please follow the link below:
                     <a href='https://some-front.com/confirm-registration?code=${code}'>complete registration</a>
                 </p>
-        `
+        `;
   },
   recoveryPasswordByAccount: (code: string) => {
     return `
@@ -13,6 +13,6 @@ export const emailExamples = {
                 <p>To finish password recovery please follow the link below:
                     <a href='http://localhost:3000/api/auth/password-recovery?recoveryCode=${code}'>recovery password</a>
                  </p>
-        `
-  }
-}
+        `;
+  },
+};

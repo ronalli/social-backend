@@ -92,7 +92,6 @@ export class BlogsController {
     return await this.blogsService.deleteBlog(blogId);
   }
 
-
   @UseGuards(BasicAuthGuard)
   @Post('sa/blogs/:blogId/posts')
   async createPostForSpecialBlog(
@@ -197,7 +196,6 @@ export class BlogsController {
     }
     return;
   }
-
 
   // public
   @Get('blogs')

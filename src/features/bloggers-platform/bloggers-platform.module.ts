@@ -33,12 +33,8 @@ import { LikesQueryRepository } from '../likes/infrastructure/likes.query-reposi
 import { UpdatePostHandler } from './posts/application/usecases/update-post.usecase';
 
 @Module({
-  imports: [
-    CqrsModule,
-    AuthModule,
-    UsersModule,
-  ],
-//   controllers: [CommentsController, PostsController, BlogsController],
+  imports: [CqrsModule, AuthModule, UsersModule],
+  //   controllers: [CommentsController, PostsController, BlogsController],
   controllers: [BlogsController, PostsController, CommentsController],
   providers: [
     PostsService,
@@ -65,11 +61,20 @@ import { UpdatePostHandler } from './posts/application/usecases/update-post.usec
     UpdateLikeStatusCommentHandler,
     UpdateCommentHandler,
     DeleteCommentHandler,
-    UpdatePostHandler
-//     ,  UpdateLikeStatusHandler,
-
+    UpdatePostHandler,
+    //     ,  UpdateLikeStatusHandler,
   ],
-  exports: [BlogsService, BlogsQueryRepository, BlogsRepository, PostsService, PostsRepository, PostsQueryRepository, CommentsService, CommentsRepository, CommentsQueryRepository]
+  exports: [
+    BlogsService,
+    BlogsQueryRepository,
+    BlogsRepository,
+    PostsService,
+    PostsRepository,
+    PostsQueryRepository,
+    CommentsService,
+    CommentsRepository,
+    CommentsQueryRepository,
+  ],
   // exports: [BlogsService, BlogsQueryRepository, BlogsRepository, PostsService, PostsRepository, PostsQueryRepository, CommentsService, CommentsRepository]
 })
 //

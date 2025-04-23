@@ -342,8 +342,8 @@ describe('Likes e2e Test by Posts', () => {
 
     const users = await Promise.all(
       Array.from({ length: 5 }, (_, i) =>
-        serviceUsers.authorizationUser(app, `user${i}`)
-      )
+        serviceUsers.authorizationUser(app, `user${i}`),
+      ),
     );
 
     for (const { accessToken } of users) {
@@ -361,5 +361,4 @@ describe('Likes e2e Test by Posts', () => {
     expect(body.extendedLikesInfo.newestLikes).toHaveLength(3);
     expect(body.extendedLikesInfo.newestLikes[0].login).toBe('user4-1');
   });
-
 });

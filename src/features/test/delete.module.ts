@@ -6,7 +6,6 @@ import { DeleteAllCollectionsController } from './api/delete.all.collections.con
   imports: [],
   controllers: [DeleteAllCollectionsController],
   providers: [DeleteService],
-  exports: [DeleteService]
+  exports: [DeleteService],
 })
-
 export class DeleteModule {}

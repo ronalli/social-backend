@@ -15,7 +15,6 @@ export class CommentsQueryRepository {
   ) {}
 
   async getComment(commentId: string, userId: string) {
-
     const hasUserId = userId !== null && userId !== undefined;
 
     const values = hasUserId ? [commentId, userId] : [commentId];
@@ -34,18 +33,18 @@ export class CommentsQueryRepository {
         (SELECT COUNT(*) FROM public."commentsLikeStatus" WHERE "commentId" = c.id AND "likeStatus" = 'Dislike') AS "dislikesCount"
       FROM public."commentsPosts" c 
       JOIN public.users u ON u.id = c."userId"
-      LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id ${hasUserId ? `AND s."userId" = $2` : `` }
+      LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id ${hasUserId ? `AND s."userId" = $2` : ``}
       WHERE c.id = $1
       ;
     `;
 
-  //   COALESCE(
-  //     CASE
-  //   WHEN $2 IS NULL THEN 'None'
-  //   ELSE s."likeStatus"
-  //   END,
-  //     'None'
-  // ) AS "myStatus",
+    //   COALESCE(
+    //     CASE
+    //   WHEN $2 IS NULL THEN 'None'
+    //   ELSE s."likeStatus"
+    //   END,
+    //     'None'
+    // ) AS "myStatus",
 
     // LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id AND (s."userId" = $2 OR $2 IS NULL)
 
@@ -56,17 +55,21 @@ export class CommentsQueryRepository {
     return result[0];
   }
 
-  async getAllCommentsFormSpecialPost(userId: string, postId: string, queryParams: CommentQueryDto) {
+  async getAllCommentsFormSpecialPost(
+    userId: string,
+    postId: string,
+    queryParams: CommentQueryDto,
+  ) {
+    const defaultQueryParams =
+      this.queryParamsService.createDefaultValuesQueryParams(queryParams);
 
-    const defaultQueryParams = this.queryParamsService.createDefaultValuesQueryParams(queryParams)
+    const { sortBy, sortDirection, pageNumber, pageSize } = defaultQueryParams;
 
-    const {sortBy, sortDirection, pageNumber, pageSize} = defaultQueryParams;
-
-    const totalCountQuery = `SELECT * FROM "commentsPosts" WHERE "postId" = $1;`
+    const totalCountQuery = `SELECT * FROM "commentsPosts" WHERE "postId" = $1;`;
 
     const totalCount = await this.dataSource.query(totalCountQuery, [postId]);
 
-    const pagesCount = Math.ceil(totalCount.length/pageSize);
+    const pagesCount = Math.ceil(totalCount.length / pageSize);
 
     const query = `
         WITH result AS (
@@ -89,16 +92,15 @@ export class CommentsQueryRepository {
         LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)}
         `;
 
-    const result = await this.dataSource.query(query, [userId,postId]);
+    const result = await this.dataSource.query(query, [userId, postId]);
 
     return {
       pagesCount: +pagesCount,
       page: +pageNumber,
       pageSize: +pageSize,
       totalCount: +totalCount.length,
-      items: result
-    }
-
+      items: result,
+    };
   }
 
   async isCommentDoesExist(commentId: string): Promise<boolean> {

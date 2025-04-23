@@ -13,7 +13,8 @@ import { BlogsQueryRepository } from '../../../blogs/infrastructure/blogs.query-
 @Injectable()
 export class MappingsPostsService {
   constructor(
-    @Inject(forwardRef(() => BlogsQueryRepository)) private readonly blogsQueryRepository: BlogsQueryRepository,
+    @Inject(forwardRef(() => BlogsQueryRepository))
+    private readonly blogsQueryRepository: BlogsQueryRepository,
   ) {}
 
   async formatingAllPostForView(posts: PostDB[]) {
@@ -25,10 +26,20 @@ export class MappingsPostsService {
     return result;
   }
 
-  async formatingDataForOutputPost(
-    post: PostDB,
-  ): Promise<PostOutputModel> {
-    const { id, title, shortDescription, content, createdAt, blogId, blogName, myStatus, likesCount, dislikesCount, newestLikes  } = post;
+  async formatingDataForOutputPost(post: PostDB): Promise<PostOutputModel> {
+    const {
+      id,
+      title,
+      shortDescription,
+      content,
+      createdAt,
+      blogId,
+      blogName,
+      myStatus,
+      likesCount,
+      dislikesCount,
+      newestLikes,
+    } = post;
 
     return {
       id,
@@ -42,7 +53,7 @@ export class MappingsPostsService {
         likesCount: +likesCount,
         dislikesCount: +dislikesCount,
         myStatus,
-        newestLikes: newestLikes || []
+        newestLikes: newestLikes || [],
       },
     };
   }

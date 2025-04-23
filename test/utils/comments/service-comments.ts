@@ -17,7 +17,7 @@ export const serviceComments = {
       })
       .expect(201);
 
-    return {comment: resp.body, accessToken};
+    return { comment: resp.body, accessToken };
   },
 
   createComments: async (app: INestApplication, count: number = 5) => {
@@ -34,7 +34,6 @@ export const serviceComments = {
         .expect(201);
     }
 
-    return {postId}
-
+    return { postId };
   },
 };

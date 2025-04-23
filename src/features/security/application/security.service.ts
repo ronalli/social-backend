@@ -49,7 +49,7 @@ export class SecurityService {
       throw new ForbiddenException();
     }
 
-    return await this.securityRepository.deleteDevice(res.iat, deviceIdParam)
+    return await this.securityRepository.deleteDevice(res.iat, deviceIdParam);
   }
 
   async deleteCurrentSession(data: IDecodeRefreshToken) {
@@ -69,8 +69,7 @@ export class SecurityService {
   }
 
   async updateVersionSession(token: string) {
-
-    const data = await decodeToken(token)
+    const data = await decodeToken(token);
 
     if (!data) {
       throw new UnauthorizedException();

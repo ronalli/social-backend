@@ -1,7 +1,7 @@
-import {config} from 'dotenv';
-config()
+import { config } from 'dotenv';
+config();
 
-export type EnvironmentVariable = {[key: string]: string | undefined};
+export type EnvironmentVariable = { [key: string]: string | undefined };
 
 export type EnvironmentsTypes =
   | 'DEVELOPMENT'
@@ -12,7 +12,7 @@ export type EnvironmentsTypes =
 export const Environments = ['DEVELOPMENT', 'STAGING', 'PRODUCTION', 'TESTING'];
 
 export class EnvironmentSettings {
-  constructor(private env: EnvironmentsTypes) { }
+  constructor(private env: EnvironmentsTypes) {}
 
   getEnv() {
     return this.env;
@@ -38,31 +38,29 @@ export class EnvironmentSettings {
 export class AppSettings {
   constructor(
     public env: EnvironmentSettings,
-    public api: APISettings
-  ) {
-  }
+    public api: APISettings,
+  ) {}
 }
-
 
 class APISettings {
   public readonly APP_PORT: number;
   public readonly ADMIN_LOGIN: string;
   public readonly ADMIN_PASSWORD: string;
 
-
   public readonly MONGO_CONNECTION_URI: string;
-
 
   constructor(private readonly envVariables: EnvironmentVariable) {
     // Application
-    this.APP_PORT = this.getNumberOrDefault(envVariables.APP_PORT as string, 4000);
+    this.APP_PORT = this.getNumberOrDefault(
+      envVariables.APP_PORT as string,
+      4000,
+    );
     this.ADMIN_LOGIN = envVariables.ADMIN_LOGIN ?? 'admin';
     this.ADMIN_PASSWORD = envVariables.ADMIN_PASSWORD ?? 'qwerty';
 
     // Database
     this.MONGO_CONNECTION_URI =
       envVariables.MONGO_CONNECTION_URI ?? 'mongodb://localhost/nest';
-
   }
 
   private getNumberOrDefault(value: any, defaultValue: number): number {

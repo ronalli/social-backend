@@ -7,31 +7,35 @@ export class DeleteCommentCommand {
   constructor(
     public commentId: string,
     public userId: string,
-  ) {
-  }
+  ) {}
 }
 
-
 @CommandHandler(DeleteCommentCommand)
-export class DeleteCommentHandler implements ICommandHandler<DeleteCommentCommand> {
+export class DeleteCommentHandler
+  implements ICommandHandler<DeleteCommentCommand>
+{
   constructor(
     private readonly commentsRepository: CommentsRepository,
     private readonly commentsQueryRepository: CommentsQueryRepository,
-  ) {
-  }
+  ) {}
 
   async execute(command: DeleteCommentCommand) {
-
-    const {commentId, userId} = command;
+    const { commentId, userId } = command;
 
     const result = await this.commentsQueryRepository.getCommentById(commentId);
 
     if (!result) {
-      throw new NotFoundException([{message: 'Not found comment', field: 'commentId'}])
+      throw new NotFoundException([
+        { message: 'Not found comment', field: 'commentId' },
+      ]);
     }
     if (result && userId !== result.userId) {
-
-      throw new ForbiddenException([{message: 'Try edit the comment that is not your own', field: 'userId'}])
+      throw new ForbiddenException([
+        {
+          message: 'Try edit the comment that is not your own',
+          field: 'userId',
+        },
+      ]);
     }
     return await this.commentsRepository.deleteComment(commentId);
   }

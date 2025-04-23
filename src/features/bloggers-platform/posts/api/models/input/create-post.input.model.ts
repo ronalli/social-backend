@@ -2,7 +2,6 @@ import { IsNotEmpty, IsString, Length } from 'class-validator';
 import { Trim } from '../../../../../../common/decorators/transform/trim';
 
 export class PostCreateModel {
-
   @IsString()
   @IsNotEmpty()
   @Trim()

@@ -4,27 +4,30 @@ import { jwtService } from './jwt.service';
 
 export const serviceInfoLike = {
   async getIdUserByToken(token: string | undefined): Promise<string> {
-    if(!token) {
-      return 'None'
+    if (!token) {
+      return 'None';
     }
-    return jwtService.getUserIdByToken(token)
+    return jwtService.getUserIdByToken(token);
   },
 
-  async initializeStatusLike(token: string, parentId: string, LikeModel: LikeModelType) {
-    const currentAccount = await decodeToken(token)
+  async initializeStatusLike(
+    token: string,
+    parentId: string,
+    LikeModel: LikeModelType,
+  ) {
+    const currentAccount = await decodeToken(token);
 
-    if(!currentAccount) {
-      return 'None'
+    if (!currentAccount) {
+      return 'None';
     }
 
-    const response = await LikeModel.findOne(({
-      $and: [{userId: currentAccount.userId}, {parentId:  parentId}]
-    }))
+    const response = await LikeModel.findOne({
+      $and: [{ userId: currentAccount.userId }, { parentId: parentId }],
+    });
 
-    if(!response) {
-      return 'None'
+    if (!response) {
+      return 'None';
     }
-    return response.status
-  }
-}
-
+    return response.status;
+  },
+};

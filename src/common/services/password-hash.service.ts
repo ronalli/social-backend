@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcrypt';
 
 export const bcryptService = {
   generateHash: async (password: string) => {
@@ -8,5 +8,5 @@ export const bcryptService = {
 
   checkPassword: async (password: string, hash: string) => {
     return bcrypt.compare(password, hash);
-  }
-}
+  },
+};

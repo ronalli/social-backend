@@ -39,11 +39,11 @@ export class SecurityRepository {
   }
 
   async deleteDevicesButCurrent(data: IDecodeRefreshToken) {
-    const { iat, userId } = data;
+    const { userId, deviceId } = data;
 
-    const query = `DELETE FROM public."deviceSessions" WHERE ("userId" = $1 AND NOT iat = $2);`;
+    const query = `DELETE FROM public."deviceSessions" WHERE ("userId" = $1 AND "deviceId" != $2);`;
 
-    const result = await this.dataSource.query(query, [userId, iat]);
+    const result = await this.dataSource.query(query, [userId, deviceId]);
 
     return result[1] > 0;
   }

@@ -68,7 +68,7 @@ export class AuthService {
             deviceId: devicedId,
             userId: String(result[0].id),
           },
-          '20s',
+          '1h',
         );
 
         await this.securityService.createAuthSessions(
@@ -106,7 +106,7 @@ export class AuthService {
       ]);
     }
 
-    console.log('e45346', new Date().toISOString());
+    // console.log('e45346', new Date().toISOString());
 
     const hash = await bcryptService.generateHash(password);
     const createdAt = new Date().toISOString();

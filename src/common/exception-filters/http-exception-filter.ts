@@ -9,13 +9,6 @@ import { Response } from 'express';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  private readonly emptyResponseStatuses = [
-    HttpStatus.UNAUTHORIZED,
-    HttpStatus.NOT_FOUND,
-    HttpStatus.INTERNAL_SERVER_ERROR,
-    HttpStatus.FORBIDDEN,
-    HttpStatus.TOO_MANY_REQUESTS,
-  ];
 
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -55,33 +48,24 @@ export class HttpExceptionFilter implements ExceptionFilter {
     //   });
     // }
 
-    if (this.emptyResponseStatuses.includes(status)) {
-      return response.status(status).json({});
+    if (status === HttpStatus.UNAUTHORIZED) {
+      response.status(status).json({});
     }
 
-    return response.status(status).json({
-      statusCode: status,
-      message: exception.message,
-    });
+    if (status === HttpStatus.NOT_FOUND) {
+      response.status(status).json({});
+    }
 
-    // if (status === HttpStatus.UNAUTHORIZED) {
-    //   response.status(status).json({});
-    // }
-    //
-    // if (status === HttpStatus.NOT_FOUND) {
-    //   response.status(status).json({});
-    // }
-    //
-    // if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
-    //   response.status(status).json({});
-    // }
-    //
-    // if (status === HttpStatus.FORBIDDEN) {
-    //   response.status(status).json({});
-    // }
-    //
-    // if (status === HttpStatus.TOO_MANY_REQUESTS) {
-    //   response.status(status).json({});
-    // }
+    if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
+      response.status(status).json({});
+    }
+
+    if (status === HttpStatus.FORBIDDEN) {
+      response.status(status).json({});
+    }
+
+    if (status === HttpStatus.TOO_MANY_REQUESTS) {
+      response.status(status).json({});
+    }
   }
 }

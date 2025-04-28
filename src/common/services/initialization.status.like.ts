@@ -10,24 +10,24 @@ export const serviceInfoLike = {
     return jwtService.getUserIdByToken(token);
   },
 
-  async initializeStatusLike(
-    token: string,
-    parentId: string,
-    LikeModel: LikeModelType,
-  ) {
-    const currentAccount = await decodeToken(token);
-
-    if (!currentAccount) {
-      return 'None';
-    }
-
-    const response = await LikeModel.findOne({
-      $and: [{ userId: currentAccount.userId }, { parentId: parentId }],
-    });
-
-    if (!response) {
-      return 'None';
-    }
-    return response.status;
-  },
+  // async initializeStatusLike(
+  //   token: string,
+  //   parentId: string,
+  //   LikeModel: LikeModelType,
+  // ) {
+  //   const currentAccount = await decodeToken(token);
+  //
+  //   if (!currentAccount) {
+  //     return 'None';
+  //   }
+  //
+  //   const response = await LikeModel.findOne({
+  //     $and: [{ userId: currentAccount.userId }, { parentId: parentId }],
+  //   });
+  //
+  //   if (!response) {
+  //     return 'None';
+  //   }
+  //   return response.status;
+  // },
 };

@@ -174,16 +174,22 @@ describe('Security', () => {
       .expect(200);
 
     expect(resp.body.length).toBe(3);
-
-  })
+  });
 
   it('should be return 403, when other user try to delete session by id ', async () => {
-
     const user = await serviceSecurity.registrationUser(app, 'john');
     const user1 = await serviceSecurity.registrationUser(app, 'alina');
 
-    const {refreshToken} = await serviceSecurity.authorizationUser(app, user.login, user.password);
-    const {refreshToken: rf2} = await serviceSecurity.authorizationUser(app, user1.login, user1.password);
+    const { refreshToken } = await serviceSecurity.authorizationUser(
+      app,
+      user.login,
+      user.password,
+    );
+    const { refreshToken: rf2 } = await serviceSecurity.authorizationUser(
+      app,
+      user1.login,
+      user1.password,
+    );
 
     const decode1 = (await jwtService.decodeToken(refreshToken)) as {
       deviceId: string;
@@ -198,14 +204,72 @@ describe('Security', () => {
       .set('Cookie', `refreshToken=${rf2}`)
       .expect(403);
 
-
     await customRequest(app)
       .delete(`security/devices/${decode2.deviceId}`)
       .set('Cookie', `refreshToken=${refreshToken}`)
       .expect(403);
+  });
 
-  })
+  it('should be return 404, when user try to delete session by id, but this session not found', async () => {
+    const user = await serviceSecurity.registrationUser(app, 'dark');
 
+    const { refreshToken } = await serviceSecurity.authorizationUser(
+      app,
+      user.login,
+      user.password,
+    );
+
+    await customRequest(app)
+      .delete(`security/devices/${randomUUID()}`)
+      .set('Cookie', `refreshToken=${refreshToken}`)
+      .expect(404);
+  });
+
+  it('should correctly handle concurrent session deletions', async () => {
+    const user1 = await serviceSecurity.registrationUser(app, 'user1');
+    const user2 = await serviceSecurity.registrationUser(app, 'user2');
+
+    const sessions1 = [];
+    const sessions2 = [];
+
+    for (let i = 0; i < 3; i++) {
+      sessions1.push(
+        await serviceSecurity.authorizationUser(
+          app,
+          user1.login,
+          user1.password,
+        ),
+      );
+      sessions2.push(
+        await serviceSecurity.authorizationUser(
+          app,
+          user2.login,
+          user2.password,
+        ),
+      );
+    }
+    await Promise.all([
+      customRequest(app)
+        .delete('security/devices')
+        .set('Cookie', `refreshToken=${sessions1[0].refreshToken}`)
+        .expect(204),
+      customRequest(app)
+        .delete('security/devices')
+        .set('Cookie', `refreshToken=${sessions2[0].refreshToken}`)
+        .expect(204),
+    ]);
+
+    const resp1 = await customRequest(app)
+      .get('security/devices')
+      .set('Cookie', `refreshToken=${sessions1[0].refreshToken}`)
+      .expect(200);
+
+    const resp2 = await customRequest(app)
+      .get('security/devices')
+      .set('Cookie', `refreshToken=${sessions2[0].refreshToken}`)
+      .expect(200);
+
+    expect(resp1.body.length).toBe(1);
+    expect(resp2.body.length).toBe(1);
+  });
 });
-
-//functions 73.66 lines 80.48

@@ -68,7 +68,7 @@ export class AuthService {
             deviceId: devicedId,
             userId: String(result[0].id),
           },
-          '1h',
+          '20s', //1h
         );
 
         await this.securityService.createAuthSessions(

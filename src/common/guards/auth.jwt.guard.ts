@@ -22,6 +22,7 @@ export class AuthJwtGuard implements CanActivate {
       request.headers.authorization,
     );
 
+
     if (result.status === ResultCode.Success && result.data) {
       request['userId'] = result.data;
       request['login'] = result.login;

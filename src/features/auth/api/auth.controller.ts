@@ -25,6 +25,7 @@ import { MappingsRequestHeadersService } from '../../../common/utils/mappings.re
 
 import { SkipThrottle } from '@nestjs/throttler';
 import { HTTP_STATUSES } from '../../../settings/http.status';
+import { RecoveryPasswordInputModel } from '../../users/api/models/input/recovery-password.input.model';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -61,11 +62,11 @@ export class AuthController {
   @HttpCode(HTTP_STATUSES.NotContent)
   @Post('password-recovery')
   async passwordRecovery(
-    @Body('email') email: string,
+    @Body() body: RecoveryPasswordInputModel,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    await this.authService.recoveryCode(email);
+    await this.authService.recoveryCode(body.email);
     res.json();
   }
 
@@ -150,6 +151,8 @@ export class AuthController {
 
     if (!result) throw new NotFoundException('User not found');
 
-    return this.mappingsUsersService.formatViewModel(result);
+    const resp = this.mappingsUsersService.formatViewModel(result);
+
+    res.json(resp);
   }
 }

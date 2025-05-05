@@ -10,7 +10,7 @@ import {
   Put,
   UseGuards,
   BadRequestException,
-  NotFoundException,
+  NotFoundException, Headers,
 } from '@nestjs/common';
 
 import { CommandBus } from '@nestjs/cqrs';
@@ -49,13 +49,13 @@ export class CommentsController {
       new UpdateLikeStatusCommentCommand(commentId, userId, data.likeStatus),
     );
 
-    return res.status(204).send({});
+    return res.sendStatus(204);
   }
 
   @UseGuards(AuthJwtGuard)
   @Put(':commentId')
   async updateComment(
-    @Param('commentId') commentId: string,
+    @Param('commentId', ValidateObjectIdPipe) commentId: string,
     @Body() content: UpdateCommentModel,
     @Req() req: Request,
     @Res() res: Response,
@@ -71,7 +71,7 @@ export class CommentsController {
         { message: 'If the inputModel has incorrect values', field: 'value' },
       ]);
 
-    return res.status(204).send({});
+    return res.sendStatus(204);
   }
 
   @UseGuards(AuthJwtGuard)
@@ -83,19 +83,20 @@ export class CommentsController {
   ) {
     const userId = req.userId!;
     await this.commandBus.execute(new DeleteCommentCommand(commentId, userId));
-    return res.status(204).send({});
+    return res.sendStatus(204);
   }
 
   @Get(':commentId')
   async getComment(
     @Param('commentId', ValidateObjectIdPipe) commentId: string,
+    @Headers('authorization') authHeader: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const foundedComment =
+    const foundComment =
       await this.commentsQueryRepository.isCommentDoesExist(commentId);
 
-    if (!foundedComment) {
+    if (!foundComment) {
       throw new NotFoundException([
         {
           message: `If comment with specified postId doesn\'t exists`,
@@ -104,7 +105,7 @@ export class CommentsController {
       ]);
     }
 
-    const token = req.headers?.authorization?.split(' ')[1] || '';
+    const token = authHeader?.split(' ')[1] || '';
 
     const userId = await jwtService.getUserIdByToken(token);
 

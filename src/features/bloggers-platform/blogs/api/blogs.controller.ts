@@ -5,6 +5,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   NotFoundException,
   Param,
@@ -39,8 +40,7 @@ export class BlogsController {
     private readonly blogsQueryRepository: BlogsQueryRepository,
     private readonly commandBus: CommandBus,
     private readonly postsService: PostsService,
-  ) {
-  }
+  ) {}
 
   @UseGuards(BasicAuthGuard)
   @Get('sa/blogs')
@@ -88,13 +88,13 @@ export class BlogsController {
 
   @UseGuards(BasicAuthGuard)
   @Post('sa/blogs/:blogId/posts')
+  @HttpCode(HTTP_STATUSES.Created)
   async createPostForSpecialBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Body() post: PostCreateModelQuery,
-    @Req() req: Request,
-    @Res() res: Response,
+    @Headers('authorization') authHeader: string,
   ) {
-    const token = req.headers.authorization?.split(' ')[1] || 'unknown';
+    const token = authHeader?.split(' ')[1] || 'unknown';
     const currentUser = await serviceInfoLike.getIdUserByToken(token);
     const { title, shortDescription, content } = post;
 
@@ -112,34 +112,29 @@ export class BlogsController {
       ),
     );
 
-    const newPost = await this.postsService.getPost(idCreatedPost, currentUser);
-
-    return res.status(HTTP_STATUSES.Created).send(newPost);
+    return await this.postsService.getPost(idCreatedPost, currentUser);
   }
 
   @UseGuards(BasicAuthGuard)
   @Get('sa/blogs/:blogId/posts')
+  @HttpCode(HTTP_STATUSES.Success)
   async getAllPostsForBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Query() query: QueryParamsDto,
-    @Req() req: Request,
-    @Res() res: Response,
+    @Headers('authorization') authHeader: string,
   ) {
-    const header = req.headers.authorization?.split(' ')[1];
+    const header = authHeader?.split(' ')[1];
     const currentUser = await serviceInfoLike.getIdUserByToken(header);
 
     const blogFound = await this.blogsQueryRepository.blogIsExist(blogId);
 
     if (!blogFound) this.throwBlogNotFoundException(blogId);
 
-    const foundPosts =
-      await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
-        blogId,
-        query,
-        currentUser,
-      );
-
-    return res.status(HTTP_STATUSES.Success).send(foundPosts);
+    return await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
+      blogId,
+      query,
+      currentUser,
+    );
   }
 
   @UseGuards(BasicAuthGuard)
@@ -188,26 +183,21 @@ export class BlogsController {
   async getPublicAllPostsForBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Query() query: QueryParamsDto,
-    @Req() req: Request,
+    @Headers('authorization') authHeader: string,
     @Res() res: Response,
   ) {
-    const header = req.headers.authorization?.split(' ')[1];
+    const header = authHeader?.split(' ')[1];
     const currentUser = await serviceInfoLike.getIdUserByToken(header);
 
     const blogFound = await this.blogsQueryRepository.blogIsExist(blogId);
 
-    if (blogFound) {
-      const foundPosts =
-        await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
-          blogId,
-          query,
-          currentUser,
-        );
+    if (!blogFound) this.throwBlogNotFoundException(blogId);
 
-      return res.status(HTTP_STATUSES.Success).send(foundPosts);
-    }
-
-    this.throwBlogNotFoundException(blogId);
+    return await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
+      blogId,
+      query,
+      currentUser,
+    );
   }
 
   @Get('blogs/:blogId')

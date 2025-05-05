@@ -42,8 +42,8 @@ export class AuthController {
     private readonly mappingsRequestHeadersService: MappingsRequestHeadersService,
   ) {}
 
-  @HttpCode(HTTP_STATUSES.Success)
   @Post('login')
+  @HttpCode(HTTP_STATUSES.Success)
   async login(
     @Body() loginModel: LoginInputModel,
     @Req() req: Request,

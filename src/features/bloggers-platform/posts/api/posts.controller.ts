@@ -5,6 +5,8 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
+  HttpCode,
   NotFoundException,
   Param,
   Post,
@@ -26,6 +28,11 @@ import { CreateCommentCommand } from '../../comments/application/usecases/create
 import { UpdateLikeStatusPostCommand } from '../application/usecases/update-likeStatus.post.usecase';
 import { LikeStatusEntity } from '../../../likes/domain/like.entity';
 import { jwtService } from '../../../../common/services/jwt.service';
+import { HTTP_STATUSES } from '../../../../settings/http.status';
+import {
+  User,
+  UserDecorator,
+} from '../../../../common/decorators/validate/user.decorator';
 
 @ApiTags('Posts')
 @Controller('')
@@ -66,70 +73,47 @@ export class PostsController {
 
   @UseGuards(AuthJwtGuard)
   @Put('posts/:postId/like-status')
+  @HttpCode(HTTP_STATUSES.NotContent)
   async updateLikeStatusForSpecialPost(
     @Param('postId', ValidateObjectIdPipe) postId: string,
     @Body() data: LikeStatusEntity,
-    @Req() req: Request,
-    @Res() res: Response,
+    @User() user: UserDecorator,
   ) {
-    const userId = req.userId!;
-    const login = req.login!;
+    const { id: userId, login } = user;
 
     const foundedPost = await this.postsQueryRepository.isPostDoesExist(postId);
 
-    if (!foundedPost) {
-      throw new NotFoundException([
-        {
-          message: `If post with specified postId doesn\'t exists`,
-          field: 'postId',
-        },
-      ]);
-    }
+    if (!foundedPost) this.throwPostNotFoundException();
 
     await this.commandBus.execute(
       new UpdateLikeStatusPostCommand(postId, userId, data.likeStatus, login),
     );
-
-    return res.status(204).send({});
+    return;
   }
 
   @Get('posts/:postId/comments')
+  @HttpCode(HTTP_STATUSES.Success)
   async getAllCommentsForPost(
     @Param('postId', ValidateObjectIdPipe) postId: string,
     @Query() query: QueryParamsDto,
-    @Req() req: Request,
-    @Res() res: Response,
+    @Headers('authorization') authHeader: string,
   ) {
     const foundedPost = await this.postsQueryRepository.isPostDoesExist(postId);
 
-    if (!foundedPost) {
-      throw new NotFoundException([
-        {
-          message: `If post with specified postId doesn\'t exists`,
-          field: 'postId',
-        },
-      ]);
-    }
+    if (!foundedPost) this.throwPostNotFoundException();
 
-    const token = req.headers.authorization?.split(' ')[1];
-    const result = await this.commentsService.findAllComments(
-      token,
-      postId,
-      query,
-    );
-    res.status(200).send(result);
+    const token = authHeader?.split(' ')[1];
+    return await this.commentsService.findAllComments(token, postId, query);
   }
 
   @UseGuards(AuthJwtGuard)
   @Post('posts/:postId/comments')
+  @HttpCode(HTTP_STATUSES.Created)
   async createCommentForSpecialPost(
     @Param('postId', ValidateObjectIdPipe) postId: string,
     @Body() comment: CreatePostSpecialPostModel,
-    @Req() req: Request,
-    @Res() res: Response,
+    @User('id') userId: string,
   ) {
-    const userId = req.userId!;
-
     const result = await this.commandBus.execute(
       new CreateCommentCommand(comment.content, postId, userId),
     );
@@ -137,44 +121,32 @@ export class PostsController {
     if (!result)
       throw new BadRequestException([{ message: 'Wrong', field: 'bad' }]);
 
-    const response = await this.commentsService.getOneComment(
-      userId,
-      result.id,
-    );
-
-    res.status(201).send(response);
+    return await this.commentsService.getOneComment(userId, result.id);
   }
 
   @Get('posts')
+  @HttpCode(HTTP_STATUSES.Success)
   async getPosts(
     @Query() query: QueryParamsDto,
-    @Req() req: Request,
-    @Res() res: Response,
+    @Headers('authorization') authHeader: string,
   ) {
-    const token = req.headers.authorization?.split(' ')[1];
-    const result = await this.postsService.getAllPosts(token, query);
-
-    res.status(200).send(result);
+    const token = authHeader?.split(' ')[1];
+    return await this.postsService.getAllPosts(token, query);
   }
 
   @Get('posts/:id')
+  @HttpCode(HTTP_STATUSES.Success)
   async getPost(
     @Param('id', ValidateObjectIdPipe) id: string,
-    @Req() req: Request,
-    @Res() res: Response,
+    @Headers('authorization') authHeader: string,
   ) {
     const foundedPost = await this.postsQueryRepository.isPostDoesExist(id);
 
-    if (!foundedPost) {
-      throw new NotFoundException([
-        { message: 'Not found post', field: 'postId' },
-      ]);
-    }
+    if (!foundedPost) this.throwPostNotFoundException();
 
-    const token = req.headers?.authorization?.split(' ')[1] || '';
+    const token = authHeader?.split(' ')[1] || '';
     const userId = await jwtService.getUserIdByToken(token);
-    const result = await this.postsService.getPost(id, userId);
-    res.status(200).send(result);
+    return await this.postsService.getPost(id, userId);
   }
 
   // @UseGuards(BasicAuthGuard)
@@ -206,4 +178,13 @@ export class PostsController {
   // async deletePost(@Param('id', ValidateObjectIdPipe) id: string) {
   //   return await this.postsService.deletePost(id);
   // }
+
+  private throwPostNotFoundException(): never {
+    throw new NotFoundException([
+      {
+        message: `If post with specified postId doesn\'t exists`,
+        field: 'postId',
+      },
+    ]);
+  }
 }

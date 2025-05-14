@@ -1,7 +1,4 @@
 import { INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { applyAppSettings } from '../../src/settings/apply.app.setting';
 import { DataSource } from 'typeorm';
 import { customRequest } from '../utils/custom-request';
 import * as process from 'node:process';

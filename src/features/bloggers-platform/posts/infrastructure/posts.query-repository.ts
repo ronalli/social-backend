@@ -8,6 +8,7 @@ import {
   PostDB,
   PostOutputModelDB,
 } from '../api/models/output/post.output.model';
+import { createOrderByClause } from '../../../../common/utils/orderByClause';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -23,7 +24,9 @@ export class PostsQueryRepository {
 
     const { pageNumber, pageSize, sortBy, sortDirection } = defaultQueryParams;
 
-    const query1 = `
+    const orderByClause = createOrderByClause(sortBy, sortDirection);
+
+    const query = `
     WITH result AS (
       SELECT 
         p.id, 
@@ -55,13 +58,13 @@ export class PostsQueryRepository {
      LEFT JOIN public."postsLikeStatus" s ON s."postId" = p.id AND s."userId" = $1
        )
      SELECT * FROM result
-     ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
+     ORDER BY ${orderByClause}
      LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;
 
-    const query = `SELECT * FROM public.posts ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
-        LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;
+    // const query = `SELECT * FROM public.posts ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
+    //     LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;
 
-    const response = await this.dataSource.query(query1, [userId]);
+    const response = await this.dataSource.query(query, [userId]);
 
     const totalQuery = `SELECT * FROM public.posts;`;
 

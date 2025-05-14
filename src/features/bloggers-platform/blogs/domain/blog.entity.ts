@@ -14,7 +14,7 @@ export class BlogEntity {
   websiteUrl: string;
 
   @IsString()
-  createdAt: string;
+  createdAt: Date;
 
   @IsString()
   isMembership: boolean;

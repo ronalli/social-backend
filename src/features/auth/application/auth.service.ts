@@ -106,10 +106,8 @@ export class AuthService {
       ]);
     }
 
-    // console.log('e45346', new Date().toISOString());
-
     const hash = await bcryptService.generateHash(password);
-    const createdAt = new Date().toISOString();
+    const createdAt = new Date();
     const id = randomUUID();
     const confirmation = new ConfirmationInfoEmail(id);
 

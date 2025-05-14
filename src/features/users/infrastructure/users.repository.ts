@@ -13,7 +13,7 @@ export class UsersRepository {
     login: string,
     email: string,
     hash: string,
-    createdAt: string,
+    createdAt: Date,
     confirmation: ConfirmationInfoEmail,
   ): Promise<string> {
     const values = [id, login, email, hash, createdAt];
@@ -53,11 +53,13 @@ export class UsersRepository {
 
   async delete(id: string): Promise<boolean> {
     const query = `WITH deleted_table AS (
-        DELETE FROM public."confirmationEmailUsers"
-        WHERE "userId" = $1
-        )
-        DELETE FROM public."users" WHERE "id" = $1
-        ;`;
+    DELETE
+    FROM public."confirmationEmailUsers"
+    WHERE "userId" = $1 )
+    DELETE
+    FROM public."users"
+    WHERE "id" = $1
+    ;`;
 
     const result = await this.dataSource.query(query, [id]);
 

@@ -14,7 +14,7 @@ export class BlogsService {
     post: PostUpdateSpecialModel,
     blogId: string,
     postId: string,
-  ) {
+  ): Promise<boolean> {
     return await this.blogsRepository.updatePost(post, blogId, postId);
   }
 

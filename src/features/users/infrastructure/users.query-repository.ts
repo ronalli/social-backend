@@ -1,11 +1,8 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserQueryDto } from '../api/models/user-query.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { createOrderByClause } from '../../../common/utils/orderByClause';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -41,6 +38,8 @@ export class UsersQueryRepository {
 
     const pagesCount = Math.ceil(totalCount.length / pageSize);
 
+    const orderByClause = createOrderByClause(sortBy, sortDirection);
+
     const query = `
             SELECT id, login, email, "createdAt" 
             FROM public."users" 
@@ -48,7 +47,7 @@ export class UsersQueryRepository {
             ($1::text IS NULL AND $2::text IS NULL)
              OR 
              (login ILIKE COALESCE($1::text, '%') OR email ILIKE COALESCE($2::text, '%'))
-            ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
+            ORDER BY ${orderByClause}
             LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)}
             `;
 
@@ -98,7 +97,7 @@ export class UsersQueryRepository {
     return { resultLogin, resultEmail };
   }
 
-  async doesExistByEmail(email: string) {
+  async doesExistByEmail(email: string): Promise<boolean> {
     const query = `SELECT * FROM public."users" WHERE email = $1`;
 
     const response = await this.dataSource.query(query, [email]);

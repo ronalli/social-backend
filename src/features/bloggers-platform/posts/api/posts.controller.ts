@@ -1,4 +1,3 @@
-import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import {
   BadRequestException,
@@ -12,8 +11,6 @@ import {
   Post,
   Put,
   Query,
-  Req,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import { PostsService } from '../application/posts.service';

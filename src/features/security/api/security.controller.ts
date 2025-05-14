@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Req,
@@ -29,43 +30,46 @@ export class SecurityController {
     private readonly securityService: SecurityService,
   ) {}
 
-  @UseGuards(RefreshTokenGuard)
+  // @UseGuards(RefreshTokenGuard)
   @Get('devices')
   async getSessions(@Req() req: Request) {
     const token = req.cookies.refreshToken;
     const data = await decodeToken(token);
 
-    if (!data) {
+    if (!data?.userId) {
       throw new UnauthorizedException();
     }
 
-    const { userId } = data;
+    // const { userId } = data;
 
-    const response = await this.securityQueryRepository.allSessionsUser(userId);
+    const sessions = await this.securityQueryRepository.allSessionsUser(
+      data.userId,
+    );
 
-    if (!response) throw new UnauthorizedException();
+    if (!sessions) throw new UnauthorizedException();
 
-    return mappingSessions(response);
+    return mappingSessions(sessions);
   }
 
-  @UseGuards(RefreshTokenGuard)
+  // @UseGuards(RefreshTokenGuard)
+  @HttpCode(HTTP_STATUSES.NotContent)
   @Delete('devices')
-  async deleteAllDevices(@Req() req: Request, @Res() res: Response) {
+  async deleteAllDevices(@Req() req: Request) {
     const refreshToken = req.cookies.refreshToken;
 
-    const response = await this.securityService.deleteDevices(refreshToken);
+    const isDeleted = await this.securityService.deleteDevices(refreshToken);
 
-    if (response) return res.status(HTTP_STATUSES.NotContent).send({});
+    if (!isDeleted) throw new UnauthorizedException();
 
-    throw new UnauthorizedException();
+    return;
   }
 
-  @UseGuards(RefreshTokenGuard)
+  // @UseGuards(RefreshTokenGuard)
+  @HttpCode(HTTP_STATUSES.NotContent)
   @Delete('devices/:deviceId')
   async deleteDeviceById(
     @Param('deviceId') deviceId: string,
     @Req() req: Request,
-    @Res() res: Response,
   ) {
     const refreshToken = req.cookies.refreshToken;
 
@@ -75,11 +79,12 @@ export class SecurityController {
 
     const decode = await decodeToken(refreshToken);
 
-    if (decode) {
-      await this.securityService.deleteAuthSessionWithParam(decode, deviceId);
-
-      return res.status(HTTP_STATUSES.NotContent).send({});
+    if (!decode) {
+      throw new UnauthorizedException();
     }
-    throw new UnauthorizedException();
+
+    await this.securityService.deleteAuthSessionWithParam(decode, deviceId);
+
+    return;
   }
 }

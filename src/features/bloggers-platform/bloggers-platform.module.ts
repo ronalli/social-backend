@@ -23,7 +23,6 @@ import { CommentsQueryRepository } from './comments/infrastructure/comments.quer
 import { CommentsController } from './comments/api/comments.controller';
 import { CommentsService } from './comments/application/comments.service';
 import { UpdateLikeStatusPostHandler } from './posts/application/usecases/update-likeStatus.post.usecase';
-import { LikesModule } from '../likes/likes.module';
 import { LikesRepository } from '../likes/infrastructure/likes.repository';
 import { UpdateLikeStatusCommentHandler } from './comments/application/usecases/update-likeStatus.usecase';
 import { UpdateCommentHandler } from './comments/application/usecases/update-comment.usecase';
@@ -34,7 +33,6 @@ import { UpdatePostHandler } from './posts/application/usecases/update-post.usec
 
 @Module({
   imports: [CqrsModule, AuthModule, UsersModule],
-  //   controllers: [CommentsController, PostsController, BlogsController],
   controllers: [BlogsController, PostsController, CommentsController],
   providers: [
     PostsService,
@@ -62,7 +60,6 @@ import { UpdatePostHandler } from './posts/application/usecases/update-post.usec
     UpdateCommentHandler,
     DeleteCommentHandler,
     UpdatePostHandler,
-    //     ,  UpdateLikeStatusHandler,
   ],
   exports: [
     BlogsService,
@@ -75,8 +72,5 @@ import { UpdatePostHandler } from './posts/application/usecases/update-post.usec
     CommentsRepository,
     CommentsQueryRepository,
   ],
-  // exports: [BlogsService, BlogsQueryRepository, BlogsRepository, PostsService, PostsRepository, PostsQueryRepository, CommentsService, CommentsRepository]
 })
-//
-//
 export class BloggersPlatformModule {}

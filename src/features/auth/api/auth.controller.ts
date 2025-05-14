@@ -91,22 +91,23 @@ export class AuthController {
   @Post('registration-confirmation')
   async confirmationEmail(
     @Body('code') code: string,
-    @Req() req: Request,
-    @Res() res: Response,
+    // @Req() req: Request,
+    // @Res() res: Response,
   ) {
     await this.authService.confirmEmail(code);
-    res.json();
+    return;
   }
 
   @HttpCode(HTTP_STATUSES.NotContent)
   @Post('registration')
   async registration(
     @Body() registerModel: UserCreateModel,
-    @Req() req: Request,
-    @Res() res: Response,
+    // @Req() req: Request,
+    // @Res() res: Response,
   ) {
     await this.authService.registration(registerModel);
-    res.json();
+    // res.json();
+    return;
   }
 
   @HttpCode(HTTP_STATUSES.NotContent)

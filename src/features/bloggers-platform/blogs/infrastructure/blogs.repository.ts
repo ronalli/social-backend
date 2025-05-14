@@ -16,7 +16,8 @@ export class BlogsRepository {
   async create(blog: BlogEntity) {
     const { id, name, description, websiteUrl, createdAt, isMembership } = blog;
 
-    const query = `INSERT INTO public."blogs" (id, "createdAt", description, name, "websiteUrl", "isMembership") VALUES($1, $2, $3, $4, $5, $6) RETURNING *;`;
+    const query = `INSERT INTO public."blogs" (id, "createdAt", description, name, "websiteUrl", "isMembership")
+                   VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;`;
 
     const result = await this.dataSource.query(query, [
       id,
@@ -31,7 +32,11 @@ export class BlogsRepository {
   }
 
   async updateBlog(blog: BlogUpdateModel) {
-    const query = `UPDATE public.blogs SET name = $1, description = $2, "websiteUrl" = $3 WHERE id = $4 RETURNING *;`;
+    const query = `UPDATE public.blogs
+                   SET name         = $1,
+                       description  = $2,
+                       "websiteUrl" = $3
+                   WHERE id = $4 RETURNING *;`;
 
     const values = [blog.name, blog.description, blog.websiteUrl, blog.blogId];
 
@@ -40,7 +45,7 @@ export class BlogsRepository {
     return response[0];
   }
 
-  async delete(blogId: string) {
+  async delete(blogId: string): Promise<boolean> {
     const foundBlog = await this.findBlogById(blogId);
 
     if (!foundBlog)
@@ -68,7 +73,12 @@ export class BlogsRepository {
   ): Promise<boolean> {
     const { title, shortDescription, content } = post;
 
-    const query = `UPDATE public.posts SET title = $1, "shortDescription" = $2, content = $3 WHERE id = $4 AND "blogId" = $5 RETURNING *;`;
+    const query = `UPDATE public.posts
+                   SET title              = $1,
+                       "shortDescription" = $2,
+                       content            = $3
+                   WHERE id = $4
+                     AND "blogId" = $5 RETURNING *;`;
 
     const result = await this.dataSource.query(query, [
       title,

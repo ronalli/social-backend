@@ -23,7 +23,7 @@ export class CreateBlogHandler implements ICommandHandler<CreateBlogCommand> {
       name,
       description,
       websiteUrl,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
       isMembership: false,
     };
 

@@ -65,7 +65,7 @@ export class PostsRepository {
   //
   // }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<boolean> {
     const query = `DELETE FROM public.posts WHERE id = $1 RETURNING *;`;
 
     const result = await this.dataSource.query(query, [id]);

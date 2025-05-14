@@ -62,5 +62,6 @@ export class UsersController {
     if (!result) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
+    return;
   }
 }

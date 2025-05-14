@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { CommentOutputModelDB } from '../api/models/output/comment.output.model';
 import { CommentQueryDto } from '../api/models/comment-query.dto';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
+import { createOrderByClause } from '../../../../common/utils/orderByClause';
 
 @Injectable()
 export class CommentsQueryRepository {
@@ -71,6 +72,8 @@ export class CommentsQueryRepository {
 
     const pagesCount = Math.ceil(totalCount.length / pageSize);
 
+    const orderByClause = createOrderByClause(sortBy, sortDirection);
+
     const query = `
         WITH result AS (
           SELECT 
@@ -88,7 +91,7 @@ export class CommentsQueryRepository {
           WHERE "postId" = $2 
           ) 
         SELECT * FROM result
-        ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
+        ORDER BY ${orderByClause}
         LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)}
         `;
 

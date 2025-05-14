@@ -14,5 +14,5 @@ export class RegistrationModelUser {
   hash: string;
 
   @IsString()
-  createdAt: string;
+  createdAt: Date;
 }

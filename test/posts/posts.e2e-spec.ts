@@ -2,7 +2,6 @@ import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { randomUUID } from 'node:crypto';
 import { customRequest } from '../utils/custom-request';
-import * as process from 'node:process';
 import { serviceBlogs } from '../utils/blogs/service-blogs';
 import { servicePost } from '../utils/posts/service-post';
 import { initAppAndClearDB } from '../utils/base.init-settings';

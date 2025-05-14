@@ -30,7 +30,7 @@ export class SecurityRepository {
     return result[0];
   }
 
-  async deleteDevice(iat: string, deviceId: string) {
+  async deleteDevice(iat: string, deviceId: string): Promise<boolean> {
     const query = `DELETE FROM public."deviceSessions" WHERE iat = $1 AND "deviceId" = $2;`;
 
     const result = await this.dataSource.query(query, [iat, deviceId]);
@@ -38,7 +38,7 @@ export class SecurityRepository {
     return result[1] > 0;
   }
 
-  async deleteDevicesButCurrent(data: IDecodeRefreshToken) {
+  async deleteDevicesButCurrent(data: IDecodeRefreshToken): Promise<boolean> {
     const { userId, deviceId } = data;
 
     const query = `DELETE FROM public."deviceSessions" WHERE ("userId" = $1 AND "deviceId" != $2);`;
@@ -56,7 +56,7 @@ export class SecurityRepository {
     return result[0];
   }
 
-  async updateDevice(data: IDecodeRefreshToken) {
+  async updateDevice(data: IDecodeRefreshToken): Promise<boolean> {
     const { iat, deviceId, userId, exp } = data;
 
     const query = `UPDATE public."deviceSessions" SET iat = $1, exp = $2 WHERE "deviceId" = $3 AND "userId" = $4;`;

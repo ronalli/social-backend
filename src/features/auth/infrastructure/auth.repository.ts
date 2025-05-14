@@ -38,11 +38,13 @@ export class AuthRepository {
       confirmation.confirmationCode,
     ];
 
-    const query = `INSERT INTO public."users" (id, login, email, hash, "createdAt") VALUES($1, $2, $3, $4, $5) RETURNING *;`;
+    const query = `INSERT INTO public."users" (id, login, email, hash, "createdAt")
+                   VALUES ($1, $2, $3, $4, $5) RETURNING *;`;
 
     const response = await this.dataSource.query(query, valuesUser);
 
-    const queryEmail = `INSERT INTO public."confirmationEmailUsers" ("userId", "isConfirmed", "expirationDate", "confirmationCode") VALUES($1, $2, $3, $4) RETURNING *`;
+    const queryEmail = `INSERT INTO public."confirmationEmailUsers" ("userId", "isConfirmed", "expirationDate", "confirmationCode")
+                        VALUES ($1, $2, $3, $4) RETURNING *`;
 
     await this.dataSource.query(queryEmail, valuesEmail);
 
@@ -75,7 +77,8 @@ export class AuthRepository {
     const id = randomUUID();
 
     const query = `
-    INSERT INTO public."oldRefreshTokens" (id, "refreshToken") VALUES ($1, $2) RETURNING *`;
+      INSERT INTO public."oldRefreshTokens" (id, "refreshToken")
+      VALUES ($1, $2) RETURNING *`;
 
     const result = await this.dataSource.query(query, [id, token]);
 

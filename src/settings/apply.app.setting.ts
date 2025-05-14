@@ -21,7 +21,7 @@ export const applyAppSettings = (app: INestApplication) => {
 
   setAppExceptionsFilters(app);
 
-  // setCors(app)
+  setAppCors(app);
 
 };
 
@@ -57,7 +57,7 @@ const setAppExceptionsFilters = (app: INestApplication) => {
   app.useGlobalFilters(new HttpExceptionFilter());
 };
 
-const setCors = (app: INestApplication) => {
+const setAppCors = (app: INestApplication) => {
   app.enableCors({
     origin: true,
     credentials: true,

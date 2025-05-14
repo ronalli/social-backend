@@ -1,4 +1,3 @@
-import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
@@ -12,8 +11,6 @@ import {
   Post,
   Put,
   Query,
-  Req,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import { BlogCreateModel } from './models/input/create-blog.input.model';
@@ -72,7 +69,7 @@ export class BlogsController {
       new UpdateBlogCommand(name, description, websiteUrl, blogId),
     );
 
-    if (!result) this.throwBlogNotFoundException(blogId);
+    if (!result) this.throwBlogNotFoundException();
 
     return;
   }
@@ -100,7 +97,7 @@ export class BlogsController {
 
     const result = await this.blogsQueryRepository.blogIsExist(blogId);
 
-    if (!result) this.throwBlogNotFoundException(blogId);
+    if (!result) this.throwBlogNotFoundException();
 
     const idCreatedPost = await this.commandBus.execute(
       new CreatePostCommand(
@@ -128,7 +125,7 @@ export class BlogsController {
 
     const blogFound = await this.blogsQueryRepository.blogIsExist(blogId);
 
-    if (!blogFound) this.throwBlogNotFoundException(blogId);
+    if (!blogFound) this.throwBlogNotFoundException();
 
     return await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
       blogId,
@@ -184,14 +181,13 @@ export class BlogsController {
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Query() query: QueryParamsDto,
     @Headers('authorization') authHeader: string,
-    @Res() res: Response,
   ) {
     const header = authHeader?.split(' ')[1];
     const currentUser = await serviceInfoLike.getIdUserByToken(header);
 
     const blogFound = await this.blogsQueryRepository.blogIsExist(blogId);
 
-    if (!blogFound) this.throwBlogNotFoundException(blogId);
+    if (!blogFound) this.throwBlogNotFoundException();
 
     return await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
       blogId,
@@ -204,12 +200,12 @@ export class BlogsController {
   async getBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
     const result = await this.blogsQueryRepository.findBlogById(blogId);
 
-    if (!result) this.throwBlogNotFoundException(blogId);
+    if (!result) this.throwBlogNotFoundException();
 
     return result;
   }
 
-  private throwBlogNotFoundException(blogId: string): never {
+  private throwBlogNotFoundException(): never {
     throw new NotFoundException([
       { message: 'Not found blog', field: 'blogId' },
     ]);

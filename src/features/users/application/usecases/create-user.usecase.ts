@@ -40,7 +40,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     }
 
     const hash = await bcryptService.generateHash(password);
-    const createdAt = new Date().toISOString();
+    const createdAt = new Date();
     const id = randomUUID();
     const confirmation = new ConfirmationInfoEmail(id, false);
 

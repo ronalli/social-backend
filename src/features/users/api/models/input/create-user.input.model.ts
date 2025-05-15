@@ -21,7 +21,7 @@ export class UserCreateModel {
   @Length(6, 20)
   password: string;
 
-  @ApiProperty({pattern: '/^[\\w.-]+@([\\w-]+\\.)+[\\w-]{2,4}$/', example: 'bob@example.com'})
+  @ApiProperty({pattern: '^[\\w.-]+@([\\w-]+\\.)+[\\w-]{2,4}$', example: 'bob@example.com'})
   @IsString()
   @Trim()
   @IsNotEmpty()

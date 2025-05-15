@@ -1,6 +1,8 @@
 import { IsString, isUUID } from 'class-validator';
 
 export class BlogEntity {
+
+
   @IsString()
   id: string;
 

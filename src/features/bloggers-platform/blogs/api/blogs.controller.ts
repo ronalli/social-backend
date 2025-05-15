@@ -1,4 +1,4 @@
-import { ApiBasicAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBasicAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -13,14 +13,14 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { BlogCreateModel } from './models/input/create-blog.input.model';
+import { BlogInputModel } from './models/input/create-blog.input.model';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
 import { BlogsService } from '../application/blogs.service';
 import { PostsService } from '../../posts/application/posts.service';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateBlogCommand } from '../application/usecases/create-blog.usecase';
 import { UpdateBlogCommand } from '../application/usecases/update-blog.usecase';
-import { PostCreateModelQuery } from '../../posts/api/models/input/create-post.input.query.model';
+import { PostInputModel } from '../../posts/api/models/input/create-post.input.query.model';
 import { BasicAuthGuard } from '../../../../common/guards/auth.basic.guard';
 import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdPipe';
 import { QueryParamsDto } from '../../../../common/models/query-params.dto';
@@ -28,6 +28,8 @@ import { serviceInfoLike } from '../../../../common/services/initialization.stat
 import { CreatePostCommand } from '../../posts/application/usecases/create-post.usecase';
 import { PostUpdateSpecialModel } from '../../posts/api/models/input/update-post.special.blog.model';
 import { HTTP_STATUSES } from '../../../../settings/http.status';
+import { BlogUpdateModel } from './models/input/update-blog.input';
+import { BlogViewModel } from './models/output/blog.output.model';
 
 @ApiTags('Blogs')
 @Controller('')
@@ -42,6 +44,8 @@ export class BlogsController {
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Get('sa/blogs')
+  @ApiResponse({status: 200, description: 'Success', type: BlogViewModel})
+  @ApiResponse({status: 401, description: 'Unauthorized'})
   async getBlogs(@Query() query: QueryParamsDto) {
     return await this.blogsQueryRepository.getAllBlogs(query);
   }
@@ -49,7 +53,7 @@ export class BlogsController {
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Post('sa/blogs')
-  async createBlog(@Body() createModel: BlogCreateModel) {
+  async createBlog(@Body() createModel: BlogInputModel) {
     const { name, websiteUrl, description } = createModel;
     const createdBlogId = await this.commandBus.execute(
       new CreateBlogCommand(name, description, websiteUrl),
@@ -64,7 +68,7 @@ export class BlogsController {
   @HttpCode(HTTP_STATUSES.NotContent)
   async update(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
-    @Body() updateBlog: BlogCreateModel,
+    @Body() updateBlog: BlogInputModel,
   ): Promise<boolean> {
     const { name, description, websiteUrl } = updateBlog;
 
@@ -93,7 +97,7 @@ export class BlogsController {
   @HttpCode(HTTP_STATUSES.Created)
   async createPostForSpecialBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
-    @Body() post: PostCreateModelQuery,
+    @Body() post: PostInputModel,
     @Headers('authorization') authHeader: string,
   ) {
     const token = authHeader?.split(' ')[1] || 'unknown';
@@ -147,7 +151,7 @@ export class BlogsController {
   async updatePostForSpecialBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Param('postId', ValidateObjectIdPipe) postId: string,
-    @Body() post: PostUpdateSpecialModel,
+    @Body() post: PostInputModel,
   ) {
     const response = await this.blogsService.updatePostBySpecialBlog(
       post,

@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 
 import { CommandBus } from '@nestjs/cqrs';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdPipe';
 import { AuthJwtGuard } from '../../../../common/guards/auth.jwt.guard';
 import { LikeStatusEntity } from '../../../likes/domain/like.entity';
@@ -35,6 +35,7 @@ export class CommentsController {
     private readonly commentsQueryRepository: CommentsQueryRepository,
   ) {}
 
+  @ApiBearerAuth()
   @UseGuards(AuthJwtGuard)
   @Put(':commentId/like-status')
   async updateLikeStatusForSpecialComment(
@@ -52,6 +53,7 @@ export class CommentsController {
     return res.sendStatus(204);
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthJwtGuard)
   @Put(':commentId')
   async updateComment(
@@ -74,6 +76,7 @@ export class CommentsController {
     return res.sendStatus(204);
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthJwtGuard)
   @Delete(':commentId')
   async deleteComment(

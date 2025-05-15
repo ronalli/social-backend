@@ -7,7 +7,7 @@ import { BlogsQueryRepository } from './blogs/infrastructure/blogs.query-reposit
 import { BlogsService } from './blogs/application/blogs.service';
 import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
 import { MappingsPostsService } from './posts/application/mappings/mapping.posts';
-import { MappingBlogsService } from './blogs/application/mappings/mapping.blogs';
+// import { MappingBlogsService } from './blogs/application/mappings/mapping.blogs';
 import { QueryParamsService } from '../../common/utils/create.default.values';
 import { PostsService } from './posts/application/posts.service';
 import { PostsQueryRepository } from './posts/infrastructure/posts.query-repository';
@@ -47,7 +47,7 @@ import { UpdatePostHandler } from './posts/application/usecases/update-post.usec
     LikesRepository,
     LikesService,
     LikesQueryRepository,
-    MappingBlogsService,
+    // MappingBlogsService,
     MappingsPostsService,
     QueryParamsService,
     CreateBlogHandler,

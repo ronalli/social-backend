@@ -1,4 +1,4 @@
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   BadRequestException,
   Body,
@@ -68,6 +68,7 @@ export class PostsController {
   //   res.status(201).send(post);
   // }
 
+  @ApiBearerAuth()
   @UseGuards(AuthJwtGuard)
   @Put('posts/:postId/like-status')
   @HttpCode(HTTP_STATUSES.NotContent)
@@ -103,6 +104,7 @@ export class PostsController {
     return await this.commentsService.findAllComments(token, postId, query);
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthJwtGuard)
   @Post('posts/:postId/comments')
   @HttpCode(HTTP_STATUSES.Created)

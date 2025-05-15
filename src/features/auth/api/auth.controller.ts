@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -20,9 +20,7 @@ import { AuthJwtGuard } from '../../../common/guards/auth.jwt.guard';
 import { MappingsUsersService } from '../../users/application/mappings/mappings.users';
 import { SetNewPasswordModel } from './models/input/set-new-password.model';
 import { RefreshTokenGuard } from '../../../common/guards/refreshToken.guard';
-
 import { MappingsRequestHeadersService } from '../../../common/utils/mappings.request.headers';
-
 import { SkipThrottle } from '@nestjs/throttler';
 import { HTTP_STATUSES } from '../../../settings/http.status';
 import { RecoveryPasswordInputModel } from '../../users/api/models/input/recovery-password.input.model';
@@ -87,6 +85,25 @@ export class AuthController {
     res.json();
   }
 
+  @ApiBearerAuth()
+  @UseGuards(RefreshTokenGuard)
+  @Post('refresh-token')
+  async refreshToken(@Req() req: Request, @Res() res: Response) {
+    const cookie = req.cookies.refreshToken;
+    const response = await this.authService.refreshToken(cookie);
+
+    if (response.data) {
+      res.cookie('refreshToken', response.data.refreshToken, {
+        httpOnly: true,
+        secure: true,
+      });
+
+      return res.status(200).send({ accessToken: response.data.accessToken });
+    }
+
+    throw new UnauthorizedException();
+  }
+
   @HttpCode(HTTP_STATUSES.NotContent)
   @Post('registration-confirmation')
   async confirmationEmail(
@@ -120,6 +137,7 @@ export class AuthController {
     res.json();
   }
 
+  @ApiBearerAuth()
   @UseGuards(RefreshTokenGuard)
   // @SkipThrottle()
   @Post('logout')
@@ -140,6 +158,7 @@ export class AuthController {
     throw new UnauthorizedException();
   }
 
+  @ApiBearerAuth()
   @HttpCode(HTTP_STATUSES.Success)
   @UseGuards(AuthJwtGuard)
   @Get('me')

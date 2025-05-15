@@ -1,4 +1,4 @@
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Delete,
@@ -30,7 +30,7 @@ export class SecurityController {
     private readonly securityService: SecurityService,
   ) {}
 
-  // @UseGuards(RefreshTokenGuard)
+  @ApiBearerAuth()
   @Get('devices')
   async getSessions(@Req() req: Request) {
     const token = req.cookies.refreshToken;
@@ -39,9 +39,6 @@ export class SecurityController {
     if (!data?.userId) {
       throw new UnauthorizedException();
     }
-
-    // const { userId } = data;
-
     const sessions = await this.securityQueryRepository.allSessionsUser(
       data.userId,
     );
@@ -51,7 +48,7 @@ export class SecurityController {
     return mappingSessions(sessions);
   }
 
-  // @UseGuards(RefreshTokenGuard)
+  @ApiBearerAuth()
   @HttpCode(HTTP_STATUSES.NotContent)
   @Delete('devices')
   async deleteAllDevices(@Req() req: Request) {
@@ -64,7 +61,7 @@ export class SecurityController {
     return;
   }
 
-  // @UseGuards(RefreshTokenGuard)
+  @ApiBearerAuth()
   @HttpCode(HTTP_STATUSES.NotContent)
   @Delete('devices/:deviceId')
   async deleteDeviceById(

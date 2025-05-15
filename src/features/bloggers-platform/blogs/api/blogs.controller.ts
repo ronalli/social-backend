@@ -1,4 +1,4 @@
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBasicAuth, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -39,12 +39,14 @@ export class BlogsController {
     private readonly postsService: PostsService,
   ) {}
 
+  @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Get('sa/blogs')
   async getBlogs(@Query() query: QueryParamsDto) {
     return await this.blogsQueryRepository.getAllBlogs(query);
   }
 
+  @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Post('sa/blogs')
   async createBlog(@Body() createModel: BlogCreateModel) {
@@ -56,6 +58,7 @@ export class BlogsController {
     return await this.blogsQueryRepository.findBlogById(createdBlogId);
   }
 
+  @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Put('sa/blogs/:blogId')
   @HttpCode(HTTP_STATUSES.NotContent)
@@ -74,6 +77,7 @@ export class BlogsController {
     return;
   }
 
+  @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Delete('sa/blogs/:blogId')
   @HttpCode(HTTP_STATUSES.NotContent)
@@ -83,6 +87,7 @@ export class BlogsController {
     return await this.blogsService.deleteBlog(blogId);
   }
 
+  @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Post('sa/blogs/:blogId/posts')
   @HttpCode(HTTP_STATUSES.Created)
@@ -112,6 +117,7 @@ export class BlogsController {
     return await this.postsService.getPost(idCreatedPost, currentUser);
   }
 
+  @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Get('sa/blogs/:blogId/posts')
   @HttpCode(HTTP_STATUSES.Success)
@@ -134,6 +140,7 @@ export class BlogsController {
     );
   }
 
+  @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Put('sa/blogs/:blogId/posts/:postId')
   @HttpCode(HTTP_STATUSES.NotContent)
@@ -153,6 +160,7 @@ export class BlogsController {
     return;
   }
 
+  @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Delete('sa/blogs/:blogId/posts/:postId')
   @HttpCode(HTTP_STATUSES.NotContent)

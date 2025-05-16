@@ -28,6 +28,7 @@ import { SecurityService } from '../../security/application/security.service';
 import { HeaderSessionModel } from '../../../common/models/header.session.model';
 import { UsersService } from '../../users/application/users.service';
 import { validate as isValidUUID } from 'uuid';
+import { RegistrationConfirmationCode } from '../api/models/input/registration-confirmation-code.model';
 
 @Injectable()
 export class AuthService {

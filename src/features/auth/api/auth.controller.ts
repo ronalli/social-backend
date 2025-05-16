@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -24,6 +24,19 @@ import { MappingsRequestHeadersService } from '../../../common/utils/mappings.re
 import { SkipThrottle } from '@nestjs/throttler';
 import { HTTP_STATUSES } from '../../../settings/http.status';
 import { RecoveryPasswordInputModel } from '../../users/api/models/input/recovery-password.input.model';
+import { BlogOutputModel } from '../../bloggers-platform/blogs/api/models/output/blog.output.model';
+import { LoginViewModel } from '../domain/login.view-model';
+import { LoginApiResponse } from '../../../common/services/swagger/auth/login.api-response';
+import { PasswordRecoveryApiResponse } from '../../../common/services/swagger/auth/pasword-recovery.api-response';
+import { NewPasswordApiResponse } from '../../../common/services/swagger/auth/new-password.api-response';
+import { RefreshTokenApiResponse } from '../../../common/services/swagger/auth/refresh-token.api-response';
+import { RegistrationConfirmationApiResponse } from '../../../common/services/swagger/auth/registration-confirmation.api-response';
+import { RegistrationConfirmationCode } from './models/input/registration-confirmation-code.model';
+import { RegistrationApiResponse } from '../../../common/services/swagger/auth/registration.api-response';
+import { RegistrationEmailResendingApiResponse } from '../../../common/services/swagger/auth/registration-email-resending.api-response';
+import { RegistrationEmailResending } from './models/input/registration-email-resending.model';
+import { LogoutApiResponse } from '../../../common/services/swagger/auth/logout.api-response';
+import { MeApiResponse } from '../../../common/services/swagger/auth/me.api-response';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -41,6 +54,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
+  @LoginApiResponse()
   @HttpCode(HTTP_STATUSES.Success)
   async login(
     @Body() loginModel: LoginInputModel,
@@ -59,22 +73,16 @@ export class AuthController {
 
   @HttpCode(HTTP_STATUSES.NotContent)
   @Post('password-recovery')
-  async passwordRecovery(
-    @Body() body: RecoveryPasswordInputModel,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
+  @PasswordRecoveryApiResponse()
+  async passwordRecovery(@Body() body: RecoveryPasswordInputModel) {
     await this.authService.recoveryCode(body.email);
-    res.json();
+    return;
   }
 
   @HttpCode(HTTP_STATUSES.NotContent)
   @Post('new-password')
-  async setNewPassword(
-    @Body() query: SetNewPasswordModel,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
+  @NewPasswordApiResponse()
+  async setNewPassword(@Body() query: SetNewPasswordModel) {
     const { newPassword, recoveryCode } = query;
 
     const response =
@@ -82,12 +90,13 @@ export class AuthController {
 
     await this.authService.updatePassword(newPassword, response);
 
-    res.json();
+    return;
   }
 
   @ApiBearerAuth()
   @UseGuards(RefreshTokenGuard)
   @Post('refresh-token')
+  @RefreshTokenApiResponse()
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     const cookie = req.cookies.refreshToken;
     const response = await this.authService.refreshToken(cookie);
@@ -106,41 +115,33 @@ export class AuthController {
 
   @HttpCode(HTTP_STATUSES.NotContent)
   @Post('registration-confirmation')
-  async confirmationEmail(
-    @Body('code') code: string,
-    // @Req() req: Request,
-    // @Res() res: Response,
-  ) {
-    await this.authService.confirmEmail(code);
+  @RegistrationConfirmationApiResponse()
+  async confirmationEmail(@Body() body: RegistrationConfirmationCode) {
+    await this.authService.confirmEmail(body.code);
     return;
   }
 
   @HttpCode(HTTP_STATUSES.NotContent)
   @Post('registration')
-  async registration(
-    @Body() registerModel: UserCreateModel,
-    // @Req() req: Request,
-    // @Res() res: Response,
-  ) {
+  @RegistrationApiResponse()
+  async registration(@Body() registerModel: UserCreateModel) {
     await this.authService.registration(registerModel);
-    // res.json();
     return;
   }
 
   @HttpCode(HTTP_STATUSES.NotContent)
   @Post('registration-email-resending')
-  async resendConfirmationCode(
-    @Body('email') email: string,
-    @Res() res: Response,
-  ) {
-    await this.authService.resendCode(email);
-    res.json();
+  @RegistrationEmailResendingApiResponse()
+  async resendConfirmationCode(@Body() body: RegistrationEmailResending) {
+    await this.authService.resendCode(body.email);
+    return;
   }
 
   @ApiBearerAuth()
   @UseGuards(RefreshTokenGuard)
   // @SkipThrottle()
   @Post('logout')
+  @LogoutApiResponse()
   async logout(@Req() req: Request, @Res() res: Response) {
     const cookie = req.cookies.refreshToken;
 
@@ -162,7 +163,8 @@ export class AuthController {
   @HttpCode(HTTP_STATUSES.Success)
   @UseGuards(AuthJwtGuard)
   @Get('me')
-  async me(@Req() req: Request, @Res() res: Response) {
+  @MeApiResponse()
+  async me(@Req() req: Request) {
     const userId = req['userId'];
 
     if (!userId) throw new UnauthorizedException();
@@ -171,8 +173,6 @@ export class AuthController {
 
     if (!result) throw new NotFoundException('User not found');
 
-    const resp = this.mappingsUsersService.formatViewModel(result);
-
-    res.json(resp);
+    return this.mappingsUsersService.formatViewModel(result);
   }
 }

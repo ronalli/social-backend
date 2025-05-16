@@ -29,7 +29,7 @@ import { CreatePostCommand } from '../../posts/application/usecases/create-post.
 import { PostUpdateSpecialModel } from '../../posts/api/models/input/update-post.special.blog.model';
 import { HTTP_STATUSES } from '../../../../settings/http.status';
 import { BlogUpdateModel } from './models/input/update-blog.input';
-import { BlogViewModel } from './models/output/blog.output.model';
+import { BlogOutputModel, BlogViewModel } from './models/output/blog.output.model';
 
 @ApiTags('Blogs')
 @Controller('')
@@ -53,6 +53,9 @@ export class BlogsController {
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Post('sa/blogs')
+  @ApiResponse({status: 201, description: 'Returns the newly created blog', type: BlogOutputModel})
+  @ApiResponse({status: 400, description: 'If the inputModel has incorrect values'})
+  @ApiResponse({status: 401, description: 'Unauthorized'})
   async createBlog(@Body() createModel: BlogInputModel) {
     const { name, websiteUrl, description } = createModel;
     const createdBlogId = await this.commandBus.execute(

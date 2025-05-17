@@ -30,6 +30,7 @@ import {
   User,
   UserDecorator,
 } from '../../../../common/decorators/validate/user.decorator';
+import { PostQueryDto } from './models/post-query.dto';
 
 @ApiTags('Posts')
 @Controller('')
@@ -122,11 +123,11 @@ export class PostsController {
 
     return await this.commentsService.getOneComment(userId, result.id);
   }
-
-  @Get('posts')
   @HttpCode(HTTP_STATUSES.Success)
+  @Get('posts')
+
   async getPosts(
-    @Query() query: QueryParamsDto,
+    @Query() query: PostQueryDto,
     @Headers('authorization') authHeader: string,
   ) {
     const token = authHeader?.split(' ')[1];

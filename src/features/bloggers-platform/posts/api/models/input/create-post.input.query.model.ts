@@ -8,7 +8,6 @@ export class PostInputModel {
     maxLength: 30,
   })
   @IsString()
-  // @Trim()
   @Length(2, 30)
   title: string;
 
@@ -16,7 +15,6 @@ export class PostInputModel {
     maxLength: 100,
   })
   @IsString()
-  // @Trim()
   @Length(5, 100)
   shortDescription: string;
 
@@ -24,7 +22,6 @@ export class PostInputModel {
     maxLength: 1000,
   })
   @IsString()
-  // @Trim()
   @Length(5, 1000)
   content: string;
 }

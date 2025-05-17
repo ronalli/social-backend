@@ -27,16 +27,18 @@ import { QueryParamsDto } from '../../../../common/models/query-params.dto';
 import { serviceInfoLike } from '../../../../common/services/initialization.status.like';
 import { CreatePostCommand } from '../../posts/application/usecases/create-post.usecase';
 import { HTTP_STATUSES } from '../../../../settings/http.status';
-import {
-  BlogOutputModel,
-  BlogViewModel,
-} from './models/output/blog.output.model';
 import { PrivateGetBlogsApiResponse } from '../../../../common/services/swagger/blogs/private-get-blogs.api-response';
 import { BlogsQueryDto } from './models/input/blogs-query.dto';
 import { PrivateCreateBlogApiResponse } from '../../../../common/services/swagger/blogs/private-create-blog.api-response';
+import { PrivateUpdateBlogApiResponse } from '../../../../common/services/swagger/blogs/private-update-blog.api-response';
+import { CreatePostForSpecialBlogApiResponse } from '../../../../common/services/swagger/blogs/create-post-for-special-blog.api-response';
+import { GetPostsForBlogApiResponse } from '../../../../common/services/swagger/blogs/get-posts-for-blog.api-response';
+import { PostQueryDto } from '../../posts/api/models/post-query.dto';
+import { UpdatePostForSpecialBlogApiResponse } from '../../../../common/services/swagger/blogs/update-post-for-special-blog.api-response';
 import {
-  PrivateUpdateBlogApiResponse
-} from '../../../../common/services/swagger/blogs/private-update-blog.api-response';
+  DeletePostForSpecialBlogApiResponse
+} from '../../../../common/services/swagger/blogs/delete-post-for-special-blog.api-response';
+import { GetBlogApiResponse } from '../../../../common/services/swagger/blogs/get-blog.api-response';
 
 @ApiTags('Blogs')
 @Controller('')
@@ -100,11 +102,11 @@ export class BlogsController {
     return await this.blogsService.deleteBlog(blogId);
   }
 
-
+  @HttpCode(HTTP_STATUSES.Created)
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Post('sa/blogs/:blogId/posts')
-  @HttpCode(HTTP_STATUSES.Created)
+  @CreatePostForSpecialBlogApiResponse()
   async createPostForSpecialBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Body() post: PostInputModel,
@@ -131,13 +133,14 @@ export class BlogsController {
     return await this.postsService.getPost(idCreatedPost, currentUser);
   }
 
+  @HttpCode(HTTP_STATUSES.Success)
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Get('sa/blogs/:blogId/posts')
-  @HttpCode(HTTP_STATUSES.Success)
+  @GetPostsForBlogApiResponse()
   async getAllPostsForBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
-    @Query() query: QueryParamsDto,
+    @Query() query: PostQueryDto,
     @Headers('authorization') authHeader: string,
   ) {
     const header = authHeader?.split(' ')[1];
@@ -154,10 +157,11 @@ export class BlogsController {
     );
   }
 
+  @HttpCode(HTTP_STATUSES.NotContent)
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Put('sa/blogs/:blogId/posts/:postId')
-  @HttpCode(HTTP_STATUSES.NotContent)
+  @UpdatePostForSpecialBlogApiResponse()
   async updatePostForSpecialBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Param('postId', ValidateObjectIdPipe) postId: string,
@@ -174,10 +178,11 @@ export class BlogsController {
     return;
   }
 
+  @HttpCode(HTTP_STATUSES.NotContent)
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Delete('sa/blogs/:blogId/posts/:postId')
-  @HttpCode(HTTP_STATUSES.NotContent)
+  @DeletePostForSpecialBlogApiResponse()
   async deletePostForSpecialBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Param('postId', ValidateObjectIdPipe) postId: string,
@@ -194,14 +199,16 @@ export class BlogsController {
 
   // public
   @Get('blogs')
-  async getPublicAllBlogs(@Query() query: QueryParamsDto) {
+  @PrivateGetBlogsApiResponse()
+  async getPublicAllBlogs(@Query() query: BlogsQueryDto) {
     return await this.blogsQueryRepository.getAllBlogs(query);
   }
 
   @Get('blogs/:blogId/posts')
+  @GetPostsForBlogApiResponse()
   async getPublicAllPostsForBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
-    @Query() query: QueryParamsDto,
+    @Query() query: PostQueryDto,
     @Headers('authorization') authHeader: string,
   ) {
     const header = authHeader?.split(' ')[1];
@@ -219,6 +226,7 @@ export class BlogsController {
   }
 
   @Get('blogs/:blogId')
+  @GetBlogApiResponse()
   async getBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
     const result = await this.blogsQueryRepository.findBlogById(blogId);
 

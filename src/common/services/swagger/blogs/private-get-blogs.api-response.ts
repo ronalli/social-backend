@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
-import { DevicesViewModel } from '../../../../features/security/api/models/output/devices.view.model';
+import { BlogViewModel } from '../../../../features/bloggers-platform/blogs/api/models/output/blog.view-model';
+
 
 export function PrivateGetBlogsApiResponse() {
 
@@ -8,7 +9,7 @@ export function PrivateGetBlogsApiResponse() {
     ApiResponse({
       status: 200,
       description: 'Success',
-      type: DevicesViewModel,
+      type: BlogViewModel,
     }),
     ApiResponse({ status: 401, description: 'Unauthorized' }),
 

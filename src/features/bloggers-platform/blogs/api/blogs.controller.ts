@@ -26,10 +26,17 @@ import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdP
 import { QueryParamsDto } from '../../../../common/models/query-params.dto';
 import { serviceInfoLike } from '../../../../common/services/initialization.status.like';
 import { CreatePostCommand } from '../../posts/application/usecases/create-post.usecase';
-import { PostUpdateSpecialModel } from '../../posts/api/models/input/update-post.special.blog.model';
 import { HTTP_STATUSES } from '../../../../settings/http.status';
-import { BlogUpdateModel } from './models/input/update-blog.input';
-import { BlogOutputModel, BlogViewModel } from './models/output/blog.output.model';
+import {
+  BlogOutputModel,
+  BlogViewModel,
+} from './models/output/blog.output.model';
+import { PrivateGetBlogsApiResponse } from '../../../../common/services/swagger/blogs/private-get-blogs.api-response';
+import { BlogsQueryDto } from './models/input/blogs-query.dto';
+import { PrivateCreateBlogApiResponse } from '../../../../common/services/swagger/blogs/private-create-blog.api-response';
+import {
+  PrivateUpdateBlogApiResponse
+} from '../../../../common/services/swagger/blogs/private-update-blog.api-response';
 
 @ApiTags('Blogs')
 @Controller('')
@@ -44,18 +51,15 @@ export class BlogsController {
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Get('sa/blogs')
-  @ApiResponse({status: 200, description: 'Success', type: BlogViewModel})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
-  async getBlogs(@Query() query: QueryParamsDto) {
+  @PrivateGetBlogsApiResponse()
+  async getBlogs(@Query() query: BlogsQueryDto) {
     return await this.blogsQueryRepository.getAllBlogs(query);
   }
 
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Post('sa/blogs')
-  @ApiResponse({status: 201, description: 'Returns the newly created blog', type: BlogOutputModel})
-  @ApiResponse({status: 400, description: 'If the inputModel has incorrect values'})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
+  @PrivateCreateBlogApiResponse()
   async createBlog(@Body() createModel: BlogInputModel) {
     const { name, websiteUrl, description } = createModel;
     const createdBlogId = await this.commandBus.execute(
@@ -65,10 +69,11 @@ export class BlogsController {
     return await this.blogsQueryRepository.findBlogById(createdBlogId);
   }
 
+  @HttpCode(HTTP_STATUSES.NotContent)
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Put('sa/blogs/:blogId')
-  @HttpCode(HTTP_STATUSES.NotContent)
+  @PrivateUpdateBlogApiResponse()
   async update(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Body() updateBlog: BlogInputModel,
@@ -84,15 +89,17 @@ export class BlogsController {
     return;
   }
 
+  @HttpCode(HTTP_STATUSES.NotContent)
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @Delete('sa/blogs/:blogId')
-  @HttpCode(HTTP_STATUSES.NotContent)
+  @PrivateUpdateBlogApiResponse()
   async delete(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
   ): Promise<boolean> {
     return await this.blogsService.deleteBlog(blogId);
   }
+
 
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)

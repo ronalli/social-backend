@@ -19,6 +19,9 @@ import { SecurityService } from '../application/security.service';
 import { mappingSessions } from '../../../common/utils/mappings.sessions.service';
 import { SkipThrottle } from '@nestjs/throttler';
 import { HTTP_STATUSES } from '../../../settings/http.status';
+import { GetDevicesApiResponse } from '../../../common/services/swagger/security/get-devices.api-response';
+import { DeleteAllApiResponse } from '../../../common/services/swagger/security/delete-all.api-response';
+import { DeleteSpecifiedApiResponse } from '../../../common/services/swagger/security/delete-specified.api-response';
 
 // @SkipThrottle()
 @ApiTags('Security')
@@ -32,6 +35,7 @@ export class SecurityController {
 
   @ApiBearerAuth()
   @Get('devices')
+  @GetDevicesApiResponse()
   async getSessions(@Req() req: Request) {
     const token = req.cookies.refreshToken;
     const data = await decodeToken(token);
@@ -51,6 +55,7 @@ export class SecurityController {
   @ApiBearerAuth()
   @HttpCode(HTTP_STATUSES.NotContent)
   @Delete('devices')
+  @DeleteAllApiResponse()
   async deleteAllDevices(@Req() req: Request) {
     const refreshToken = req.cookies.refreshToken;
 
@@ -64,6 +69,7 @@ export class SecurityController {
   @ApiBearerAuth()
   @HttpCode(HTTP_STATUSES.NotContent)
   @Delete('devices/:deviceId')
+  @DeleteSpecifiedApiResponse()
   async deleteDeviceById(
     @Param('deviceId') deviceId: string,
     @Req() req: Request,

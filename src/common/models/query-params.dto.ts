@@ -1,4 +1,3 @@
-// import { SortDirection } from 'mongodb';
 import { IsOptional, IsString } from 'class-validator';
 
 export type SortDirection = 'asc' | 'desc';

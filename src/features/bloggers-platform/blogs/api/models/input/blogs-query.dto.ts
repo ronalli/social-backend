@@ -16,7 +16,6 @@ export class BlogsQueryDto extends QueryParamsDto {
 
   @ApiPropertyOptional({
     enum: SortDirection,
-    description: 'Available values: asc, desc',
     default: SortDirection.DESC,
   })
   sortDirection?: SortDirection;
@@ -38,5 +37,4 @@ export class BlogsQueryDto extends QueryParamsDto {
     default: 10,
   })
   pageSize?: number;
-
 }

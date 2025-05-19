@@ -7,6 +7,7 @@ import { LikesService } from '../../../likes/application/likes.service';
 import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
 import { MappingsCommentsService } from './mappings/mapping.comments';
 import { CommentOutputModel } from '../api/models/output/comment.output.model';
+import { CommentQueryDto } from '../api/models/comment-query.dto';
 
 @Injectable()
 export class CommentsService {
@@ -70,7 +71,7 @@ export class CommentsService {
   async findAllComments(
     token: string,
     postId: string,
-    queryParams: QueryParamsDto,
+    queryParams: CommentQueryDto,
   ) {
     const currentUserId = await jwtService.getUserIdByToken(token);
 

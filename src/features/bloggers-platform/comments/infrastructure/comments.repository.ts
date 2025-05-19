@@ -12,7 +12,7 @@ import {
 } from '../domain/comment.entity';
 import { MappingsCommentsService } from '../application/mappings/mapping.comments';
 import { UpdateLikeStatusCommentCommand } from '../application/usecases/update-likeStatus.usecase';
-import { UpdateCommentModel } from '../api/models/input/update-comment.model';
+import { InputCommentModel } from '../api/models/input/update-comment.model';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
 import { QueryParamsDto } from '../../../../common/models/query-params.dto';
 import { CommentCreateModel } from '../api/models/input/create-comment.model';
@@ -35,7 +35,7 @@ export class CommentsRepository {
 
   async updateComment(
     id: string,
-    contentUpdate: UpdateCommentModel,
+    contentUpdate: InputCommentModel,
   ): Promise<boolean> {
     const query = `UPDATE public."commentsPosts" SET content = $1 WHERE id = $2;`;
 

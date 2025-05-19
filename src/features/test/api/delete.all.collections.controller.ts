@@ -1,5 +1,5 @@
 import { Controller, Delete, HttpCode, Req, Res } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { DeleteService } from '../application/delete.service';
 import { HTTP_STATUSES } from '../../../settings/http.status';
 
@@ -8,8 +8,12 @@ import { HTTP_STATUSES } from '../../../settings/http.status';
 export class DeleteAllCollectionsController {
   constructor(private readonly deleteService: DeleteService) {}
 
-  @Delete('all-data')
   @HttpCode(HTTP_STATUSES.NotContent)
+  @Delete('all-data')
+ @ApiResponse({
+   status: 204,
+   description: 'All data deleted',
+ })
   async delete() {
     await this.deleteService.deleteAll();
     return;

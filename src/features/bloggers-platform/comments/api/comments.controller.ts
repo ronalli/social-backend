@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import {
   Body,
   Controller,
@@ -21,7 +21,7 @@ import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdP
 import { AuthJwtGuard } from '../../../../common/guards/auth.jwt.guard';
 import { LikeStatusEntity } from '../../../likes/domain/like.entity';
 import { UpdateLikeStatusCommentCommand } from '../application/usecases/update-likeStatus.usecase';
-import { UpdateCommentModel } from './models/input/update-comment.model';
+import { InputCommentModel } from './models/input/update-comment.model';
 import { UpdateCommentCommand } from '../application/usecases/update-comment.usecase';
 import { DeleteCommentCommand } from '../application/usecases/delete-comment.usecase';
 import { CommentsService } from '../application/comments.service';
@@ -68,7 +68,7 @@ export class CommentsController {
   @UpdateCommentApiResponse()
   async updateComment(
     @Param('commentId', ValidateObjectIdPipe) commentId: string,
-    @Body() content: UpdateCommentModel,
+    @Body() content: InputCommentModel,
     @Req() req: Request,
   ) {
     const userId = req.userId!;

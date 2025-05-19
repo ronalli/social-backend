@@ -31,6 +31,15 @@ import {
   UserDecorator,
 } from '../../../../common/decorators/validate/user.decorator';
 import { PostQueryDto } from './models/post-query.dto';
+import { UpdateLikeStatusForSpecialPostApiResponse } from '../../../../common/services/swagger/posts/update-like-status-for-special-post.api-response';
+import { GetCommentsForPostApiResponse } from '../../../../common/services/swagger/posts/get-comments-for-post.api-response';
+import { CommentQueryDto } from '../../comments/api/models/comment-query.dto';
+import {
+  CreateCommentForPostApiResponse
+} from '../../../../common/services/swagger/posts/create-comment-for-post.api-response';
+import { InputCommentModel } from '../../comments/api/models/input/update-comment.model';
+import { GetPostsApiResponse } from '../../../../common/services/swagger/posts/get-posts.api-response';
+import { GetPostByIdApiResponse } from '../../../../common/services/swagger/posts/get-post-by-id.api-response';
 
 @ApiTags('Posts')
 @Controller('')
@@ -69,10 +78,11 @@ export class PostsController {
   //   res.status(201).send(post);
   // }
 
+  @HttpCode(HTTP_STATUSES.NotContent)
   @ApiBearerAuth()
   @UseGuards(AuthJwtGuard)
   @Put('posts/:postId/like-status')
-  @HttpCode(HTTP_STATUSES.NotContent)
+  @UpdateLikeStatusForSpecialPostApiResponse()
   async updateLikeStatusForSpecialPost(
     @Param('postId', ValidateObjectIdPipe) postId: string,
     @Body() data: LikeStatusEntity,
@@ -90,11 +100,12 @@ export class PostsController {
     return;
   }
 
-  @Get('posts/:postId/comments')
   @HttpCode(HTTP_STATUSES.Success)
+  @Get('posts/:postId/comments')
+  @GetCommentsForPostApiResponse()
   async getAllCommentsForPost(
     @Param('postId', ValidateObjectIdPipe) postId: string,
-    @Query() query: QueryParamsDto,
+    @Query() query: CommentQueryDto,
     @Headers('authorization') authHeader: string,
   ) {
     const foundedPost = await this.postsQueryRepository.isPostDoesExist(postId);
@@ -105,13 +116,14 @@ export class PostsController {
     return await this.commentsService.findAllComments(token, postId, query);
   }
 
+  @HttpCode(HTTP_STATUSES.Created)
   @ApiBearerAuth()
   @UseGuards(AuthJwtGuard)
   @Post('posts/:postId/comments')
-  @HttpCode(HTTP_STATUSES.Created)
+  @CreateCommentForPostApiResponse()
   async createCommentForSpecialPost(
     @Param('postId', ValidateObjectIdPipe) postId: string,
-    @Body() comment: CreatePostSpecialPostModel,
+    @Body() comment: InputCommentModel,
     @User('id') userId: string,
   ) {
     const result = await this.commandBus.execute(
@@ -123,9 +135,10 @@ export class PostsController {
 
     return await this.commentsService.getOneComment(userId, result.id);
   }
+
   @HttpCode(HTTP_STATUSES.Success)
   @Get('posts')
-
+  @GetPostsApiResponse()
   async getPosts(
     @Query() query: PostQueryDto,
     @Headers('authorization') authHeader: string,
@@ -134,8 +147,9 @@ export class PostsController {
     return await this.postsService.getAllPosts(token, query);
   }
 
-  @Get('posts/:id')
   @HttpCode(HTTP_STATUSES.Success)
+  @Get('posts/:id')
+  @GetPostByIdApiResponse()
   async getPost(
     @Param('id', ValidateObjectIdPipe) id: string,
     @Headers('authorization') authHeader: string,

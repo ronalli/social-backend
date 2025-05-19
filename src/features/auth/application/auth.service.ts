@@ -2,8 +2,6 @@ import { ResultCode } from '../../../settings/http.status';
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
@@ -28,7 +26,6 @@ import { SecurityService } from '../../security/application/security.service';
 import { HeaderSessionModel } from '../../../common/models/header.session.model';
 import { UsersService } from '../../users/application/users.service';
 import { validate as isValidUUID } from 'uuid';
-import { RegistrationConfirmationCode } from '../api/models/input/registration-confirmation-code.model';
 
 @Injectable()
 export class AuthService {
@@ -210,7 +207,6 @@ export class AuthService {
     }
   }
 
-  //
   async logout(token: string) {
     console.log(token);
 
@@ -240,20 +236,8 @@ export class AuthService {
     }
 
     throw new UnauthorizedException();
-
-    //
-    // if (success) {
-    //   const data = await decodeToken(token);
-    //
-    //   if (data && (await this.securityService.deleteCurrentSession(data))) {
-    //     return true;
-    //   }
-    // }
-    //
-    // throw new UnauthorizedException();
   }
 
-  //
   async refreshToken(token: string) {
     const validId = await jwtService.getUserIdByToken(token);
 
@@ -294,43 +278,6 @@ export class AuthService {
 
     throw new UnauthorizedException();
   }
-
-  //
-  // if (validId && !findedToken) {
-  //
-  //   const newRefreshToken = new RefreshTokenModel({ refreshToken: token });
-  //
-  //   await newRefreshToken.save();
-  //
-  //   const user = await this.UserModel.findOne({ _id: new ObjectId(validId) });
-  //
-  //   if (user) {
-  //
-  //     const decode = await decodeToken(token);
-  //
-  //     if (decode) {
-  //       const deviceId = decode.deviceId;
-  //
-  //       const accessToken = await jwtService.createdJWT({ deviceId, userId: String(user._id) }, '10s');
-  //       const refreshToken = await jwtService.createdJWT({ deviceId, userId: String(user._id) }, '20s');
-  //
-  //       const response = await this.securityServices.updateVersionSession(refreshToken);
-  //
-  //       if (response.status === ResultCode.Success) {
-  //         return { status: ResultCode.Success, data: { accessToken, refreshToken } };
-  //       }
-  //     }
-  //   }
-  // }
-  // return {
-  //   status: ResultCode.Unauthorized,
-  //   data: null,
-  //   errorMessage: {
-  //     message: 'If the JWT refreshToken inside cookie is missing, expired or incorrect',
-  //     field: 'refreshToken',
-  //   },
-  // };
-  // }
 
   async recoveryCode(email: string) {
     const response = await this.authRepository.findByEmail(email);

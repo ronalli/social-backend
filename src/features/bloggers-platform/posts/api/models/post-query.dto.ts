@@ -27,7 +27,6 @@ export class PostQueryDto extends QueryParamsDto {
 
   @ApiPropertyOptional({
     enum: SortDirection,
-    description: 'Available values: asc, desc',
     default: SortDirection.DESC,
   })
   sortDirection?: SortDirection;

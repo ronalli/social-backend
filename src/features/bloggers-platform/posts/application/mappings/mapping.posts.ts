@@ -4,10 +4,6 @@ import {
   PostOutputModelDB,
 } from '../../api/models/output/post.output.model';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import {
-  LikeDocument,
-  LikeModelType,
-} from '../../../../likes/domain/like.entity';
 import { BlogsQueryRepository } from '../../../blogs/infrastructure/blogs.query-repository';
 
 @Injectable()

@@ -1,6 +1,5 @@
-import { HydratedDocument, Model, Types } from 'mongoose';
-import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import { IsEnum, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export enum LikeStatus {
   None = 'None',
@@ -9,34 +8,11 @@ export enum LikeStatus {
 }
 
 export class LikeStatusEntity {
+
+  @ApiProperty({
+    enum: LikeStatus,
+  })
   @IsString()
   @IsEnum(LikeStatus, { message: 'likeStatus must be Like, Dislike, or None' })
   likeStatus: LikeStatus;
 }
-
-@Schema()
-export class Like {
-  @Prop({ type: Types.ObjectId, auto: true })
-  _id: Types.ObjectId;
-
-  @Prop()
-  addedAt: string;
-
-  @Prop()
-  userId: string;
-
-  @Prop()
-  parentId: string;
-
-  @Prop()
-  login: string;
-
-  @Prop({ type: String, enum: LikeStatus })
-  status: LikeStatus;
-}
-
-export const LikeSchema = SchemaFactory.createForClass(Like);
-LikeSchema.loadClass(Like);
-
-export type LikeDocument = HydratedDocument<Like>;
-export type LikeModelType = Model<LikeDocument>;

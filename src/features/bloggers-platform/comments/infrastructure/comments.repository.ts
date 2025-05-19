@@ -13,12 +13,6 @@ import {
 import { MappingsCommentsService } from '../application/mappings/mapping.comments';
 import { UpdateLikeStatusCommentCommand } from '../application/usecases/update-likeStatus.usecase';
 import { UpdateCommentModel } from '../api/models/input/update-comment.model';
-import {
-  Like,
-  LikeDocument,
-  LikeModelType,
-  LikeStatus,
-} from '../../../likes/domain/like.entity';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
 import { QueryParamsDto } from '../../../../common/models/query-params.dto';
 import { CommentCreateModel } from '../api/models/input/create-comment.model';
@@ -125,14 +119,14 @@ export class CommentsRepository {
   //   // }
   // }
 
-  async addStatusLike(like: LikeDocument) {
-    // try {
-    //   const insertResult = await this.LikeModel.insertMany([like]);
-    //   return insertResult[0].id;
-    // } catch (e) {
-    //   throw new InternalServerErrorException(e);
-    // }
-  }
+  // async addStatusLike(like: LikeDocument) {
+  //   // try {
+  //   //   const insertResult = await this.LikeModel.insertMany([like]);
+  //   //   return insertResult[0].id;
+  //   // } catch (e) {
+  //   //   throw new InternalServerErrorException(e);
+  //   // }
+  // }
 
   async updateStatusLike(
     like: UpdateLikeStatusCommentCommand,

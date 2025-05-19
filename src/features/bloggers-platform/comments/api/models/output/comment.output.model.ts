@@ -1,20 +1,62 @@
-export class CommentOutputModel {
-  id: string;
-  content: string;
-  commentatorInfo: ICommentatorInfo;
-  createdAt: string;
-  likesInfo: ILikesInfoViewModel;
-}
+import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { LikeStatus } from '../../../../../likes/domain/like.entity';
 
-interface ICommentatorInfo {
+class CommentatorInfo {
+  @ApiProperty()
+  @IsString()
   userId: string;
+
+  @ApiProperty()
+  @IsString()
   userLogin: string;
 }
 
-export interface ILikesInfoViewModel {
+export class LikesInfoViewModel {
+  @ApiProperty({
+    type: Number,
+    format: 'int32',
+  })
+  @IsNumber()
   likesCount: number;
+
+  @ApiProperty({
+    type: Number,
+    format: 'int32',
+  })
+  @IsNumber()
   dislikesCount: number;
-  myStatus: string;
+
+  @ApiProperty({
+    enum: LikeStatus,
+    description: 'Send None if you want to unlike/undislike',
+  })
+  @IsString()
+  @IsEnum(LikeStatus, { message: 'likeStatus must be Like, Dislike, or None' })
+  myStatus: LikeStatus;
+}
+
+export class CommentOutputModel {
+  @ApiProperty()
+  @IsString()
+  id: string;
+
+  @ApiProperty()
+  @IsString()
+  content: string;
+
+  @ApiProperty({
+    type: CommentatorInfo,
+  })
+  commentatorInfo: CommentatorInfo;
+
+  @IsString()
+  createdAt: string;
+
+  @ApiProperty({
+    type: LikesInfoViewModel,
+  })
+  likesInfo: LikesInfoViewModel;
 }
 
 export class CommentOutputModelDB {

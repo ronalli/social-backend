@@ -6,6 +6,7 @@ import { jwtService } from '../../../../common/services/jwt.service';
 import { LikesService } from '../../../likes/application/likes.service';
 import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
 import { MappingsCommentsService } from './mappings/mapping.comments';
+import { CommentOutputModel } from '../api/models/output/comment.output.model';
 
 @Injectable()
 export class CommentsService {
@@ -14,13 +15,15 @@ export class CommentsService {
     private readonly mappingsCommentsService: MappingsCommentsService,
   ) {}
 
-  async getOneComment(userId: string, commentId: string) {
+  async getOneComment(userId: string, commentId: string): Promise<CommentOutputModel> {
     const currentComment = await this.commentsQueryRepository.getComment(
       commentId,
       userId,
     );
 
-    return this.mappingsCommentsService.formatingCommentForView(currentComment);
+
+    return  this.mappingsCommentsService.formatingCommentForView(currentComment);
+
   }
 
   // async update(id: string, content: string, userId: string) {

@@ -10,7 +10,9 @@ import {
   Put,
   UseGuards,
   BadRequestException,
-  NotFoundException, Headers,
+  NotFoundException,
+  Headers,
+  HttpCode,
 } from '@nestjs/common';
 
 import { CommandBus } from '@nestjs/cqrs';
@@ -25,6 +27,11 @@ import { DeleteCommentCommand } from '../application/usecases/delete-comment.use
 import { CommentsService } from '../application/comments.service';
 import { jwtService } from '../../../../common/services/jwt.service';
 import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
+import { HTTP_STATUSES } from '../../../../settings/http.status';
+import { UpdateLikeStatusForSpecialCommentApiResponse } from '../../../../common/services/swagger/comments/update-like-status-for-special-comment.api-response';
+import { UpdateCommentApiResponse } from '../../../../common/services/swagger/comments/update-comment.api-response';
+import { DeleteCommentApiResponse } from '../../../../common/services/swagger/comments/delete-comment.api-resposne';
+import { GetCommentApiResponse } from '../../../../common/services/swagger/comments/get-comment.api-response';
 
 @ApiTags('Comments')
 @Controller('comments')
@@ -35,14 +42,15 @@ export class CommentsController {
     private readonly commentsQueryRepository: CommentsQueryRepository,
   ) {}
 
+  @HttpCode(HTTP_STATUSES.NotContent)
   @ApiBearerAuth()
   @UseGuards(AuthJwtGuard)
   @Put(':commentId/like-status')
+  @UpdateLikeStatusForSpecialCommentApiResponse()
   async updateLikeStatusForSpecialComment(
     @Param('commentId', ValidateObjectIdPipe) commentId: string,
     @Body() data: LikeStatusEntity,
     @Req() req: Request,
-    @Res() res: Response,
   ) {
     const userId = req.userId!;
 
@@ -50,17 +58,18 @@ export class CommentsController {
       new UpdateLikeStatusCommentCommand(commentId, userId, data.likeStatus),
     );
 
-    return res.sendStatus(204);
+    return;
   }
 
+  @HttpCode(HTTP_STATUSES.NotContent)
   @ApiBearerAuth()
   @UseGuards(AuthJwtGuard)
   @Put(':commentId')
+  @UpdateCommentApiResponse()
   async updateComment(
     @Param('commentId', ValidateObjectIdPipe) commentId: string,
     @Body() content: UpdateCommentModel,
     @Req() req: Request,
-    @Res() res: Response,
   ) {
     const userId = req.userId!;
 
@@ -73,28 +82,29 @@ export class CommentsController {
         { message: 'If the inputModel has incorrect values', field: 'value' },
       ]);
 
-    return res.sendStatus(204);
+    return;
   }
 
+  @HttpCode(HTTP_STATUSES.NotContent)
   @ApiBearerAuth()
   @UseGuards(AuthJwtGuard)
   @Delete(':commentId')
+  @DeleteCommentApiResponse()
   async deleteComment(
     @Param('commentId') commentId: string,
     @Req() req: Request,
-    @Res() res: Response,
   ) {
     const userId = req.userId!;
     await this.commandBus.execute(new DeleteCommentCommand(commentId, userId));
-    return res.sendStatus(204);
+    return;
   }
 
+  @HttpCode(HTTP_STATUSES.Success)
   @Get(':commentId')
+  @GetCommentApiResponse()
   async getComment(
     @Param('commentId', ValidateObjectIdPipe) commentId: string,
     @Headers('authorization') authHeader: string,
-    @Req() req: Request,
-    @Res() res: Response,
   ) {
     const foundComment =
       await this.commentsQueryRepository.isCommentDoesExist(commentId);
@@ -112,11 +122,6 @@ export class CommentsController {
 
     const userId = await jwtService.getUserIdByToken(token);
 
-    const response = await this.commentsService.getOneComment(
-      userId,
-      commentId,
-    );
-
-    return res.status(200).send(response);
+    return await this.commentsService.getOneComment(userId, commentId);
   }
 }

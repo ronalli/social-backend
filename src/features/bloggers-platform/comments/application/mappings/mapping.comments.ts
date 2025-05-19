@@ -1,12 +1,11 @@
 import { CommentDocument } from '../../domain/comment.entity';
 import { CommentOutputModel } from '../../api/models/output/comment.output.model';
 import { Injectable } from '@nestjs/common';
-import { LikeModelType } from '../../../../likes/domain/like.entity';
 import { LikeInfoOutputModel } from '../../../../likes/api/models/like.info.output.model';
 
 @Injectable()
 export class MappingsCommentsService {
-  formatingCommentForView(comment: any) {
+  formatingCommentForView(comment: any): CommentOutputModel {
     return {
       id: comment.id,
       content: comment.content,

@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
-enum LikeStatus {
+export enum LikeStatus {
   None = 'None',
   Like = 'Like',
   Dislike = 'Dislike',
@@ -9,6 +9,7 @@ enum LikeStatus {
 export class LikeStatusModelForPost {
   @IsString()
   id: string;
+
   @IsNotEmpty()
   @IsString()
   @IsEnum(LikeStatus, { message: 'likeStatus must be Like, Dislike, or None' })

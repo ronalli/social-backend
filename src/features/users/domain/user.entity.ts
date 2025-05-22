@@ -5,40 +5,37 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ConfirmationEmailEntity } from './confirmation.email.entity';
 
-// @Entity()
-// export class EmailConfirmation {
-//   @PrimaryGeneratedColumn()
-//   id: number;
-//
-//   @Column({ type: String, default: null, length: 100 })
-//   confirmationCode: string | null;
-//
-//   @Column({ type: Date, default: null, length: 50 })
-//   expirationDate: Date | null;
-//
-//   @Column({ type: Boolean, default: false, length: 5 })
-//   isConfirmed?: boolean;
-// }
+@Entity({
+  name: 'users',
+})
+export class UserEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-@Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ type: String, length: 10 })
+  @Column({ length: 10 })
   login: string;
 
-  @Column({ type: String, length: 20 })
+  @Column({ length: 20, unique: true })
   email: string;
 
-  @Column({ type: String, length: 100 })
+  @Column()
   hash: string;
 
-  @Column({ type: String, length: 100 })
-  createdAt: string;
+  @Column({
+    type: 'timestamp with time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  createdAt: Date;
 
-  // @OneToOne(() => EmailConfirmation )
-  // @JoinColumn()
-  // emailConfirmation: EmailConfirmation
+  @OneToOne(
+    (type) => ConfirmationEmailEntity,
+    {
+      cascade: true,
+      onDelete: 'CASCADE',
+    },
+  )
+  @JoinColumn()
+  confirmation: ConfirmationEmailEntity;
 }

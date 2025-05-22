@@ -10,8 +10,6 @@ import {
   Param,
   Post,
   Query,
-  Req,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
@@ -34,11 +32,7 @@ export class UsersController {
 
   @UseGuards(BasicAuthGuard)
   @Get('')
-  async getAllUsers(
-    @Query() query: UserQueryDto,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async getAllUsers(@Query() query: UserQueryDto) {
     return await this.usersQueryRepository.getAllUsers(query);
   }
 

@@ -17,8 +17,6 @@ import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
 import { CommentsService } from '../../comments/application/comments.service';
 import { CommandBus } from '@nestjs/cqrs';
-import { CreatePostSpecialPostModel } from './models/input/create-post.special.post.model';
-import { QueryParamsDto } from '../../../../common/models/query-params.dto';
 import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdPipe';
 import { AuthJwtGuard } from '../../../../common/guards/auth.jwt.guard';
 import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
@@ -34,9 +32,7 @@ import { PostQueryDto } from './models/post-query.dto';
 import { UpdateLikeStatusForSpecialPostApiResponse } from '../../../../common/services/swagger/posts/update-like-status-for-special-post.api-response';
 import { GetCommentsForPostApiResponse } from '../../../../common/services/swagger/posts/get-comments-for-post.api-response';
 import { CommentQueryDto } from '../../comments/api/models/comment-query.dto';
-import {
-  CreateCommentForPostApiResponse
-} from '../../../../common/services/swagger/posts/create-comment-for-post.api-response';
+import { CreateCommentForPostApiResponse } from '../../../../common/services/swagger/posts/create-comment-for-post.api-response';
 import { InputCommentModel } from '../../comments/api/models/input/update-comment.model';
 import { GetPostsApiResponse } from '../../../../common/services/swagger/posts/get-posts.api-response';
 import { GetPostByIdApiResponse } from '../../../../common/services/swagger/posts/get-post-by-id.api-response';

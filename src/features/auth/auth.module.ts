@@ -13,9 +13,13 @@ import { SecurityModule } from '../security/security.module';
 import { MappingsRequestHeadersService } from '../../common/utils/mappings.request.headers';
 import { SecurityQueryRepository } from '../security/infrastructure/security-query.repository';
 import { SecurityRepository } from '../security/infrastructure/security.repository';
+import { AuthTypeOrmRepository } from './infrastructure/auth.typeorm.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserEntity } from '../users/domain/user.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([UserEntity]),
     // ThrottlerModule.forRoot([
     //   {
     //     ttl: 10000,
@@ -38,7 +42,8 @@ import { SecurityRepository } from '../security/infrastructure/security.reposito
     SecurityQueryRepository,
     SecurityRepository,
     MappingsRequestHeadersService,
+    AuthTypeOrmRepository
   ],
-  exports: [AuthService],
+  exports: [AuthService, AuthTypeOrmRepository],
 })
 export class AuthModule {}

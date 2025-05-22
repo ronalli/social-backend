@@ -1,22 +1,26 @@
 import { Module } from '@nestjs/common';
 import { UsersController } from './api/users.controller';
 import { UsersService } from './application/users.service';
-import { User } from './domain/user.entity';
+import { UserEntity } from './domain/user.entity';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CreateUserHandler } from './application/usecases/create-user.usecase';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersRepository } from './infrastructure/users.repository';
 import { UsersQueryRepository } from './infrastructure/users.query-repository';
+import { UsersTypeOrmRepository } from './infrastructure/users.typeorm.repository';
+import { ConfirmationEmailEntity } from './domain/confirmation.email.entity';
+
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), CqrsModule],
+  imports: [TypeOrmModule.forFeature([UserEntity, ConfirmationEmailEntity]), CqrsModule],
   controllers: [UsersController],
   providers: [
     UsersService,
     UsersRepository,
     UsersQueryRepository,
     CreateUserHandler,
+    UsersTypeOrmRepository
   ],
-  exports: [UsersService, UsersRepository, UsersQueryRepository],
+  exports: [UsersService, UsersRepository, UsersQueryRepository, UsersTypeOrmRepository],
 })
 export class UsersModule {}

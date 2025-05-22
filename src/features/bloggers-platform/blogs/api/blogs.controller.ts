@@ -112,8 +112,8 @@ export class BlogsController {
     @Body() post: PostInputModel,
     @Headers('authorization') authHeader: string,
   ) {
-    const token = authHeader?.split(' ')[1] || 'unknown';
-    const currentUser = await serviceInfoLike.getIdUserByToken(token);
+    const token = authHeader?.split(' ')[1] || 'unknown'; //
+    const currentUser = await serviceInfoLike.getIdUserByToken(token); //
     const { title, shortDescription, content } = post;
 
     const result = await this.blogsQueryRepository.blogIsExist(blogId);

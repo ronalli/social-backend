@@ -11,7 +11,7 @@ export class ConfirmationInfoEmail {
     this.confirmationCode = isDate ? randomUUID() : null;
     this.userId = userId;
     this.expirationDate = isDate
-      ? add(new Date(), { hours: 0, minutes: 1 })
+      ? add(new Date(), { hours: 0, minutes: 10 })
       : null;
     this.isConfirmed = !isDate;
   }

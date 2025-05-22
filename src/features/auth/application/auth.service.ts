@@ -26,6 +26,7 @@ import { SecurityService } from '../../security/application/security.service';
 import { HeaderSessionModel } from '../../../common/models/header.session.model';
 import { UsersService } from '../../users/application/users.service';
 import { validate as isValidUUID } from 'uuid';
+import { AuthTypeOrmRepository } from '../infrastructure/auth.typeorm.repository';
 
 @Injectable()
 export class AuthService {
@@ -37,12 +38,15 @@ export class AuthService {
     private readonly authQueryRepository: AuthQueryRepository,
     private readonly securityService: SecurityService,
     private readonly usersService: UsersService,
+    private readonly authTypeORMRepository: AuthTypeOrmRepository,
     @InjectDataSource() protected dataSource: DataSource,
   ) {}
 
   async login(data: LoginInputModel, dataSession: HeaderSessionModel) {
     const { loginOrEmail }: LoginInputModel = data;
     const result = await this.authRepository.findByLoginOrEmail(loginOrEmail);
+
+    console.log(result);
 
     if (result.length) {
       const success = await bcryptService.checkPassword(
@@ -66,7 +70,7 @@ export class AuthService {
             deviceId: devicedId,
             userId: String(result[0].id),
           },
-          '20s', //1h
+          '1h', //20s
         );
 
         await this.securityService.createAuthSessions(

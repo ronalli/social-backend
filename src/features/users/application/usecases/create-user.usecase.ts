@@ -6,6 +6,7 @@ import { UsersQueryRepository } from '../../infrastructure/users.query-repositor
 import { BadRequestException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { ConfirmationInfoEmail } from '../../../../common/utils/createConfirmationInfoForEmail';
+import { UsersTypeOrmRepository } from '../../infrastructure/users.typeorm.repository';
 
 export class CreateUserCommand {
   constructor(
@@ -20,6 +21,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
   constructor(
     private readonly usersQueryRepository: UsersQueryRepository,
     private readonly usersRepository: UsersRepository,
+    private readonly usersTypeORMRepository: UsersTypeOrmRepository,
   ) {}
 
   async execute(command: CreateUserCommand): Promise<string> {
@@ -44,7 +46,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     const id = randomUUID();
     const confirmation = new ConfirmationInfoEmail(id, false);
 
-    return await this.usersRepository.create(
+    return await this.usersTypeORMRepository.create(
       id,
       login,
       email,

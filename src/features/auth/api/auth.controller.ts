@@ -24,8 +24,6 @@ import { MappingsRequestHeadersService } from '../../../common/utils/mappings.re
 import { SkipThrottle } from '@nestjs/throttler';
 import { HTTP_STATUSES } from '../../../settings/http.status';
 import { RecoveryPasswordInputModel } from '../../users/api/models/input/recovery-password.input.model';
-import { BlogOutputModel } from '../../bloggers-platform/blogs/api/models/output/blog.output.model';
-import { LoginViewModel } from '../domain/login.view-model';
 import { LoginApiResponse } from '../../../common/services/swagger/auth/login.api-response';
 import { PasswordRecoveryApiResponse } from '../../../common/services/swagger/auth/pasword-recovery.api-response';
 import { NewPasswordApiResponse } from '../../../common/services/swagger/auth/new-password.api-response';

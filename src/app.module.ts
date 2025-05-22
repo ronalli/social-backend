@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from './features/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './features/users/domain/user.entity';
+import { UserEntity } from './features/users/domain/user.entity';
 import { AuthModule } from './features/auth/auth.module';
 import { DeleteModule } from './features/test/delete.module';
 import { SecurityModule } from './features/security/security.module';
@@ -10,6 +10,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { BloggersPlatformModule } from './features/bloggers-platform/bloggers-platform.module';
 import { configModule } from './dynamic-config-module';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ConfirmationEmailEntity } from './features/users/domain/confirmation.email.entity';
 
 // TypeOrmModule.forRoot({
 //   type: 'postgres',
@@ -34,9 +35,10 @@ import { CqrsModule } from '@nestjs/cqrs';
       port: 5432,
       username: 'postgres',
       password: 'sa',
-      entities: [User],
-      database: 'SocialBD',
+      entities: [UserEntity, ConfirmationEmailEntity],
+      database: 'SocialBD_typeorm',
       synchronize: true,
+      
       logging: true,
     }),
     UsersModule,

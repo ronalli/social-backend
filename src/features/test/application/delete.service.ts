@@ -7,8 +7,10 @@ export class DeleteService {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async deleteAll() {
-    const query = `TRUNCATE TABLE public."users", public.blogs,  public.posts, public."commentsPosts", public."commentsLikeStatus", public."postsLikeStatus", public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`;
+    const query = `TRUNCATE TABLE public."users", public."confirmationEmailUsers" RESTART IDENTITY CASCADE;`;
 
     const response = await this.dataSource.query(query);
   }
 }
+
+// const query = `TRUNCATE TABLE public."users", public.blogs,  public.posts, public."commentsPosts", public."commentsLikeStatus", public."postsLikeStatus", public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`;

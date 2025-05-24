@@ -8,7 +8,7 @@ export const mappingSessions = (
     return {
       ip: deviceDB.ip,
       title: deviceDB.deviceName,
-      lastActiveDate: deviceDB.iat,
+      lastActiveDate: deviceDB.iat.toISOString(),
       deviceId: deviceDB.deviceId,
     };
   });

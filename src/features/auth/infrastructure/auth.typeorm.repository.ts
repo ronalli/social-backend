@@ -8,21 +8,11 @@ export class AuthTypeOrmRepository {
   public constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-
   ) {}
 
   public async findByLoginOrEmail(loginOrEmail: string) {
-    const result = await this.userRepository.findOne({
-      where:[
-        {login: loginOrEmail},
-        {email: loginOrEmail}
-      ]
-    })
-
-    console.log(result);
-
-    return result;
-
+    return await this.userRepository.findOne({
+      where: [{ login: loginOrEmail }, { email: loginOrEmail }],
+    });
   }
-
 }

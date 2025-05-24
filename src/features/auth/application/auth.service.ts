@@ -44,14 +44,12 @@ export class AuthService {
 
   async login(data: LoginInputModel, dataSession: HeaderSessionModel) {
     const { loginOrEmail }: LoginInputModel = data;
-    const result = await this.authRepository.findByLoginOrEmail(loginOrEmail);
+    const foundUser = await this.authTypeORMRepository.findByLoginOrEmail(loginOrEmail);
 
-    console.log(result);
-
-    if (result.length) {
+    if (foundUser) {
       const success = await bcryptService.checkPassword(
         data.password,
-        result[0].hash,
+        foundUser.hash,
       );
 
       if (success) {
@@ -60,7 +58,7 @@ export class AuthService {
         const accessToken = await jwtService.createdJWT(
           {
             deviceId: devicedId,
-            userId: String(result[0].id),
+            userId: String(foundUser.id),
           },
           '1h', //10s
         );
@@ -68,7 +66,7 @@ export class AuthService {
         const refreshToken = await jwtService.createdJWT(
           {
             deviceId: devicedId,
-            userId: String(result[0].id),
+            userId: String(foundUser.id),
           },
           '1h', //20s
         );
@@ -82,6 +80,7 @@ export class AuthService {
           data: { accessToken, refreshToken },
         };
       } else {
+
         throw new UnauthorizedException();
       }
     }

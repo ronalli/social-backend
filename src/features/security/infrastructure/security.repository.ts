@@ -1,6 +1,5 @@
 import {
   Injectable,
-  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { IDecodeRefreshToken } from '../../../common/services/decode.token';
@@ -12,25 +11,25 @@ export class SecurityRepository {
   constructor(protected dataSource: DataSource) {}
 
   async createDeviceSession(session: DeviceSessionEntity) {
-    const { deviceId, deviceName, iat, userId, exp, ip, id } = session;
-
-    const query = `
-      INSERT INTO public."deviceSessions" (id, "deviceId", exp, iat, ip, "userId", "deviceName") VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *;
-    `;
-    const result = await this.dataSource.query(query, [
-      id,
-      deviceId,
-      exp,
-      iat,
-      ip,
-      userId,
-      deviceName,
-    ]);
-
-    return result[0];
+    // const { deviceId, deviceName, iat, userId, exp, ip, id } = session;
+    //
+    // const query = `
+    //   INSERT INTO public."deviceSessions" (id, "deviceId", exp, iat, ip, "userId", "deviceName") VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *;
+    // `;
+    // const result = await this.dataSource.query(query, [
+    //   id,
+    //   deviceId,
+    //   exp,
+    //   iat,
+    //   ip,
+    //   userId,
+    //   deviceName,
+    // ]);
+    //
+    // return result[0];
   }
 
-  async deleteDevice(iat: string, deviceId: string): Promise<boolean> {
+  async deleteDevice(iat: Date, deviceId: string): Promise<boolean> {
     const query = `DELETE FROM public."deviceSessions" WHERE iat = $1 AND "deviceId" = $2;`;
 
     const result = await this.dataSource.query(query, [iat, deviceId]);

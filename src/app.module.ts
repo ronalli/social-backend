@@ -11,6 +11,7 @@ import { BloggersPlatformModule } from './features/bloggers-platform/bloggers-pl
 import { configModule } from './dynamic-config-module';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ConfirmationEmailEntity } from './features/users/domain/confirmation.email.entity';
+import { DeviceSessionEntity } from './features/security/domain/device.entity';
 
 // TypeOrmModule.forRoot({
 //   type: 'postgres',
@@ -35,7 +36,7 @@ import { ConfirmationEmailEntity } from './features/users/domain/confirmation.em
       port: 5432,
       username: 'postgres',
       password: 'sa',
-      entities: [UserEntity, ConfirmationEmailEntity],
+      entities: [UserEntity, ConfirmationEmailEntity, DeviceSessionEntity],
       database: 'SocialBD_typeorm',
       synchronize: true,
       

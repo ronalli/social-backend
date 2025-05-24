@@ -13,11 +13,13 @@ import { SecurityRepository } from '../infrastructure/security.repository';
 import { SessionHeadersInput } from '../api/models/input/session-headers.input';
 import { SkipThrottle } from '@nestjs/throttler';
 import { randomUUID } from 'node:crypto';
+import { SecurityTypeOrmRepository } from '../infrastructure/security.typeorm.repository';
 
 @Injectable()
 // @SkipThrottle()
 export class SecurityService {
-  constructor(private readonly securityRepository: SecurityRepository) {}
+  constructor(private readonly securityRepository: SecurityRepository,
+              private readonly securityTypeOrmRepository: SecurityTypeOrmRepository) {}
 
   async createAuthSessions(token: string, data: SessionHeadersInput) {
     const payload = await decodeToken(token);
@@ -29,7 +31,7 @@ export class SecurityService {
         ...payload,
       };
 
-      await this.securityRepository.createDeviceSession(session);
+      await this.securityTypeOrmRepository.createDeviceSession(session);
     }
   }
 

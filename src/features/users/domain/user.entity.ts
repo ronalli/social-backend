@@ -1,11 +1,12 @@
 import {
   Column,
   Entity,
-  JoinColumn,
+  JoinColumn, OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ConfirmationEmailEntity } from './confirmation.email.entity';
+import { DeviceSessionEntity } from '../../security/domain/device.entity';
 
 @Entity({
   name: 'users',
@@ -30,12 +31,14 @@ export class UserEntity {
   createdAt: Date;
 
   @OneToOne(
-    (type) => ConfirmationEmailEntity,
+    () => ConfirmationEmailEntity,
     {
       cascade: true,
       onDelete: 'CASCADE',
     },
   )
-  @JoinColumn()
   confirmation: ConfirmationEmailEntity;
+
+  @OneToMany(() => DeviceSessionEntity, (session) => session.user)
+  sessions: DeviceSessionEntity[];
 }

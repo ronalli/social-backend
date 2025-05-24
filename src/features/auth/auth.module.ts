@@ -16,10 +16,12 @@ import { SecurityRepository } from '../security/infrastructure/security.reposito
 import { AuthTypeOrmRepository } from './infrastructure/auth.typeorm.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../users/domain/user.entity';
+import { SecurityTypeOrmRepository } from '../security/infrastructure/security.typeorm.repository';
+import { DeviceSessionEntity } from '../security/domain/device.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([UserEntity, DeviceSessionEntity]),
     // ThrottlerModule.forRoot([
     //   {
     //     ttl: 10000,
@@ -36,11 +38,13 @@ import { UserEntity } from '../users/domain/user.entity';
     AuthService,
     AuthRepository,
     AuthQueryRepository,
+
     MappingsUsersService,
     NodemailerService,
     SecurityService,
     SecurityQueryRepository,
     SecurityRepository,
+    SecurityTypeOrmRepository,
     MappingsRequestHeadersService,
     AuthTypeOrmRepository
   ],

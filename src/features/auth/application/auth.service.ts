@@ -114,7 +114,7 @@ export class AuthService {
     const id = randomUUID();
     const confirmation = new ConfirmationInfoEmail(id);
 
-    const userId = await this.authRepository.createUser(
+    const userId = await this.authTypeORMRepository.createUser(
       { id, login, email, hash, createdAt },
       confirmation,
     );
@@ -198,14 +198,10 @@ export class AuthService {
       const code = randomUUID();
       const expirationDate = add(new Date().toISOString(), {
         hours: 0,
-        minutes: 1,
+        minutes: 10,
       });
 
-      await this.authRepository.updateConfirmationInfo(
-        result.id,
-        expirationDate,
-        code,
-      );
+      await this.authTypeORMRepository.updateConfirmationInfo(false, expirationDate, code, result.id)
 
       this.nodemailerService
         .sendEmail(email, code, emailExamples.registrationEmail)
@@ -228,13 +224,11 @@ export class AuthService {
     const correctIdUser = await jwtService.getUserIdByToken(token);
 
     const successAddRefreshToken =
-      await this.authRepository.addOverdueRefreshToken(token);
+      await this.authTypeORMRepository.addOverdueRefreshToken(token);
 
     //add search user on id
     if (correctIdUser) {
       const data = await decodeToken(token);
-
-      console.log('1', data);
 
       if (data) {
         await this.securityService.deleteCurrentSession(data);

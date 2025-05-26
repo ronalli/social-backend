@@ -7,7 +7,7 @@ export class DeleteService {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async deleteAll() {
-    const query = `TRUNCATE TABLE public."users", public."confirmationEmailUsers", public."recoveryCodes" RESTART IDENTITY CASCADE;`;
+    const query = `TRUNCATE TABLE public."users", public."confirmationEmailUsers", public."recoveryCodes", public."oldRefreshTokens", public."deviceSessions" RESTART IDENTITY CASCADE;`;
 
     const response = await this.dataSource.query(query);
   }

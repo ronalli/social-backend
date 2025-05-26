@@ -6,6 +6,8 @@ import { RecoveryCodeEntity } from '../domain/recoveryCode.entity';
 import { OldRefreshTokenEntity } from '../domain/refreshToken.entity';
 import { randomUUID } from 'node:crypto';
 import { ConfirmationEmailEntity } from '../../users/domain/confirmation.email.entity';
+import { RegistrationModelUser } from '../api/models/input/registration.model';
+import { ConfirmationInfoEmail } from '../../../common/utils/createConfirmationInfoForEmail';
 
 @Injectable()
 export class AuthTypeOrmRepository {
@@ -60,8 +62,8 @@ export class AuthTypeOrmRepository {
 
   public async updateConfirmationInfo(
     isConfirmed: boolean,
-    expirationDate: null,
-    confirmationCode: null,
+    expirationDate: null | Date,
+    confirmationCode: null | string,
     userId: string,
   ) {
     const result = await this.confirmationEmailRepository.update(
@@ -83,4 +85,30 @@ export class AuthTypeOrmRepository {
       { message: 'Something went wrong', field: 'code/email' },
     ]);
   }
+
+  public async createUser(
+    data: RegistrationModelUser,
+    confirmationInfo: ConfirmationInfoEmail,
+  ): Promise<string> {
+    const user = this.userRepository.create({
+      id: data.id,
+      login: data.login,
+      email: data.email,
+      hash: data.hash,
+      createdAt: data.createdAt,
+    });
+
+    const confirmation = this.confirmationEmailRepository.create({
+      userId: confirmationInfo.userId,
+      isConfirmed: confirmationInfo.isConfirmed,
+      expirationDate: confirmationInfo.expirationDate,
+      confirmationCode: confirmationInfo.confirmationCode,
+    });
+
+    await this.userRepository.save(user);
+    await this.confirmationEmailRepository.save(confirmation);
+
+    return user.id;
+  }
+
 }

@@ -57,7 +57,7 @@ export class SecurityService {
   async deleteCurrentSession(data: IDecodeRefreshToken) {
     const { iat, userId, deviceId } = data;
 
-    return await this.securityRepository.deleteDevice(iat, deviceId);
+    return await this.securityTypeOrmRepository.deleteDevice(iat, deviceId);
   }
 
   async deleteDevices(token: string) {

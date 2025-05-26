@@ -47,4 +47,14 @@ export class SecurityTypeOrmRepository {
     throw new UnauthorizedException();
   }
 
+  async deleteDevice(iat: Date, deviceId: string): Promise<boolean> {
+
+    const result = await this.deviceSessionRepository.delete({
+      iat: iat,
+      deviceId: deviceId,
+    })
+
+    return result.affected === 1;
+  }
+
 }

@@ -18,8 +18,10 @@ import { SecurityTypeOrmRepository } from '../infrastructure/security.typeorm.re
 @Injectable()
 // @SkipThrottle()
 export class SecurityService {
-  constructor(private readonly securityRepository: SecurityRepository,
-              private readonly securityTypeOrmRepository: SecurityTypeOrmRepository) {}
+  constructor(
+    private readonly securityRepository: SecurityRepository,
+    private readonly securityTypeOrmRepository: SecurityTypeOrmRepository,
+  ) {}
 
   async createAuthSessions(token: string, data: SessionHeadersInput) {
     const payload = await decodeToken(token);
@@ -41,7 +43,7 @@ export class SecurityService {
   ) {
     const { iat, userId, deviceId } = data;
 
-    const res = await this.securityRepository.getDevice(deviceIdParam);
+    const res = await this.securityTypeOrmRepository.getDevice(deviceIdParam);
 
     if (!res) {
       throw new NotFoundException();
@@ -51,7 +53,10 @@ export class SecurityService {
       throw new ForbiddenException();
     }
 
-    return await this.securityRepository.deleteDevice(res.iat, deviceIdParam);
+    return await this.securityTypeOrmRepository.deleteDevice(
+      res.iat,
+      deviceIdParam,
+    );
   }
 
   async deleteCurrentSession(data: IDecodeRefreshToken) {
@@ -67,7 +72,7 @@ export class SecurityService {
       throw new UnauthorizedException();
     }
 
-    return await this.securityRepository.deleteDevicesButCurrent(decode);
+    return await this.securityTypeOrmRepository.deleteDevicesButCurrent(decode);
   }
 
   async updateVersionSession(token: string) {

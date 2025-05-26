@@ -1,19 +1,11 @@
-// import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-// import { HydratedDocument, Model, Types } from 'mongoose';
-//
-// @Schema()
-// export class OldRefreshToken {
-//   @Prop({ type: Types.ObjectId, auto: true })
-//   _id: Types.ObjectId;
-//
-//   @Prop({ required: true })
-//   refreshToken: string;
-// }
-//
-// export const OldRefreshTokenSchema =
-//   SchemaFactory.createForClass(OldRefreshToken);
-//
-// OldRefreshTokenSchema.loadClass(OldRefreshToken);
-//
-// export type OldRefreshTokenDocument = HydratedDocument<OldRefreshToken>;
-// export type OldRefreshTokenModel = Model<OldRefreshTokenDocument>;
+import { Column, Entity } from 'typeorm';
+
+@Entity({
+  name: 'oldRefreshTokens',
+})
+export class OldRefreshTokenEntity {
+  @Column('uuid', { primary: true, nullable: false })
+  id: string;
+  @Column({ nullable: false })
+  refreshToken: string;
+}

@@ -12,6 +12,8 @@ import { configModule } from './dynamic-config-module';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ConfirmationEmailEntity } from './features/users/domain/confirmation.email.entity';
 import { DeviceSessionEntity } from './features/security/domain/device.entity';
+import { RecoveryCodeEntity } from './features/auth/domain/recoveryCode.entity';
+import { OldRefreshTokenEntity } from './features/auth/domain/refreshToken.entity';
 
 // TypeOrmModule.forRoot({
 //   type: 'postgres',
@@ -36,7 +38,7 @@ import { DeviceSessionEntity } from './features/security/domain/device.entity';
       port: 5432,
       username: 'postgres',
       password: 'sa',
-      entities: [UserEntity, ConfirmationEmailEntity, DeviceSessionEntity],
+      entities: [UserEntity, ConfirmationEmailEntity, DeviceSessionEntity, RecoveryCodeEntity, OldRefreshTokenEntity],
       database: 'SocialBD_typeorm',
       synchronize: true,
       

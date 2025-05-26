@@ -27,6 +27,7 @@ import { HeaderSessionModel } from '../../../common/models/header.session.model'
 import { UsersService } from '../../users/application/users.service';
 import { validate as isValidUUID } from 'uuid';
 import { AuthTypeOrmRepository } from '../infrastructure/auth.typeorm.repository';
+import { SecurityTypeOrmRepository } from '../../security/infrastructure/security.typeorm.repository';
 
 @Injectable()
 export class AuthService {
@@ -39,12 +40,14 @@ export class AuthService {
     private readonly securityService: SecurityService,
     private readonly usersService: UsersService,
     private readonly authTypeORMRepository: AuthTypeOrmRepository,
+    private readonly securityTypeOrmRepository: SecurityTypeOrmRepository,
     @InjectDataSource() protected dataSource: DataSource,
   ) {}
 
   async login(data: LoginInputModel, dataSession: HeaderSessionModel) {
     const { loginOrEmail }: LoginInputModel = data;
-    const foundUser = await this.authTypeORMRepository.findByLoginOrEmail(loginOrEmail);
+    const foundUser =
+      await this.authTypeORMRepository.findByLoginOrEmail(loginOrEmail);
 
     if (foundUser) {
       const success = await bcryptService.checkPassword(
@@ -80,7 +83,6 @@ export class AuthService {
           data: { accessToken, refreshToken },
         };
       } else {
-
         throw new UnauthorizedException();
       }
     }
@@ -161,9 +163,12 @@ export class AuthService {
     );
 
     if (isFindCode && foundUser) {
-      const query = `UPDATE public."confirmationEmailUsers" SET "isConfirmed" = $1, "expirationDate" = $2, "confirmationCode" = $3 WHERE "userId" = $4 RETURNING *;`;
-
-      await this.dataSource.query(query, [true, null, null, isFindCode.userId]);
+      await this.authTypeORMRepository.updateConfirmationInfo(
+        true,
+        null,
+        null,
+        isFindCode.userId,
+      );
     }
     return true;
   }
@@ -252,7 +257,7 @@ export class AuthService {
     }
 
     if (validId && !findedToken) {
-      await this.authRepository.addOverdueRefreshToken(token);
+      await this.authTypeORMRepository.addOverdueRefreshToken(token);
 
       const currentUser = await this.usersService.findUser(validId);
 
@@ -283,16 +288,15 @@ export class AuthService {
   }
 
   async recoveryCode(email: string) {
-    const response = await this.authRepository.findByEmail(email);
+    const response = await this.authTypeORMRepository.findByEmail(email);
 
     if (response) {
       const dataCode = await createRecoveryCode(email, '1h');
 
-      const values = [response.id, dataCode];
-
-      const query = `INSERT INTO public."recoveryCodes"("userId", code) VALUES ($1, $2) RETURNING *`;
-
-      await this.dataSource.query(query, values);
+      await this.authTypeORMRepository.createRecoveryCode(
+        response.id,
+        dataCode,
+      );
 
       this.nodemailerService
         .sendEmail(email, dataCode, emailExamples.recoveryPasswordByAccount)
@@ -308,9 +312,7 @@ export class AuthService {
     if (isSearchUser) {
       const hash = await bcryptService.generateHash(password);
 
-      const query = `UPDATE public."users" SET hash = $1 WHERE email = $2 RETURNING *`;
-
-      await this.dataSource.query(query, [hash, email]);
+      await this.authTypeORMRepository.updatePasswordByUserEmail(email, hash);
     }
     return;
   }

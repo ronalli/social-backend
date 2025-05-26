@@ -12,8 +12,6 @@ export const decodeToken = async (
 ): Promise<IDecodeRefreshToken | null> => {
   const data = await jwtService.decodeToken(token);
 
-  console.log('data', data);
-
   if (data && typeof data === 'object') {
     return {
       deviceId: data.deviceId,

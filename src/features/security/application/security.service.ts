@@ -77,7 +77,7 @@ export class SecurityService {
       throw new UnauthorizedException();
     }
 
-    const response = await this.securityRepository.updateDevice(data);
+    const response = await this.securityTypeOrmRepository.updateDevice(data);
 
     if (!response) {
       throw new UnauthorizedException();

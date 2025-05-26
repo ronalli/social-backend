@@ -18,10 +18,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../users/domain/user.entity';
 import { SecurityTypeOrmRepository } from '../security/infrastructure/security.typeorm.repository';
 import { DeviceSessionEntity } from '../security/domain/device.entity';
+import { RecoveryCodeEntity } from './domain/recoveryCode.entity';
+import { OldRefreshTokenEntity } from './domain/refreshToken.entity';
+import { ConfirmationEmailEntity } from '../users/domain/confirmation.email.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, DeviceSessionEntity]),
+    TypeOrmModule.forFeature([UserEntity, DeviceSessionEntity, RecoveryCodeEntity, OldRefreshTokenEntity, ConfirmationEmailEntity]),
     // ThrottlerModule.forRoot([
     //   {
     //     ttl: 10000,

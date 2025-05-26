@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeviceSessionEntity } from '../domain/device.entity';
 import { Repository } from 'typeorm';
+import { IDecodeRefreshToken } from '../../../common/services/decode.token';
 
 @Injectable()
 export class SecurityTypeOrmRepository {
@@ -26,7 +27,24 @@ export class SecurityTypeOrmRepository {
 
     await this.deviceSessionRepository.save(result);
 
+  }
 
+  public async updateDevice(data: IDecodeRefreshToken): Promise<boolean> {
+    const { iat, deviceId, userId, exp } = data;
+
+    const updateSession = await this.deviceSessionRepository.update({
+      deviceId: deviceId,
+      userId: userId
+    }, {
+      iat: iat,
+      exp: exp,
+    })
+
+    if (updateSession.affected === 1) {
+      return true;
+    }
+
+    throw new UnauthorizedException();
   }
 
 }

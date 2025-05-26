@@ -15,10 +15,10 @@ export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ length: 10 })
+  @Column({ length: 10, unique: true })
   login: string;
 
-  @Column({ length: 20, unique: true })
+  @Column({ unique: true })
   email: string;
 
   @Column()

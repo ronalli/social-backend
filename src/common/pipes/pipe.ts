@@ -1,10 +1,14 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 import { validate as isValidUUID } from 'uuid';
 import { BlogsQueryRepository } from '../../features/bloggers-platform/blogs/infrastructure/blogs.query-repository';
+import {
+  BlogsTypeOrmQueryRepository
+} from '../../features/bloggers-platform/blogs/infrastructure/blogs.typeorm.query-repository';
 
 @Injectable()
 export class CustomValidationPipe implements PipeTransform {
-  constructor(private readonly blogQueryRepository: BlogsQueryRepository) {}
+  constructor(private readonly blogQueryRepository: BlogsQueryRepository,
+  private readonly blogTypeOrmQueryRepository: BlogsTypeOrmQueryRepository) {}
   async transform(value: any) {
     const { title, shortDescription, content, blogId } = value;
 
@@ -52,7 +56,7 @@ export class CustomValidationPipe implements PipeTransform {
         field: 'blogId',
       });
     } else {
-      const foundedBlog = await this.blogQueryRepository.blogIsExist(blogId);
+      const foundedBlog = await this.blogTypeOrmQueryRepository.blogIsExist(blogId);
 
       if (!foundedBlog) {
         errors.push({

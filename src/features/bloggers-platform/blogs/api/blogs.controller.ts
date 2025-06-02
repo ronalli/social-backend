@@ -39,6 +39,7 @@ import {
   DeletePostForSpecialBlogApiResponse
 } from '../../../../common/services/swagger/blogs/delete-post-for-special-blog.api-response';
 import { GetBlogApiResponse } from '../../../../common/services/swagger/blogs/get-blog.api-response';
+import { BlogsTypeOrmQueryRepository } from '../infrastructure/blogs.typeorm.query-repository';
 
 @ApiTags('Blogs')
 @Controller('')
@@ -46,6 +47,7 @@ export class BlogsController {
   constructor(
     private readonly blogsService: BlogsService,
     private readonly blogsQueryRepository: BlogsQueryRepository,
+    private readonly blogsTypeORMQueryRepository: BlogsTypeOrmQueryRepository,
     private readonly commandBus: CommandBus,
     private readonly postsService: PostsService,
   ) {}
@@ -116,7 +118,7 @@ export class BlogsController {
     const currentUser = await serviceInfoLike.getIdUserByToken(token); //
     const { title, shortDescription, content } = post;
 
-    const result = await this.blogsQueryRepository.blogIsExist(blogId);
+    const result = await this.blogsTypeORMQueryRepository.blogIsExist(blogId);
 
     if (!result) this.throwBlogNotFoundException();
 
@@ -146,7 +148,7 @@ export class BlogsController {
     const header = authHeader?.split(' ')[1];
     const currentUser = await serviceInfoLike.getIdUserByToken(header);
 
-    const blogFound = await this.blogsQueryRepository.blogIsExist(blogId);
+    const blogFound = await this.blogsTypeORMQueryRepository.blogIsExist(blogId);
 
     if (!blogFound) this.throwBlogNotFoundException();
 
@@ -214,7 +216,7 @@ export class BlogsController {
     const header = authHeader?.split(' ')[1];
     const currentUser = await serviceInfoLike.getIdUserByToken(header);
 
-    const blogFound = await this.blogsQueryRepository.blogIsExist(blogId);
+    const blogFound = await this.blogsTypeORMQueryRepository.blogIsExist(blogId);
 
     if (!blogFound) this.throwBlogNotFoundException();
 
@@ -228,7 +230,7 @@ export class BlogsController {
   @Get('blogs/:blogId')
   @GetBlogApiResponse()
   async getBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
-    const result = await this.blogsQueryRepository.findBlogById(blogId);
+    const result = await this.blogsTypeORMQueryRepository.findBlogById(blogId);
 
     if (!result) this.throwBlogNotFoundException();
 

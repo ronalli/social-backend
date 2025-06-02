@@ -33,19 +33,24 @@ import { UpdatePostHandler } from './posts/application/usecases/update-post.usec
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Blog } from './blogs/domain/blog.entity';
 import { BlogsTypeOrmRepository } from './blogs/infrastructure/blogs.typeorm.repository';
+import { BlogsTypeOrmQueryRepository } from './blogs/infrastructure/blogs.typeorm.query-repository';
+import { Post } from './posts/domain/post.entity';
+import { PostsTypeormRepository } from './posts/infrastructure/posts.typeorm.repository';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Blog]),CqrsModule, AuthModule, UsersModule],
+  imports: [TypeOrmModule.forFeature([Blog, Post]),CqrsModule, AuthModule, UsersModule],
   controllers: [BlogsController, PostsController, CommentsController],
   providers: [
     PostsService,
     PostsRepository,
+    PostsTypeormRepository,
     PostsQueryRepository,
     BlogsService,
     BlogsRepository,
     BlogsTypeOrmRepository,
     BlogsQueryRepository,
+    BlogsTypeOrmQueryRepository,
     CommentsService,
     CommentsRepository,
     CommentsQueryRepository,

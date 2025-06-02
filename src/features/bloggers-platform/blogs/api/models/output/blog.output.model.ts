@@ -21,7 +21,7 @@ export class BlogOutputModel {
 
   @ApiProperty({type: String, format: 'date-time'})
   @IsDateString()
-  createdAt: string;
+  createdAt: Date;
 
   @ApiProperty()
   @IsBoolean()

@@ -3,6 +3,7 @@ import { BlogsQueryRepository } from '../../../blogs/infrastructure/blogs.query-
 import { BadRequestException } from '@nestjs/common';
 import { PostsRepository } from '../../infrastructure/posts.repository';
 import { randomUUID } from 'node:crypto';
+import { PostsTypeormRepository } from '../../infrastructure/posts.typeorm.repository';
 
 export class CreatePostCommand {
   constructor(
@@ -19,6 +20,7 @@ export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
     private readonly postsRepository: PostsRepository,
+    private readonly postsTypeOrmRepository: PostsTypeormRepository,
   ) {}
 
   async execute(command: CreatePostCommand): Promise<string> {
@@ -39,6 +41,6 @@ export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {
       createdAt: new Date().toISOString(),
     };
 
-    return await this.postsRepository.create(newPost, currentUser);
+    return await this.postsTypeOrmRepository.create(newPost, currentUser);
   }
 }

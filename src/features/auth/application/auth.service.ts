@@ -63,7 +63,7 @@ export class AuthService {
             deviceId: devicedId,
             userId: String(foundUser.id),
           },
-          '1h', //10s
+          '10s', //1h
         );
 
         const refreshToken = await jwtService.createdJWT(
@@ -71,7 +71,7 @@ export class AuthService {
             deviceId: devicedId,
             userId: String(foundUser.id),
           },
-          '1h', //20s
+          '20s', //1h
         );
 
         await this.securityService.createAuthSessions(

@@ -81,7 +81,7 @@ describe('Security', () => {
   });
 
   it('should be correct delete all sessions only not current', async () => {
-    const user = await serviceSecurity.registrationUser(app, 'test');
+    const user = await serviceSecurity.registrationUser(app, 'test-5');
 
     const value = [];
 
@@ -226,8 +226,8 @@ describe('Security', () => {
   });
 
   it('should correctly handle concurrent session deletions', async () => {
-    const user1 = await serviceSecurity.registrationUser(app, 'user1');
-    const user2 = await serviceSecurity.registrationUser(app, 'user2');
+    const user1 = await serviceSecurity.registrationUser(app, 'user-t-1');
+    const user2 = await serviceSecurity.registrationUser(app, 'user-t-2');
 
     const sessions1 = [];
     const sessions2 = [];

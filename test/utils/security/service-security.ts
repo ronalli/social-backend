@@ -35,7 +35,7 @@ export const serviceSecurity = {
   },
 
   registrationUser: async (app: INestApplication, name: string) => {
-    await customRequest(app)
+     await customRequest(app)
       .post(`sa/users`)
       .set('Authorization', process.env.AUTH_HEADER)
       .send({
@@ -44,6 +44,7 @@ export const serviceSecurity = {
         email: `${name}@test.com`,
       })
       .expect(201);
+
 
     return {
       login: `${name}`,

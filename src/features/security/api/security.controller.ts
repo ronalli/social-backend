@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { RefreshTokenGuard } from '../../../common/guards/refreshToken.guard';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { decodeToken } from '../../../common/services/decode.token';
 import { SecurityQueryRepository } from '../infrastructure/security-query.repository';
 import { SecurityService } from '../application/security.service';
@@ -23,7 +23,7 @@ import { GetDevicesApiResponse } from '../../../common/services/swagger/security
 import { DeleteAllApiResponse } from '../../../common/services/swagger/security/delete-all.api-response';
 import { DeleteSpecifiedApiResponse } from '../../../common/services/swagger/security/delete-specified.api-response';
 
-// @SkipThrottle()
+@SkipThrottle()
 @ApiTags('Security')
 @UseGuards(RefreshTokenGuard)
 @Controller('security')

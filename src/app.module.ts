@@ -14,6 +14,7 @@ import { ConfirmationEmailEntity } from './features/users/domain/confirmation.em
 import { DeviceSessionEntity } from './features/security/domain/device.entity';
 import { RecoveryCodeEntity } from './features/auth/domain/recoveryCode.entity';
 import { OldRefreshTokenEntity } from './features/auth/domain/refreshToken.entity';
+import { Blog } from './features/bloggers-platform/blogs/domain/blog.entity';
 
 // TypeOrmModule.forRoot({
 //   type: 'postgres',
@@ -38,7 +39,7 @@ import { OldRefreshTokenEntity } from './features/auth/domain/refreshToken.entit
       port: 5432,
       username: 'postgres',
       password: 'sa',
-      entities: [UserEntity, ConfirmationEmailEntity, DeviceSessionEntity, RecoveryCodeEntity, OldRefreshTokenEntity],
+      entities: [Blog, UserEntity, ConfirmationEmailEntity, DeviceSessionEntity, RecoveryCodeEntity, OldRefreshTokenEntity],
       database: 'SocialBD_typeorm',
       synchronize: true,
       
@@ -52,10 +53,10 @@ import { OldRefreshTokenEntity } from './features/auth/domain/refreshToken.entit
   ],
   controllers: [],
   providers: [
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ThrottlerGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

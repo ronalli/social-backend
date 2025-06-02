@@ -1,7 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BlogsRepository } from '../../infrastructure/blogs.repository';
 import { randomUUID } from 'node:crypto';
-import { BlogEntity } from '../../domain/blog.entity';
+import { Blog } from '../../domain/blog.entity';
+import { BlogsTypeOrmRepository } from '../../infrastructure/blogs.typeorm.repository';
 
 export class CreateBlogCommand {
   constructor(
@@ -13,12 +14,14 @@ export class CreateBlogCommand {
 
 @CommandHandler(CreateBlogCommand)
 export class CreateBlogHandler implements ICommandHandler<CreateBlogCommand> {
-  constructor(private readonly blogsRepository: BlogsRepository) {}
+  constructor(private readonly blogsRepository: BlogsRepository,
+  private readonly blogsTypeOrmRepository: BlogsTypeOrmRepository
+  ) {}
 
   async execute(command: CreateBlogCommand): Promise<string> {
     const { name, description, websiteUrl } = command;
 
-    const blog: BlogEntity = {
+    const blog: Blog = {
       id: randomUUID(),
       name,
       description,
@@ -27,6 +30,6 @@ export class CreateBlogHandler implements ICommandHandler<CreateBlogCommand> {
       isMembership: false,
     };
 
-    return await this.blogsRepository.create(blog);
+    return await this.blogsTypeOrmRepository.create(blog);
   }
 }

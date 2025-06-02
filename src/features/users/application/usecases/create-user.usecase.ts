@@ -27,15 +27,16 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
   async execute(command: CreateUserCommand): Promise<string> {
     const { password, login, email } = command;
 
-    const response = await this.usersQueryRepository.doesExistByLoginOrEmail(
+    const {resultEmail, resultLogin} = await this.usersQueryRepository.doesExistByLoginOrEmail(
       login,
       email,
     );
 
-    if (!response) {
+
+    if (resultEmail.length !== 0 || resultLogin.length !== 0) {
       throw new BadRequestException([
         {
-          message: 'The email address/login is not unique',
+          message: 'The email/login is not unique',
           field: 'login/email',
         },
       ]);

@@ -3,7 +3,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { BlogEntity } from '../domain/blog.entity';
+import { Blog } from '../domain/blog.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BlogUpdateModel } from '../api/models/input/update-blog.input';
@@ -13,7 +13,7 @@ import { PostUpdateSpecialModel } from '../../posts/api/models/input/update-post
 export class BlogsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async create(blog: BlogEntity) {
+  async create(blog: Blog) {
     const { id, name, description, websiteUrl, createdAt, isMembership } = blog;
 
     const query = `INSERT INTO public."blogs" (id, "createdAt", description, name, "websiteUrl", "isMembership")
@@ -42,7 +42,7 @@ export class BlogsRepository {
 
     const response = await this.dataSource.query(query, values);
 
-    return response[0];
+    return response.length === 1;
   }
 
   async delete(blogId: string): Promise<boolean> {

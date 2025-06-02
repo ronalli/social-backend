@@ -25,19 +25,19 @@ import { ConfirmationEmailEntity } from '../users/domain/confirmation.email.enti
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, DeviceSessionEntity, RecoveryCodeEntity, OldRefreshTokenEntity, ConfirmationEmailEntity]),
-    // ThrottlerModule.forRoot([
-    //   {
-    //     ttl: 10000,
-    //     limit: 5,
-    //   },
-    // ]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
     CqrsModule,
     UsersModule,
     SecurityModule,
   ],
   controllers: [AuthController],
   providers: [
-    // ThrottlerGuard,
+    ThrottlerGuard,
     AuthService,
     AuthRepository,
     AuthQueryRepository,

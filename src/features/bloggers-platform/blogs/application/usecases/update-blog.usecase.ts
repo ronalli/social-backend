@@ -1,5 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BlogsRepository } from '../../infrastructure/blogs.repository';
+import { BlogsTypeOrmRepository } from '../../infrastructure/blogs.typeorm.repository';
+import { async } from 'rxjs';
 
 export class UpdateBlogCommand {
   constructor(
@@ -12,11 +14,10 @@ export class UpdateBlogCommand {
 
 @CommandHandler(UpdateBlogCommand)
 export class UpdateBlogHandler implements ICommandHandler<UpdateBlogCommand> {
-  constructor(private readonly blogsRepository: BlogsRepository) {}
+  constructor(private readonly blogsRepository: BlogsRepository,
+  private readonly blogsTypeORMRepository: BlogsTypeOrmRepository) {}
 
   async execute(command: UpdateBlogCommand): Promise<boolean> {
-    const response = await this.blogsRepository.updateBlog(command);
-
-    return response.length > 0;
+    return await this.blogsTypeORMRepository.updateBlog(command);
   }
 }

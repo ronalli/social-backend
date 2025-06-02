@@ -137,7 +137,7 @@ export class AuthController {
 
   @ApiBearerAuth()
   @UseGuards(RefreshTokenGuard)
-  // @SkipThrottle()
+  @SkipThrottle()
   @Post('logout')
   @LogoutApiResponse()
   async logout(@Req() req: Request, @Res() res: Response) {

@@ -30,9 +30,13 @@ import { DeleteCommentHandler } from './comments/application/usecases/delete-com
 import { LikesService } from '../likes/application/likes.service';
 import { LikesQueryRepository } from '../likes/infrastructure/likes.query-repository';
 import { UpdatePostHandler } from './posts/application/usecases/update-post.usecase';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Blog } from './blogs/domain/blog.entity';
+import { BlogsTypeOrmRepository } from './blogs/infrastructure/blogs.typeorm.repository';
+
 
 @Module({
-  imports: [CqrsModule, AuthModule, UsersModule],
+  imports: [TypeOrmModule.forFeature([Blog]),CqrsModule, AuthModule, UsersModule],
   controllers: [BlogsController, PostsController, CommentsController],
   providers: [
     PostsService,
@@ -40,6 +44,7 @@ import { UpdatePostHandler } from './posts/application/usecases/update-post.usec
     PostsQueryRepository,
     BlogsService,
     BlogsRepository,
+    BlogsTypeOrmRepository,
     BlogsQueryRepository,
     CommentsService,
     CommentsRepository,

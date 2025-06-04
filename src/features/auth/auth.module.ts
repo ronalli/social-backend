@@ -21,6 +21,7 @@ import { DeviceSessionEntity } from '../security/domain/device.entity';
 import { RecoveryCodeEntity } from './domain/recoveryCode.entity';
 import { OldRefreshTokenEntity } from './domain/refreshToken.entity';
 import { ConfirmationEmailEntity } from '../users/domain/confirmation.email.entity';
+import { AuthTypeOrmQueryRepository } from './infrastructure/auth.typeorm.query-repository';
 
 @Module({
   imports: [
@@ -41,7 +42,7 @@ import { ConfirmationEmailEntity } from '../users/domain/confirmation.email.enti
     AuthService,
     AuthRepository,
     AuthQueryRepository,
-
+    AuthTypeOrmQueryRepository,
     MappingsUsersService,
     NodemailerService,
     SecurityService,

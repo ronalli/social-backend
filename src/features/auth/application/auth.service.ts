@@ -28,6 +28,7 @@ import { UsersService } from '../../users/application/users.service';
 import { validate as isValidUUID } from 'uuid';
 import { AuthTypeOrmRepository } from '../infrastructure/auth.typeorm.repository';
 import { SecurityTypeOrmRepository } from '../../security/infrastructure/security.typeorm.repository';
+import { AuthTypeOrmQueryRepository } from '../infrastructure/auth.typeorm.query-repository';
 
 @Injectable()
 export class AuthService {
@@ -37,9 +38,10 @@ export class AuthService {
     private readonly usersQueryRepository: UsersQueryRepository,
     private readonly nodemailerService: NodemailerService,
     private readonly authQueryRepository: AuthQueryRepository,
+    private readonly authTypeOrmQueryRepository: AuthTypeOrmQueryRepository,
     private readonly securityService: SecurityService,
     private readonly usersService: UsersService,
-    private readonly authTypeORMRepository: AuthTypeOrmRepository,
+    private readonly authTypeOrmRepository: AuthTypeOrmRepository,
     private readonly securityTypeOrmRepository: SecurityTypeOrmRepository,
     @InjectDataSource() protected dataSource: DataSource,
   ) {}
@@ -47,7 +49,7 @@ export class AuthService {
   async login(data: LoginInputModel, dataSession: HeaderSessionModel) {
     const { loginOrEmail }: LoginInputModel = data;
     const foundUser =
-      await this.authTypeORMRepository.findByLoginOrEmail(loginOrEmail);
+      await this.authTypeOrmRepository.findByLoginOrEmail(loginOrEmail);
 
     if (foundUser) {
       const success = await bcryptService.checkPassword(
@@ -114,7 +116,7 @@ export class AuthService {
     const id = randomUUID();
     const confirmation = new ConfirmationInfoEmail(id);
 
-    const userId = await this.authTypeORMRepository.createUser(
+    const userId = await this.authTypeOrmRepository.createUser(
       { id, login, email, hash, createdAt },
       confirmation,
     );
@@ -163,7 +165,7 @@ export class AuthService {
     );
 
     if (isFindCode && foundUser) {
-      await this.authTypeORMRepository.updateConfirmationInfo(
+      await this.authTypeOrmRepository.updateConfirmationInfo(
         true,
         null,
         null,
@@ -201,7 +203,7 @@ export class AuthService {
         minutes: 10,
       });
 
-      await this.authTypeORMRepository.updateConfirmationInfo(false, expirationDate, code, result.id)
+      await this.authTypeOrmRepository.updateConfirmationInfo(false, expirationDate, code, result.id)
 
       this.nodemailerService
         .sendEmail(email, code, emailExamples.registrationEmail)
@@ -215,7 +217,7 @@ export class AuthService {
     console.log(token);
 
     const foundedToken =
-      await this.authQueryRepository.findOneOldRefreshToken(token);
+      await this.authTypeOrmQueryRepository.findOneOldRefreshToken(token);
 
     if (foundedToken) {
       throw new UnauthorizedException();
@@ -224,7 +226,7 @@ export class AuthService {
     const correctIdUser = await jwtService.getUserIdByToken(token);
 
     const successAddRefreshToken =
-      await this.authTypeORMRepository.addOverdueRefreshToken(token);
+      await this.authTypeOrmRepository.addOverdueRefreshToken(token);
 
     //add search user on id
     if (correctIdUser) {
@@ -244,14 +246,14 @@ export class AuthService {
     const validId = await jwtService.getUserIdByToken(token);
 
     const findedToken =
-      await this.authQueryRepository.findOneOldRefreshToken(token);
+      await this.authTypeOrmQueryRepository.findOneOldRefreshToken(token);
 
     if (findedToken) {
       throw new UnauthorizedException();
     }
 
     if (validId && !findedToken) {
-      await this.authTypeORMRepository.addOverdueRefreshToken(token);
+      await this.authTypeOrmRepository.addOverdueRefreshToken(token);
 
       const currentUser = await this.usersService.findUser(validId);
 
@@ -282,12 +284,12 @@ export class AuthService {
   }
 
   async recoveryCode(email: string) {
-    const response = await this.authTypeORMRepository.findByEmail(email);
+    const response = await this.authTypeOrmRepository.findByEmail(email);
 
     if (response) {
       const dataCode = await createRecoveryCode(email, '1h');
 
-      await this.authTypeORMRepository.createRecoveryCode(
+      await this.authTypeOrmRepository.createRecoveryCode(
         response.id,
         dataCode,
       );
@@ -306,7 +308,7 @@ export class AuthService {
     if (isSearchUser) {
       const hash = await bcryptService.generateHash(password);
 
-      await this.authTypeORMRepository.updatePasswordByUserEmail(email, hash);
+      await this.authTypeOrmRepository.updatePasswordByUserEmail(email, hash);
     }
     return;
   }
@@ -322,7 +324,7 @@ export class AuthService {
   }
 
   async checkUserCredential(login: string) {
-    return await this.authRepository.findByEmail(login);
+    return await this.authTypeOrmRepository.findByEmail(login);
   }
 
   async checkAccessToken(authHeader: string) {

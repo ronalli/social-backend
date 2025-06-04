@@ -35,9 +35,7 @@ import { CreatePostForSpecialBlogApiResponse } from '../../../../common/services
 import { GetPostsForBlogApiResponse } from '../../../../common/services/swagger/blogs/get-posts-for-blog.api-response';
 import { PostQueryDto } from '../../posts/api/models/post-query.dto';
 import { UpdatePostForSpecialBlogApiResponse } from '../../../../common/services/swagger/blogs/update-post-for-special-blog.api-response';
-import {
-  DeletePostForSpecialBlogApiResponse
-} from '../../../../common/services/swagger/blogs/delete-post-for-special-blog.api-response';
+import { DeletePostForSpecialBlogApiResponse } from '../../../../common/services/swagger/blogs/delete-post-for-special-blog.api-response';
 import { GetBlogApiResponse } from '../../../../common/services/swagger/blogs/get-blog.api-response';
 import { BlogsTypeOrmQueryRepository } from '../infrastructure/blogs.typeorm.query-repository';
 
@@ -115,7 +113,7 @@ export class BlogsController {
     @Headers('authorization') authHeader: string,
   ) {
     const token = authHeader?.split(' ')[1] || 'unknown'; //
-    const currentUser = await serviceInfoLike.getIdUserByToken(token); //
+    const currentUser = await serviceInfoLike.getIdUserByToken(token);
     const { title, shortDescription, content } = post;
 
     const result = await this.blogsTypeORMQueryRepository.blogIsExist(blogId);
@@ -148,7 +146,8 @@ export class BlogsController {
     const header = authHeader?.split(' ')[1];
     const currentUser = await serviceInfoLike.getIdUserByToken(header);
 
-    const blogFound = await this.blogsTypeORMQueryRepository.blogIsExist(blogId);
+    const blogFound =
+      await this.blogsTypeORMQueryRepository.blogIsExist(blogId);
 
     if (!blogFound) this.throwBlogNotFoundException();
 
@@ -169,7 +168,7 @@ export class BlogsController {
     @Param('postId', ValidateObjectIdPipe) postId: string,
     @Body() post: PostInputModel,
   ) {
-    const response = await this.blogsService.updatePostBySpecialBlog(
+    const response = await this.postsService.updatePostBySpecialBlog(
       post,
       blogId,
       postId,
@@ -189,7 +188,7 @@ export class BlogsController {
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Param('postId', ValidateObjectIdPipe) postId: string,
   ) {
-    const response = await this.blogsService.deletePostBySpecialBlog(
+    const response = await this.postsService.deletePostBySpecialBlog(
       blogId,
       postId,
     );
@@ -216,7 +215,8 @@ export class BlogsController {
     const header = authHeader?.split(' ')[1];
     const currentUser = await serviceInfoLike.getIdUserByToken(header);
 
-    const blogFound = await this.blogsTypeORMQueryRepository.blogIsExist(blogId);
+    const blogFound =
+      await this.blogsTypeORMQueryRepository.blogIsExist(blogId);
 
     if (!blogFound) this.throwBlogNotFoundException();
 

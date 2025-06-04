@@ -4,20 +4,21 @@ import { PostCreateDBModel } from '../../blogs/api/models/input/create-blog.db.m
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Post } from '../domain/post.entity';
+import { PostUpdateSpecialModel } from '../api/models/input/update-post.special.blog.model';
 
 @Injectable()
-export class PostsTypeormRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource,
-  @InjectRepository(Post) private readonly postRepository: Repository<Post>) {}
+export class PostsTypeOrmRepository {
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    @InjectRepository(Post) private readonly postRepository: Repository<Post>,
+  ) {}
 
   async create(post: PostCreateDBModel, currentUser: string) {
-
     const postCreated = this.postRepository.create(post);
 
     const result = await this.postRepository.save(postCreated);
 
     return result.id;
-
 
     // const { id, title, shortDescription, content, blogId, createdAt } = post;
     //
@@ -33,6 +34,35 @@ export class PostsTypeormRepository {
     // ]);
     //
     // return result[0].id;
+  }
+
+  async deletePost(blogId: string, postId: string): Promise<boolean> {
+    const result = await this.postRepository.delete({
+      id: postId,
+      blogId: blogId,
+    });
+
+    return result.affected > 0;
+  }
+
+  async updatePost(
+    post: PostUpdateSpecialModel,
+    blogId: string,
+    postId: string,
+  ): Promise<boolean> {
+    const result = await this.postRepository.update(
+      {
+        id: postId,
+        blogId: blogId,
+      },
+      {
+        title: post.title,
+        shortDescription: post.shortDescription,
+        content: post.content,
+      },
+    );
+
+    return result.affected > 0;
   }
 
   // async updateCurrentPost(post: any) {

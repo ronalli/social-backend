@@ -41,9 +41,11 @@ export class BlogsTypeOrmRepository {
     return result.affected === 1;
   }
 
-  async findBlogById(blogId: string) {
-    const query = `SELECT * FROM public."blogs" WHERE id = $1;`;
-    const result = await this.dataSource.query(query, [blogId]);
-    return result[0];
+  async findBlogById(id: string) {
+    return await this.dataSource
+      .getRepository(Blog)
+      .createQueryBuilder('blogs')
+      .where('blogs.id = :id', { id })
+      .getRawOne();
   }
 }

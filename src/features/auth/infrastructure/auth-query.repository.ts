@@ -1,4 +1,3 @@
-import { ResultCode } from '../../../settings/http.status';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';

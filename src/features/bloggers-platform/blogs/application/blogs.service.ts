@@ -6,22 +6,12 @@ import { async } from 'rxjs';
 
 @Injectable()
 export class BlogsService {
-  constructor(private readonly blogsRepository: BlogsRepository,
-  private readonly  blogsTypeOrmRepository: BlogsTypeOrmRepository) {}
+  constructor(
+    private readonly blogsRepository: BlogsRepository,
+    private readonly blogsTypeOrmRepository: BlogsTypeOrmRepository,
+  ) {}
 
   async deleteBlog(blogId: string): Promise<boolean> {
     return await this.blogsTypeOrmRepository.delete(blogId);
-  }
-
-  async updatePostBySpecialBlog(
-    post: PostUpdateSpecialModel,
-    blogId: string,
-    postId: string,
-  ): Promise<boolean> {
-    return await this.blogsRepository.updatePost(post, blogId, postId);
-  }
-
-  async deletePostBySpecialBlog(blogId: string, postId: string) {
-    return await this.blogsRepository.deletePost(blogId, postId);
   }
 }

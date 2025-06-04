@@ -4,14 +4,18 @@ import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
 import { PostQueryDto } from '../api/models/post-query.dto';
 import { jwtService } from '../../../../common/services/jwt.service';
 import { MappingsPostsService } from './mappings/mapping.posts';
+import { PostsTypeOrmRepository } from '../infrastructure/posts.typeorm.repository';
+import { PostUpdateSpecialModel } from '../api/models/input/update-post.special.blog.model';
 
 @Injectable()
 export class PostsService {
   constructor(
     private readonly postsRepository: PostsRepository,
+    private readonly postTypeOrmRepository: PostsTypeOrmRepository,
     private readonly postsQueryRepository: PostsQueryRepository,
     private readonly mappingsPostsService: MappingsPostsService,
   ) {}
+
   async getPost(id: string, currentUser: string) {
     const result = await this.postsQueryRepository.getPost(id, currentUser);
 
@@ -38,6 +42,18 @@ export class PostsService {
       ...allPosts,
       items,
     };
+  }
+
+  async updatePostBySpecialBlog(
+    post: PostUpdateSpecialModel,
+    blogId: string,
+    postId: string,
+  ): Promise<boolean> {
+    return await this.postTypeOrmRepository.updatePost(post, blogId, postId);
+  }
+
+  async deletePostBySpecialBlog(blogId: string, postId: string) {
+    return await this.postTypeOrmRepository.deletePost(blogId, postId);
   }
 
   // async updateLikeStatus(data: Omit<ILikeTypeDB, 'addedAt'>) {

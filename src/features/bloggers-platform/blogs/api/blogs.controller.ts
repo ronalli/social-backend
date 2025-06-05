@@ -1,4 +1,4 @@
-import { ApiBasicAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBasicAuth, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -23,7 +23,6 @@ import { UpdateBlogCommand } from '../application/usecases/update-blog.usecase';
 import { PostInputModel } from '../../posts/api/models/input/create-post.input.query.model';
 import { BasicAuthGuard } from '../../../../common/guards/auth.basic.guard';
 import { ValidateObjectIdPipe } from '../../../../common/pipes/validateObjectIdPipe';
-import { QueryParamsDto } from '../../../../common/models/query-params.dto';
 import { serviceInfoLike } from '../../../../common/services/initialization.status.like';
 import { CreatePostCommand } from '../../posts/application/usecases/create-post.usecase';
 import { HTTP_STATUSES } from '../../../../settings/http.status';
@@ -202,7 +201,7 @@ export class BlogsController {
   @Get('blogs')
   @PrivateGetBlogsApiResponse()
   async getPublicAllBlogs(@Query() query: BlogsQueryDto) {
-    return await this.blogsQueryRepository.getAllBlogs(query);
+    return await this.blogsTypeORMQueryRepository.getAllBlogs(query);
   }
 
   @Get('blogs/:blogId/posts')

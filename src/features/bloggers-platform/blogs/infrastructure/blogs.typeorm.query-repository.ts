@@ -5,13 +5,13 @@ import { BlogQueryDto } from '../api/models/blog-query.dto';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { BlogOutputModel } from '../api/models/output/blog.output.model';
-import { createOrderByClause } from '../../../../common/utils/orderByClause';
 import { Blog } from '../domain/blog.entity';
+import { createOrderByClause } from '../../../../common/utils/orderByClause';
 
 @Injectable()
 export class BlogsTypeOrmQueryRepository {
   constructor(
-  @InjectRepository(Blog) private readonly blogRepository: Repository<Blog>,
+    @InjectRepository(Blog) private readonly blogRepository: Repository<Blog>,
     @InjectDataSource() protected dataSource: DataSource,
     public queryParamsService: QueryParamsService,
     // private readonly mappingsBlogsService: MappingBlogsService,
@@ -92,48 +92,36 @@ export class BlogsTypeOrmQueryRepository {
   //   };
   // }
   //
-  // async getAllBlogs(queryParams: BlogQueryDto) {
-  //   const defaultQueryParams =
-  //     this.queryParamsService.createDefaultValues(queryParams);
-  //
-  //   const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize } =
-  //     defaultQueryParams;
-  //
-  //   const namePattern = searchNameTerm ? `%${searchNameTerm}%` : null;
-  //
-  //   const totalCountQuery = `SELECT *
-  //                            FROM public.blogs
-  //                            WHERE ($1::text IS NULL)
-  //                               OR (name ILIKE COALESCE($1::text, '%'));`;
-  //
-  //   const totalCount = await this.dataSource.query(totalCountQuery, [
-  //     namePattern,
-  //   ]);
-  //
-  //   const pagesCount = Math.ceil(totalCount.length / pageSize);
-  //
-  //   const orderByClause = createOrderByClause(sortBy, sortDirection);
-  //
-  //   const query = `
-  //     SELECT *
-  //     FROM public.blogs
-  //     WHERE ($1::text IS NULL)
-  //        OR (name ILIKE COALESCE($1::text, '%'))
-  //     ORDER BY ${orderByClause}
-  //       LIMIT ${pageSize}
-  //     OFFSET ${pageSize * (pageNumber - 1)};
-  //   `;
-  //
-  //   const result = await this.dataSource.query(query, [namePattern]);
-  //
-  //   return {
-  //     pagesCount: +pagesCount,
-  //     page: +pageNumber,
-  //     pageSize: +pageSize,
-  //     totalCount: +totalCount.length,
-  //     items: result,
-  //   };
-  // }
+  async getAllBlogs(queryParams: BlogQueryDto) {
+    const defaultQueryParams =
+      this.queryParamsService.createDefaultValues(queryParams);
+
+    const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize } =
+      defaultQueryParams;
+
+    // const orderByClause = createOrderByClause(sortBy, sortDirection);
+
+
+    const result = await this.blogRepository
+      .createQueryBuilder('b')
+      .where(searchNameTerm ? 'b.name ILIKE :name' : '1=1', {
+        name: `%${searchNameTerm}%`,
+      })
+      .addOrderBy(`"${sortBy}"`, `${sortDirection}`)
+      .skip(pageSize * (pageNumber - 1))
+      .take(pageSize)
+      .getManyAndCount();
+
+    const pagesCount = Math.ceil(result[1] / pageSize);
+
+    return {
+      pagesCount: +pagesCount,
+      page: +pageNumber,
+      pageSize: +pageSize,
+      totalCount: +result[1],
+      items: result,
+    };
+  }
 
   async findBlogById(blogId: string): Promise<BlogOutputModel> {
     return await this.blogRepository.findOne({

@@ -1,5 +1,4 @@
-import { SortDirection } from 'mongodb';
-import { QueryParamsDto } from '../models/query-params.dto';
+import { QueryParamsDto, SortDirection } from '../models/query-params.dto';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -15,8 +14,8 @@ export class QueryParamsService {
           : 10,
       sortBy: query.sortBy ? query.sortBy : 'createdAt',
       sortDirection: query.sortDirection
-        ? (query.sortDirection)
-        : 'desc',
+        ? query.sortDirection
+        : SortDirection.DESC,
       searchNameTerm: query.searchNameTerm ? query.searchNameTerm : null,
     };
   }
@@ -31,9 +30,7 @@ export class QueryParamsService {
             : +query.pageSize
           : 10,
       sortBy: query.sortBy ? query.sortBy : 'createdAt',
-      sortDirection: query.sortDirection
-        ? (query.sortDirection)
-        : 'desc',
+      sortDirection: query.sortDirection ? query.sortDirection : 'desc',
     };
   };
 }

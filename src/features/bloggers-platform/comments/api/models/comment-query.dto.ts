@@ -1,10 +1,10 @@
-import { QueryParamsDto } from '../../../../../common/models/query-params.dto';
+import { QueryParamsDto, SortDirection } from '../../../../../common/models/query-params.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-export enum SortDirection {
-  ASC = 'asc',
-  DESC = 'desc',
-}
+// export enum SortDirection {
+//   ASC = 'asc',
+//   DESC = 'desc',
+// }
 
 export class CommentQueryDto extends QueryParamsDto {
   @ApiPropertyOptional({

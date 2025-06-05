@@ -1,6 +1,12 @@
 import { IsOptional, IsString } from 'class-validator';
 
-export type SortDirection = 'asc' | 'desc';
+// export type SortDirection = 'ASC' | 'DESC';
+
+
+export enum SortDirection {
+  ASC = 'ASC',
+  DESC = 'DESC'
+}
 
 export class QueryParamsDto {
   @IsOptional()
@@ -8,7 +14,7 @@ export class QueryParamsDto {
   searchNameTerm?: string = null;
 
   @IsOptional()
-  sortDirection?: SortDirection = 'desc';
+  sortDirection?: SortDirection = SortDirection.DESC;
 
   @IsOptional()
   sortBy?: string = 'createdAt';

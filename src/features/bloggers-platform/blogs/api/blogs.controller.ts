@@ -209,6 +209,7 @@ export class BlogsController {
   async getPublicAllPostsForBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
     @Query() query: PostQueryDto,
+    //добавить валидацию сортировки по столбцам
     @Headers('authorization') authHeader: string,
   ) {
     const header = authHeader?.split(' ')[1];

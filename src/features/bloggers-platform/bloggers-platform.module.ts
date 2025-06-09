@@ -36,6 +36,7 @@ import { BlogsTypeOrmRepository } from './blogs/infrastructure/blogs.typeorm.rep
 import { BlogsTypeOrmQueryRepository } from './blogs/infrastructure/blogs.typeorm.query-repository';
 import { Post } from './posts/domain/post.entity';
 import { PostsTypeOrmRepository } from './posts/infrastructure/posts.typeorm.repository';
+import { PostsTypeOrmQueryRepository } from "./posts/infrastructure/posts.typeorm.query-repository";
 
 
 @Module({
@@ -44,6 +45,7 @@ import { PostsTypeOrmRepository } from './posts/infrastructure/posts.typeorm.rep
   providers: [
     PostsService,
     PostsRepository,
+    PostsTypeOrmQueryRepository,
     PostsTypeOrmRepository,
     PostsQueryRepository,
     BlogsService,

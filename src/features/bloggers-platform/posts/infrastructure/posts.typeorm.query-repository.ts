@@ -20,66 +20,80 @@ export class PostsTypeOrmQueryRepository {
     @InjectDataSource() protected dataSource: DataSource,
   ) {}
 
-  // async getPosts(queryParams: PostQueryDto, userId: string) {
-  //   const defaultQueryParams =
-  //     this.queryParamsService.createDefaultValues(queryParams);
-  //
-  //   const { pageNumber, pageSize, sortBy, sortDirection } = defaultQueryParams;
-  //
-  //   const orderByClause = createOrderByClause(sortBy, sortDirection);
-  //
-  //   const query = `
-  //   WITH result AS (
-  //     SELECT
-  //       p.id,
-  //       p.title,
-  //       p."shortDescription",
-  //       p.content,
-  //       p."blogId",
-  //       b.name AS "blogName",
-  //       p."createdAt",
-  //       COALESCE(s."likeStatus", 'None') AS "myStatus",
-  //       (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Like') AS "likesCount",
-  //       (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Dislike') AS "dislikesCount",
-  //    (
-  //      SELECT json_agg(likes)
-  //      FROM (
-  //        SELECT
-  //           pls."userId",
-  //           u.login,
-  //           pls."createdAt" as "addedAt"
-  //        FROM public."postsLikeStatus" pls
-  //        JOIN public.users u ON u.id = pls."userId"
-  //        WHERE pls."postId" = p.id AND pls."likeStatus" = 'Like'
-  //        ORDER BY pls."createdAt"::TIMESTAMP DESC
-  //        LIMIT 3
-  //        ) likes
-  //      ) as "newestLikes"
-  //    FROM posts p
-  //    JOIN blogs b ON p."blogId" = b.id
-  //    LEFT JOIN public."postsLikeStatus" s ON s."postId" = p.id AND s."userId" = $1
-  //      )
-  //    SELECT * FROM result
-  //    ORDER BY ${orderByClause}
-  //    LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;
-  //
-  //   // const query = `SELECT * FROM public.posts ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
-  //   //     LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;
-  //
-  //   const response = await this.dataSource.query(query, [userId]);
-  //
-  //   const totalQuery = `SELECT * FROM public.posts;`;
-  //
-  //   const totalCount = await this.dataSource.query(totalQuery, []);
-  //
-  //   return {
-  //     pagesCount: +Math.ceil(totalCount.length / pageSize),
-  //     page: +pageNumber,
-  //     pageSize: +pageSize,
-  //     totalCount: +totalCount.length,
-  //     items: response,
-  //   };
-  // }
+  async getPosts(queryParams: PostQueryDto, userId: string) {
+    const defaultQueryParams =
+      this.queryParamsService.createDefaultValues(queryParams);
+
+    const { pageNumber, pageSize, sortBy, sortDirection } = defaultQueryParams;
+
+    // const orderByClause = createOrderByClause(sortBy, sortDirection);
+
+    const queryBuilder = this.postRepository
+      .createQueryBuilder('p')
+      .addSelect('p.id', 'id')
+      .addSelect('p.title', 'title')
+      .addSelect('p.content', 'content')
+      .addSelect('p.shortDescription', 'shortDescription')
+      .addSelect('p.blogId', 'blogId')
+      .addSelect('b.name', 'blogName')
+      .addSelect('p.createdAt', 'createdAt')
+
+      .addSelect((subQuery) => {
+        return subQuery
+          .select("COALESCE(s.likeStatus, 'None')", 'myStatus')
+          .from('postsLikeStatus', 's')
+          .where('s.postId = p.id')
+          .andWhere('s.userId = :userId', { userId });
+      }, 'myStatus')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(*)')
+          .from('postsLikeStatus', 'pls')
+          .where('pls.postId = p.id')
+          .andWhere("pls.likeStatus = 'Like'");
+      }, 'likesCount')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(*)')
+          .from('postsLikeStatus', 'pls')
+          .where('pls.postId = p.id')
+          .andWhere("pls.likeStatus = 'Dislike'");
+      }, 'dislikesCount')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select(`json_agg(likes)`)
+          .from((qb) => {
+            return qb
+              .select([
+                'pls."userId"',
+                'u.login',
+                'pls."createdAt" as "addedAt"',
+              ])
+              .from('postsLikeStatus', 'pls')
+              .innerJoin('users', 'u', 'u.id = pls."userId"')
+              .where('pls."postId" = p.id')
+              .andWhere(`pls."likeStatus" = 'Like'`)
+              .orderBy('pls."createdAt"', 'DESC')
+              .limit(3);
+          }, 'likes');
+      }, 'newestLikes')
+      .innerJoin('blogs', 'b', 'b.id = p.blogId')
+      .orderBy(`"${sortBy}"`, `${sortDirection}`)
+      .limit(pageSize)
+      .offset(pageSize * (pageNumber - 1));
+
+    const posts = await queryBuilder.getRawMany();
+
+    const totalCount = await queryBuilder.clone().getCount();
+
+    return {
+      pagesCount: +Math.ceil(totalCount / pageSize),
+      page: +pageNumber,
+      pageSize: +pageSize,
+      totalCount: +totalCount,
+      items: posts,
+    };
+  }
 
   async getPost(postId: string, userId: string): Promise<PostDB> {
     const query = `

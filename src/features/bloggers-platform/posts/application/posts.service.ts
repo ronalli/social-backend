@@ -6,12 +6,14 @@ import { jwtService } from '../../../../common/services/jwt.service';
 import { MappingsPostsService } from './mappings/mapping.posts';
 import { PostsTypeOrmRepository } from '../infrastructure/posts.typeorm.repository';
 import { PostUpdateSpecialModel } from '../api/models/input/update-post.special.blog.model';
+import { PostsTypeOrmQueryRepository } from "../infrastructure/posts.typeorm.query-repository";
 
 @Injectable()
 export class PostsService {
   constructor(
     private readonly postsRepository: PostsRepository,
     private readonly postTypeOrmRepository: PostsTypeOrmRepository,
+    private readonly postTypeOrmQueryRepository: PostsTypeOrmQueryRepository,
     private readonly postsQueryRepository: PostsQueryRepository,
     private readonly mappingsPostsService: MappingsPostsService,
   ) {}
@@ -29,7 +31,10 @@ export class PostsService {
   async getAllPosts(token: string, query: PostQueryDto) {
     const currentUserId = await jwtService.getUserIdByToken(token);
 
-    const allPosts = await this.postsQueryRepository.getPosts(
+    // await this.postTypeOrmQueryRepository.getPosts( query, currentUserId)
+
+
+    const allPosts = await this.postTypeOrmQueryRepository.getPosts(
       query,
       currentUserId,
     );

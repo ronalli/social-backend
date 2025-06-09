@@ -19,8 +19,7 @@ export class PostsService {
   ) {}
 
   async getPost(id: string, currentUser: string) {
-    const result = await this.postsQueryRepository.getPost(id, currentUser);
-
+    const result = await this.postTypeOrmQueryRepository.getPost(id, currentUser);
     return await this.mappingsPostsService.formatingDataForOutputPost(result);
   }
 
@@ -30,9 +29,6 @@ export class PostsService {
 
   async getAllPosts(token: string, query: PostQueryDto) {
     const currentUserId = await jwtService.getUserIdByToken(token);
-
-    // await this.postTypeOrmQueryRepository.getPosts( query, currentUserId)
-
 
     const allPosts = await this.postTypeOrmQueryRepository.getPosts(
       query,

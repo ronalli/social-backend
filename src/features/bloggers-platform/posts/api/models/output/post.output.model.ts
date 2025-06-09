@@ -1,11 +1,12 @@
 import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { LikeStatus } from "../../../../../likes/domain/like.entity";
 
-export enum PostStatus {
-  None,
-  Like,
-  Dislike,
-}
+// export enum PostStatus {
+//   None,
+//   Like,
+//   Dislike,
+// }
 
 export class NewLike {
   @ApiProperty({
@@ -41,9 +42,9 @@ export class PostExtendedLikesInfo {
 
   @ApiProperty({
     type: String,
-    enum: PostStatus,
+    enum: LikeStatus,
   })
-  myStatus: PostStatus;
+  myStatus: LikeStatus;
 
   @ApiProperty({
     type: [NewLike],
@@ -55,6 +56,7 @@ export class PostOutputModel {
   @ApiProperty()
   @IsString()
   id: string;
+
   @ApiProperty()
   @IsString()
   title: string;
@@ -81,6 +83,7 @@ export class PostOutputModel {
   })
   @IsString()
   createdAt: string;
+
   @ApiProperty({
     type: PostExtendedLikesInfo,
   })
@@ -104,7 +107,7 @@ export class PostDB {
   blogId: string;
   blogName: string;
   createdAt: string;
-  myStatus: PostStatus;
+  myStatus: LikeStatus;
   likesCount: string;
   dislikesCount: string;
   newestLikes: NewLike[] | [];

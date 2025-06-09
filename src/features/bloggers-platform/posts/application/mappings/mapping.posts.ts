@@ -1,10 +1,11 @@
 import {
   PostDB,
   PostOutputModel,
-  PostOutputModelDB,
-} from '../../api/models/output/post.output.model';
+  PostOutputModelDB
+} from "../../api/models/output/post.output.model";
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { BlogsQueryRepository } from '../../../blogs/infrastructure/blogs.query-repository';
+import { LikeStatus } from "../../../../likes/domain/like.entity";
 
 @Injectable()
 export class MappingsPostsService {
@@ -48,7 +49,7 @@ export class MappingsPostsService {
       extendedLikesInfo: {
         likesCount: +likesCount,
         dislikesCount: +dislikesCount,
-        myStatus,
+        myStatus: myStatus ?? LikeStatus.None,
         newestLikes: newestLikes || [],
       },
     };

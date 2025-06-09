@@ -60,22 +60,16 @@ export class PostsTypeOrmQueryRepository {
           .andWhere("pls.likeStatus = 'Dislike'");
       }, 'dislikesCount')
       .addSelect((subQuery) => {
-        return subQuery
-          .select(`json_agg(likes)`)
-          .from((qb) => {
-            return qb
-              .select([
-                'pls."userId"',
-                'u.login',
-                'pls."createdAt" as "addedAt"',
-              ])
-              .from('postsLikeStatus', 'pls')
-              .innerJoin('users', 'u', 'u.id = pls."userId"')
-              .where('pls."postId" = p.id')
-              .andWhere(`pls."likeStatus" = 'Like'`)
-              .orderBy('pls."createdAt"', 'DESC')
-              .limit(3);
-          }, 'likes');
+        return subQuery.select(`json_agg(likes)`).from((qb) => {
+          return qb
+            .select(['pls."userId"', 'u.login', 'pls."createdAt" as "addedAt"'])
+            .from('postsLikeStatus', 'pls')
+            .innerJoin('users', 'u', 'u.id = pls."userId"')
+            .where('pls."postId" = p.id')
+            .andWhere(`pls."likeStatus" = 'Like'`)
+            .orderBy('pls."createdAt"', 'DESC')
+            .limit(3);
+        }, 'likes');
       }, 'newestLikes')
       .innerJoin('blogs', 'b', 'b.id = p.blogId')
       .orderBy(`"${sortBy}"`, `${sortDirection}`)
@@ -95,42 +89,64 @@ export class PostsTypeOrmQueryRepository {
     };
   }
 
-  async getPost(postId: string, userId: string): Promise<PostDB> {
-    const query = `
-      SELECT 
-        p.id,
-        p.title,
-        p."shortDescription",
-        p.content,
-        p."blogId",
-        b.name AS "blogName",
-        p."createdAt",
-        COALESCE(s."likeStatus", 'None') AS "myStatus",
-        (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Like') AS "likesCount",
-        (SELECT COUNT(*) FROM public."postsLikeStatus" WHERE "postId" = p.id AND "likeStatus" = 'Dislike') AS "dislikesCount",
-        (
-       SELECT json_agg(likes)
-       FROM (
-         SELECT
-            pls."createdAt" as "addedAt",
-            pls."userId",
-            u.login
-         FROM public."postsLikeStatus" pls
-         JOIN public.users u ON u.id = pls."userId"
-         WHERE pls."postId" = p.id AND pls."likeStatus" = 'Like'
-         ORDER BY pls."createdAt"::TIMESTAMP DESC
-         LIMIT 3  
-         ) likes
-       ) as "newestLikes"
-        FROM public.posts p
-        JOIN public.blogs b ON b.id = p."blogId"
-        LEFT JOIN public."postsLikeStatus" s ON s."postId" = p.id AND s."userId" = $1
-        WHERE p.id = $2;
-    `;
+  async getPost(postId: string, userId: string) {
+    const queryBuilder = this.postRepository
+      .createQueryBuilder('p')
+      .addSelect('p.id', 'id')
+      .addSelect('p.title', 'title')
+      .addSelect('p.shortDescription', 'shortDescription')
+      .addSelect('p.content', 'content')
+      .addSelect('p.blogId', 'blogId')
+      .addSelect('b.name', 'blogName')
+      .addSelect('p.createdAt', 'createdAt')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select("COALESCE(s.likeStatus, 'None')", 'myStatus')
+          .from('postsLikeStatus', 's')
+          .where('s.postId = p.id')
+          .andWhere('s.userId = :userId', { userId });
+      }, 'myStatus')
+      // .addSelect(
+      //   `COALESCE((
+      //     SELECT s."likeStatus"
+      //     FROM "postsLikeStatus" s
+      //      WHERE s."postId" = p.id AND s."userId" = :userId
+      //      LIMIT 1
+      //         ), 'None')`,
+      //   'myStatus',
+      // )
+      .setParameter('userId', userId)
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(*)')
+          .from('postsLikeStatus', 'pls')
+          .where('pls.postId = p.id')
+          .andWhere("pls.likeStatus = 'Like'");
+      }, 'likesCount')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(*)')
+          .from('postsLikeStatus', 'pls')
+          .where('pls.postId = p.id')
+          .andWhere("pls.likeStatus = 'Dislike'");
+      }, 'dislikesCount')
+      .addSelect((subQuery) => {
+        return subQuery.select(`json_agg(likes)`).from((qb) => {
+          return qb
+            .select(['pls."createdAt" as "addedAt"', 'pls."userId"', 'u.login'])
+            .from('postsLikeStatus', 'pls')
+            .innerJoin('users', 'u', 'u.id = pls."userId"')
+            .where('pls."postId" = p.id')
+            .andWhere(`pls."likeStatus" = 'Like'`)
+            .orderBy('pls."createdAt"', 'DESC')
+            .limit(3);
+        }, 'likes');
+      }, 'newestLikes')
+      .innerJoin('blogs', 'b', 'b.id = p.blogId')
+      .where('p.id = :postId', { postId });
 
-    const response = await this.dataSource.query(query, [userId, postId]);
+    return await queryBuilder.getRawOne();
 
-    return response[0];
   }
 
   async getPostById(id: string) {

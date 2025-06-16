@@ -44,7 +44,7 @@ export class BlogsController {
   constructor(
     private readonly blogsService: BlogsService,
     private readonly blogsQueryRepository: BlogsQueryRepository,
-    private readonly blogsTypeORMQueryRepository: BlogsTypeOrmQueryRepository,
+    private readonly blogsTypeOrmQueryRepository: BlogsTypeOrmQueryRepository,
     private readonly commandBus: CommandBus,
     private readonly postsService: PostsService,
   ) {}
@@ -54,7 +54,7 @@ export class BlogsController {
   @Get('sa/blogs')
   @PrivateGetBlogsApiResponse()
   async getBlogs(@Query() query: BlogsQueryDto) {
-    return await this.blogsQueryRepository.getAllBlogs(query);
+    return await this.blogsTypeOrmQueryRepository.getAllBlogs(query);
   }
 
   @ApiBasicAuth()
@@ -67,7 +67,7 @@ export class BlogsController {
       new CreateBlogCommand(name, description, websiteUrl),
     );
 
-    return await this.blogsQueryRepository.findBlogById(createdBlogId);
+    return await this.blogsTypeOrmQueryRepository.findBlogById(createdBlogId);
   }
 
   @HttpCode(HTTP_STATUSES.NotContent)
@@ -115,7 +115,7 @@ export class BlogsController {
     const currentUser = await serviceInfoLike.getIdUserByToken(token);
     const { title, shortDescription, content } = post;
 
-    const result = await this.blogsTypeORMQueryRepository.blogIsExist(blogId);
+    const result = await this.blogsTypeOrmQueryRepository.blogIsExist(blogId);
 
     if (!result) this.throwBlogNotFoundException();
 
@@ -146,11 +146,11 @@ export class BlogsController {
     const currentUser = await serviceInfoLike.getIdUserByToken(header);
 
     const blogFound =
-      await this.blogsTypeORMQueryRepository.blogIsExist(blogId);
+      await this.blogsTypeOrmQueryRepository.blogIsExist(blogId);
 
     if (!blogFound) this.throwBlogNotFoundException();
 
-    return await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
+    return await this.blogsTypeOrmQueryRepository.getAndSortPostsSpecialBlog(
       blogId,
       query,
       currentUser,
@@ -201,7 +201,7 @@ export class BlogsController {
   @Get('blogs')
   @PrivateGetBlogsApiResponse()
   async getPublicAllBlogs(@Query() query: BlogsQueryDto) {
-    return await this.blogsTypeORMQueryRepository.getAllBlogs(query);
+    return await this.blogsTypeOrmQueryRepository.getAllBlogs(query);
   }
 
   @Get('blogs/:blogId/posts')
@@ -216,11 +216,11 @@ export class BlogsController {
     const currentUser = await serviceInfoLike.getIdUserByToken(header);
 
     const blogFound =
-      await this.blogsTypeORMQueryRepository.blogIsExist(blogId);
+      await this.blogsTypeOrmQueryRepository.blogIsExist(blogId);
 
     if (!blogFound) this.throwBlogNotFoundException();
 
-    return await this.blogsQueryRepository.getAndSortPostsSpecialBlog(
+    return await this.blogsTypeOrmQueryRepository.getAndSortPostsSpecialBlog(
       blogId,
       query,
       currentUser,
@@ -230,7 +230,7 @@ export class BlogsController {
   @Get('blogs/:blogId')
   @GetBlogApiResponse()
   async getBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
-    const result = await this.blogsTypeORMQueryRepository.findBlogById(blogId);
+    const result = await this.blogsTypeOrmQueryRepository.findBlogById(blogId);
 
     if (!result) this.throwBlogNotFoundException();
 

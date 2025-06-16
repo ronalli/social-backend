@@ -36,6 +36,7 @@ import { CreateCommentForPostApiResponse } from '../../../../common/services/swa
 import { InputCommentModel } from '../../comments/api/models/input/update-comment.model';
 import { GetPostsApiResponse } from '../../../../common/services/swagger/posts/get-posts.api-response';
 import { GetPostByIdApiResponse } from '../../../../common/services/swagger/posts/get-post-by-id.api-response';
+import { PostsTypeOrmQueryRepository } from '../infrastructure/posts.typeorm.query-repository';
 
 @ApiTags('Posts')
 @Controller('')
@@ -43,6 +44,7 @@ export class PostsController {
   constructor(
     private readonly postsService: PostsService,
     private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly postsQueryTypeOrmRepository: PostsTypeOrmQueryRepository,
     private readonly commandBus: CommandBus,
     private readonly commentsService: CommentsService,
   ) {}
@@ -86,7 +88,7 @@ export class PostsController {
   ) {
     const { id: userId, login } = user;
 
-    const foundedPost = await this.postsQueryRepository.isPostDoesExist(postId);
+    const foundedPost = await this.postsQueryTypeOrmRepository.isPostDoesExist(postId);
 
     if (!foundedPost) this.throwPostNotFoundException();
 
@@ -104,7 +106,7 @@ export class PostsController {
     @Query() query: CommentQueryDto,
     @Headers('authorization') authHeader: string,
   ) {
-    const foundedPost = await this.postsQueryRepository.isPostDoesExist(postId);
+    const foundedPost = await this.postsQueryTypeOrmRepository.isPostDoesExist(postId);
 
     if (!foundedPost) this.throwPostNotFoundException();
 
@@ -150,7 +152,7 @@ export class PostsController {
     @Param('id', ValidateObjectIdPipe) id: string,
     @Headers('authorization') authHeader: string,
   ) {
-    const foundedPost = await this.postsQueryRepository.isPostDoesExist(id);
+    const foundedPost = await this.postsQueryTypeOrmRepository.isPostDoesExist(id);
 
     if (!foundedPost) this.throwPostNotFoundException();
 

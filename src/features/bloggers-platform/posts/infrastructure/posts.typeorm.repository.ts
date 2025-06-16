@@ -5,11 +5,13 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Post } from '../domain/post.entity';
 import { PostUpdateSpecialModel } from '../api/models/input/update-post.special.blog.model';
+import { PostLikeStatus } from '../../../likes/domain/like.post.entity';
+import { LikesTypeOrmQueryRepository } from '../../../likes/infrastructure/likes.typeorm.query-repository';
 
 @Injectable()
 export class PostsTypeOrmRepository {
   constructor(
-    @InjectDataSource() protected dataSource: DataSource,
+    // @InjectDataSource() protected dataSource: DataSource,
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
   ) {}
 
@@ -19,21 +21,6 @@ export class PostsTypeOrmRepository {
     const result = await this.postRepository.save(postCreated);
 
     return result.id;
-
-    // const { id, title, shortDescription, content, blogId, createdAt } = post;
-    //
-    // const query = `INSERT INTO public.posts (id, title, "shortDescription", content, "createdAt", "blogId") VALUES($1, $2, $3, $4, $5, $6) RETURNING *;`;
-    //
-    // const result = await this.dataSource.query(query, [
-    //   id,
-    //   title,
-    //   shortDescription,
-    //   content,
-    //   createdAt,
-    //   blogId,
-    // ]);
-    //
-    // return result[0].id;
   }
 
   async deletePost(blogId: string, postId: string): Promise<boolean> {
@@ -64,6 +51,8 @@ export class PostsTypeOrmRepository {
 
     return result.affected > 0;
   }
+
+
 
   // async updateCurrentPost(post: any) {
   //   const query = `UPDATE public.posts SET title = $1, "shortDescription" = $2, content = $3, "blogId" = $4 WHERE id = $5 RETURNING *;`;

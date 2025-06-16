@@ -23,9 +23,9 @@ export class PostsService {
     return await this.mappingsPostsService.formatingDataForOutputPost(result);
   }
 
-  async deletePost(id: string) {
-    return await this.postsRepository.delete(id);
-  }
+  // async deletePost(id: string) {
+  //   return await this.postTypeOrmRepository.deletePost('blogId',id);
+  // }
 
   async getAllPosts(token: string, query: PostQueryDto) {
     const currentUserId = await jwtService.getUserIdByToken(token);

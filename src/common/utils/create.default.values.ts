@@ -30,7 +30,7 @@ export class QueryParamsService {
             : +query.pageSize
           : 10,
       sortBy: query.sortBy ? query.sortBy : 'createdAt',
-      sortDirection: query.sortDirection ? query.sortDirection : 'desc',
+      sortDirection: query.sortDirection ? query.sortDirection : SortDirection.DESC,
     };
   };
 }

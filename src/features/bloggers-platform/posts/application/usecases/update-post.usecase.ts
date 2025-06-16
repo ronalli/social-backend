@@ -20,8 +20,8 @@ export class UpdatePostHandler implements ICommandHandler<UpdatePostCommand> {
   ) {}
 
   async execute(command: UpdatePostCommand) {
-    const response = await this.postsRepository.updateCurrentPost(command);
-
-    return response.length > 0;
+    // const response = await this.postsRepository.updateCurrentPost(command);
+    //
+    // return response.length > 0;
   }
 }

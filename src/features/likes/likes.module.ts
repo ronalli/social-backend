@@ -7,13 +7,26 @@ import { LikesService } from './application/likes.service';
 import { LikesQueryRepository } from './infrastructure/likes.query-repository';
 import { PostLikeStatus } from './domain/like.post.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LikesTypeOrmQueryRepository } from './infrastructure/likes.typeorm.query-repository';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([PostLikeStatus]),
-    PostsQueryRepository, PostsRepository],
+    // PostsQueryRepository,
+    // PostsRepository,
+  ],
   controllers: [LikesController],
-  providers: [LikesRepository, LikesQueryRepository, LikesService],
-  exports: [LikesRepository, LikesService, LikesQueryRepository],
+  providers: [
+    LikesRepository,
+    LikesQueryRepository,
+    LikesService,
+    LikesTypeOrmQueryRepository,
+  ],
+  exports: [
+    LikesRepository,
+    LikesService,
+    LikesQueryRepository,
+    LikesTypeOrmQueryRepository,
+  ],
 })
 export class LikesModule {}

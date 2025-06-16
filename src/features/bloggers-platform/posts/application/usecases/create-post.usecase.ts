@@ -4,6 +4,7 @@ import { BadRequestException } from '@nestjs/common';
 import { PostsRepository } from '../../infrastructure/posts.repository';
 import { randomUUID } from 'node:crypto';
 import { PostsTypeOrmRepository } from '../../infrastructure/posts.typeorm.repository';
+import { BlogsTypeOrmQueryRepository } from '../../../blogs/infrastructure/blogs.typeorm.query-repository';
 
 export class CreatePostCommand {
   constructor(
@@ -21,12 +22,13 @@ export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {
     private readonly blogsQueryRepository: BlogsQueryRepository,
     private readonly postsRepository: PostsRepository,
     private readonly postsTypeOrmRepository: PostsTypeOrmRepository,
+    private readonly blogsTypeOrmQueryRepository: BlogsTypeOrmQueryRepository,
   ) {}
 
   async execute(command: CreatePostCommand): Promise<string> {
     const { currentUser, ...post } = command;
 
-    const findBlog = await this.blogsQueryRepository.blogIsExist(
+    const findBlog = await this.blogsTypeOrmQueryRepository.blogIsExist(
       command.blogId,
     );
 

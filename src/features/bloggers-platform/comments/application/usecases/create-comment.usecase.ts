@@ -7,6 +7,7 @@ import {
 } from '../../infrastructure/comments.repository';
 import { randomUUID } from 'node:crypto';
 import { CommentCreateModel } from '../../api/models/input/create-comment.model';
+import { PostsTypeOrmQueryRepository } from '../../../posts/infrastructure/posts.typeorm.query-repository';
 
 export class CreateCommentCommand {
   constructor(
@@ -21,8 +22,9 @@ export class CreateCommentHandler
   implements ICommandHandler<CreateCommentCommand>
 {
   constructor(
-    private readonly postsQueryRepository: PostsQueryRepository,
+    // private readonly postsQueryRepository: PostsQueryRepository,
     private readonly commentsRepository: CommentsRepository,
+    private readonly postsQueryTypeOrmRepository: PostsTypeOrmQueryRepository
     // private readonly usersQueryRepository: UsersQueryRepository,
     // private readonly mappingsCommentsService: MappingsCommentsService,
   ) {}
@@ -30,7 +32,7 @@ export class CreateCommentHandler
   async execute(command: CreateCommentCommand): Promise<any> {
     const { content, postId, userId } = command;
 
-    const findPost = await this.postsQueryRepository.findPostById(postId);
+    const findPost = await this.postsQueryTypeOrmRepository.findPostById(postId);
 
     if (!findPost) {
       throw new NotFoundException([

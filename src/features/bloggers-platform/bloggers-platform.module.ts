@@ -36,11 +36,18 @@ import { BlogsTypeOrmRepository } from './blogs/infrastructure/blogs.typeorm.rep
 import { BlogsTypeOrmQueryRepository } from './blogs/infrastructure/blogs.typeorm.query-repository';
 import { Post } from './posts/domain/post.entity';
 import { PostsTypeOrmRepository } from './posts/infrastructure/posts.typeorm.repository';
-import { PostsTypeOrmQueryRepository } from "./posts/infrastructure/posts.typeorm.query-repository";
-
+import { PostsTypeOrmQueryRepository } from './posts/infrastructure/posts.typeorm.query-repository';
+import { LikesTypeOrmQueryRepository } from '../likes/infrastructure/likes.typeorm.query-repository';
+import { LikesModule } from '../likes/likes.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Blog, Post]),CqrsModule, AuthModule, UsersModule],
+  imports: [
+    TypeOrmModule.forFeature([Blog, Post]),
+    CqrsModule,
+    AuthModule,
+    UsersModule,
+    LikesModule
+  ],
   controllers: [BlogsController, PostsController, CommentsController],
   providers: [
     PostsService,
@@ -59,6 +66,7 @@ import { PostsTypeOrmQueryRepository } from "./posts/infrastructure/posts.typeor
     LikesRepository,
     LikesService,
     LikesQueryRepository,
+    // LikesTypeOrmQueryRepository,
     // MappingBlogsService,
     MappingsPostsService,
     QueryParamsService,

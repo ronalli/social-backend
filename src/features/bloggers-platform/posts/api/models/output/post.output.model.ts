@@ -96,7 +96,7 @@ export class PostOutputModelDB {
   shortDescription: string;
   content: string;
   blogId: string;
-  createdAt: string;
+  createdAt: Date;
 }
 
 export class PostDB {

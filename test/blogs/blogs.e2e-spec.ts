@@ -76,6 +76,7 @@ describe('Blogs e2e Tests', () => {
       .expect(200);
 
     blogId = resp.body.items[0].id;
+
     expect(resp.body.items.length).toBe(6);
   });
 

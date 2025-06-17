@@ -1,4 +1,5 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 // export type SortDirection = 'ASC' | 'DESC';
 
@@ -14,6 +15,8 @@ export class QueryParamsDto {
   searchNameTerm?: string = null;
 
   @IsOptional()
+  @Transform(({value}) => value?.toUpperCase())
+  @IsEnum(SortDirection, { message: 'SortDirection must be ASC or DESC' })
   sortDirection?: SortDirection = SortDirection.DESC;
 
   @IsOptional()

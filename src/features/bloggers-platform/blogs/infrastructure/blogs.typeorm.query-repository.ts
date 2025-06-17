@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { MappingsPostsService } from '../../posts/application/mappings/mapping.posts';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
 import { BlogQueryDto } from '../api/models/blog-query.dto';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { BlogOutputModel } from '../api/models/output/blog.output.model';
 import { Blog } from '../domain/blog.entity';
-import { createOrderByClause } from '../../../../common/utils/orderByClause';
 import { Post } from '../../posts/domain/post.entity';
 
 @Injectable()
@@ -16,8 +14,6 @@ export class BlogsTypeOrmQueryRepository {
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
     @InjectDataSource() protected dataSource: DataSource,
     public queryParamsService: QueryParamsService,
-    // private readonly mappingsBlogsService: MappingBlogsService,
-    private readonly mappingsPostsService: MappingsPostsService,
   ) {}
 
   async getAndSortPostsSpecialBlog(
@@ -38,7 +34,6 @@ export class BlogsTypeOrmQueryRepository {
       .addSelect('p.content', 'content')
       .addSelect('b.name', 'blogName')
       .addSelect('p.createdAt', 'createdAt')
-
       .addSelect((subQuery) => {
         const qb = subQuery
           .select("COALESCE(s.likeStatus, 'None')", 'myStatus')
@@ -65,7 +60,6 @@ export class BlogsTypeOrmQueryRepository {
           .where('pls.postId = p.id')
           .andWhere("pls.likeStatus = 'Dislike'");
       }, 'dislikesCount')
-
       .addSelect((subQuery) => {
         return subQuery.select('json_agg(likes)').from((qb) => {
           return qb
@@ -123,7 +117,7 @@ export class BlogsTypeOrmQueryRepository {
       page: +pageNumber,
       pageSize: +pageSize,
       totalCount: +result[1],
-      items: result,
+      items: result[0],
     };
   }
 

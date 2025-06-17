@@ -9,6 +9,7 @@ import { UsersRepository } from './infrastructure/users.repository';
 import { UsersQueryRepository } from './infrastructure/users.query-repository';
 import { UsersTypeOrmRepository } from './infrastructure/users.typeorm.repository';
 import { ConfirmationEmailEntity } from './domain/confirmation.email.entity';
+import { UsersTypeOrmQueryRepository } from './infrastructure/users.typeorm.query-repository';
 
 
 @Module({
@@ -19,8 +20,9 @@ import { ConfirmationEmailEntity } from './domain/confirmation.email.entity';
     UsersRepository,
     UsersQueryRepository,
     CreateUserHandler,
-    UsersTypeOrmRepository
+    UsersTypeOrmRepository,
+    UsersTypeOrmQueryRepository
   ],
-  exports: [UsersService, UsersRepository, UsersQueryRepository, UsersTypeOrmRepository],
+  exports: [UsersService, UsersRepository, UsersQueryRepository, UsersTypeOrmRepository, UsersTypeOrmQueryRepository],
 })
 export class UsersModule {}

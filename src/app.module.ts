@@ -55,10 +55,10 @@ import { PostLikeStatus } from './features/likes/domain/like.post.entity';
   ],
   controllers: [],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: ThrottlerGuard,
+    // },
   ],
 })
 export class AppModule {}

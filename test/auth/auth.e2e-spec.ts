@@ -4,7 +4,6 @@ import { initAppAndClearDB } from '../utils/base.init-settings';
 import { customRequest } from '../utils/custom-request';
 import { serviceSecurity } from '../utils/security/service-security';
 import { serviceUsers } from '../utils/users/service-users';
-import { jwtService } from '../../src/common/services/jwt.service';
 
 describe('Users e2e Tests', () => {
   let app: INestApplication;

@@ -4,17 +4,15 @@ import { MappingsPostsService } from '../application/mappings/mapping.posts';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import {
-  PostDB,
-  PostOutputModelDB,
-} from '../api/models/output/post.output.model';
-import { createOrderByClause } from '../../../../common/utils/orderByClause';
+import { PostOutputModelDB } from '../api/models/output/post.output.model';
 import { Post } from '../domain/post.entity';
+import { LikesTypeOrmQueryRepository } from '../../../likes/infrastructure/likes.typeorm.query-repository';
 
 @Injectable()
 export class PostsTypeOrmQueryRepository {
   constructor(
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
+    private readonly likesTypeOrmQueryRepository: LikesTypeOrmQueryRepository,
     private readonly queryParamsService: QueryParamsService,
     private readonly mappingsPostsService: MappingsPostsService,
     @InjectDataSource() protected dataSource: DataSource,
@@ -62,7 +60,9 @@ export class PostsTypeOrmQueryRepository {
       .addSelect((subQuery) => {
         return subQuery.select(`json_agg(likes)`).from((qb) => {
           return qb
-            .select(['pls."userId"', 'u.login', 'pls."createdAt" as "addedAt"'])
+            .select('pls.userId', 'userId')
+            .addSelect('u.login', 'login')
+            .addSelect('pls.createdAt', 'addedAt')
             .from('postsLikeStatus', 'pls')
             .innerJoin('users', 'u', 'u.id = pls."userId"')
             .where('pls."postId" = p.id')
@@ -146,7 +146,6 @@ export class PostsTypeOrmQueryRepository {
       .where('p.id = :postId', { postId });
 
     return await queryBuilder.getRawOne();
-
   }
 
   async getPostById(id: string) {
@@ -166,19 +165,28 @@ export class PostsTypeOrmQueryRepository {
   }
 
   async findPostById(postId: string): Promise<PostOutputModelDB> {
-    const query = `SELECT * FROM public.posts WHERE id = $1;`;
-
-    const response = await this.dataSource.query(query, [postId]);
-
-    return response[0];
+    return await this.postRepository.findOne({
+      where: {
+        id: postId,
+      },
+    });
   }
 
   async isPostDoesExist(postId: string): Promise<boolean> {
-    const query = `SELECT * FROM public.posts WHERE id = $1;`;
+    const queryBuilder = await this.postRepository.findOne({
+      where: {
+        id: postId,
+      },
+    });
 
-    const result = await this.dataSource.query(query, [postId]);
+    return !!queryBuilder;
+  }
 
-    return result.length > 0;
+  async getLike(postId: string, userId: string): Promise<boolean> {
+    return await this.likesTypeOrmQueryRepository.isLikePostDoesExist(
+      postId,
+      userId,
+    );
   }
 }
 

@@ -19,21 +19,23 @@ import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/usecases/create-user.usecase';
 import { UserCreateModel } from './models/input/create-user.input.model';
 import { UsersQueryRepository } from '../infrastructure/users.query-repository';
+import { UsersTypeOrmQueryRepository } from '../infrastructure/users.typeorm.query-repository';
 
 @ApiTags('Users')
 @Controller('sa/users')
 export class UsersController {
   constructor(
     @Inject(UsersService) private readonly usersService: UsersService,
-    @Inject(UsersQueryRepository)
-    private readonly usersQueryRepository: UsersQueryRepository,
+    // @Inject(UsersQueryRepository)
+    // private readonly usersQueryRepository: UsersQueryRepository,
+    private readonly usersTypeOrmQueryRepository: UsersTypeOrmQueryRepository,
     private readonly commandBus: CommandBus,
   ) {}
 
   @UseGuards(BasicAuthGuard)
   @Get('')
   async getAllUsers(@Query() query: UserQueryDto) {
-    return await this.usersQueryRepository.getAllUsers(query);
+    return await this.usersTypeOrmQueryRepository.getAllUsers(query);
   }
 
   @UseGuards(BasicAuthGuard)

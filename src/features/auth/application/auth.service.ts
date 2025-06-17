@@ -29,12 +29,14 @@ import { validate as isValidUUID } from 'uuid';
 import { AuthTypeOrmRepository } from '../infrastructure/auth.typeorm.repository';
 import { SecurityTypeOrmRepository } from '../../security/infrastructure/security.typeorm.repository';
 import { AuthTypeOrmQueryRepository } from '../infrastructure/auth.typeorm.query-repository';
+import { UsersTypeOrmQueryRepository } from '../../users/infrastructure/users.typeorm.query-repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly usersRepository: UsersRepository,
+    private readonly usersTypeOrmQueryRepository: UsersTypeOrmQueryRepository,
     private readonly usersQueryRepository: UsersQueryRepository,
     private readonly nodemailerService: NodemailerService,
     private readonly authQueryRepository: AuthQueryRepository,
@@ -65,7 +67,7 @@ export class AuthService {
             deviceId: devicedId,
             userId: String(foundUser.id),
           },
-          '10s', //1h
+          '1h', //10s
         );
 
         const refreshToken = await jwtService.createdJWT(
@@ -73,7 +75,7 @@ export class AuthService {
             deviceId: devicedId,
             userId: String(foundUser.id),
           },
-          '20s', //1h
+          '1h', //20s
         );
 
         await this.securityService.createAuthSessions(
@@ -94,18 +96,18 @@ export class AuthService {
 
   async registration(data: UserCreateModel) {
     const { login, email, password } = data;
-    const result = await this.usersQueryRepository.doesExistByLoginOrEmail(
+    const [isLogin, isEmail] = await this.usersTypeOrmQueryRepository.doesExistByLoginOrEmail(
       login,
       email,
     );
 
-    if (result.resultEmail.length !== 0) {
+    if (isEmail) {
       throw new BadRequestException([
         { message: 'User founded', field: 'email' },
       ]);
     }
 
-    if (result.resultLogin.length !== 0) {
+    if (isLogin) {
       throw new BadRequestException([
         { message: 'User founded', field: 'login' },
       ]);
@@ -123,7 +125,7 @@ export class AuthService {
 
     if (userId) {
       const confirmationCode =
-        await this.usersQueryRepository.doesExistConfirmationCode(userId);
+        await this.usersTypeOrmQueryRepository.doesExistConfirmationCode(userId);
 
       this.nodemailerService
         .sendEmail(email, confirmationCode, emailExamples.registrationEmail)
@@ -142,7 +144,7 @@ export class AuthService {
     }
 
     const isFindCode =
-      await this.usersQueryRepository.findCodeConfirmation(code);
+      await this.usersTypeOrmQueryRepository.findCodeConfirmation(code);
 
     if (!isFindCode) {
       throw new BadRequestException([
@@ -160,7 +162,7 @@ export class AuthService {
       ]);
     }
 
-    const foundUser = await this.usersQueryRepository.doesExistById(
+    const foundUser = await this.usersTypeOrmQueryRepository.doesExistById(
       isFindCode.userId,
     );
 
@@ -188,7 +190,7 @@ export class AuthService {
     }
 
     const isConfirmed =
-      await this.usersQueryRepository.doesExistConfirmationEmail(result.id);
+      await this.usersTypeOrmQueryRepository.doesExistConfirmationEmail(result.id);
 
     if (isConfirmed) {
       throw new BadRequestException([
@@ -303,7 +305,7 @@ export class AuthService {
 
   async updatePassword(password: string, email: string) {
     const isSearchUser =
-      await this.usersQueryRepository.doesExistByEmail(email);
+      await this.usersTypeOrmQueryRepository.doesExistByEmail(email);
 
     if (isSearchUser) {
       const hash = await bcryptService.generateHash(password);
@@ -336,7 +338,7 @@ export class AuthService {
 
     if (!id) throw new UnauthorizedException();
 
-    const payload = await this.usersQueryRepository.doesExistById(id);
+    const payload = await this.usersTypeOrmQueryRepository.doesExistById(id);
 
     if (!payload) throw new UnauthorizedException();
 

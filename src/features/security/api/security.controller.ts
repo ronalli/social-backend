@@ -22,6 +22,7 @@ import { HTTP_STATUSES } from '../../../settings/http.status';
 import { GetDevicesApiResponse } from '../../../common/services/swagger/security/get-devices.api-response';
 import { DeleteAllApiResponse } from '../../../common/services/swagger/security/delete-all.api-response';
 import { DeleteSpecifiedApiResponse } from '../../../common/services/swagger/security/delete-specified.api-response';
+import { SecurityTypeOrmQueryRepository } from '../infrastructure/security.typeorm.query-repository';
 
 @SkipThrottle()
 @ApiTags('Security')
@@ -30,6 +31,7 @@ import { DeleteSpecifiedApiResponse } from '../../../common/services/swagger/sec
 export class SecurityController {
   constructor(
     private readonly securityQueryRepository: SecurityQueryRepository,
+    private readonly securityTypeOrmQueryRepository: SecurityTypeOrmQueryRepository,
     private readonly securityService: SecurityService,
   ) {}
 
@@ -43,7 +45,7 @@ export class SecurityController {
     if (!data?.userId) {
       throw new UnauthorizedException();
     }
-    const sessions = await this.securityQueryRepository.allSessionsUser(
+    const sessions = await this.securityTypeOrmQueryRepository.allSessionsUser(
       data.userId,
     );
 

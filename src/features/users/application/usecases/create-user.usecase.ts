@@ -7,6 +7,7 @@ import { BadRequestException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { ConfirmationInfoEmail } from '../../../../common/utils/createConfirmationInfoForEmail';
 import { UsersTypeOrmRepository } from '../../infrastructure/users.typeorm.repository';
+import { UsersTypeOrmQueryRepository } from '../../infrastructure/users.typeorm.query-repository';
 
 export class CreateUserCommand {
   constructor(
@@ -21,19 +22,20 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
   constructor(
     private readonly usersQueryRepository: UsersQueryRepository,
     private readonly usersRepository: UsersRepository,
-    private readonly usersTypeORMRepository: UsersTypeOrmRepository,
+    private readonly usersTypeOrmRepository: UsersTypeOrmRepository,
+    private readonly usersTypeOrmQueryRepository: UsersTypeOrmQueryRepository,
   ) {}
 
   async execute(command: CreateUserCommand): Promise<string> {
     const { password, login, email } = command;
 
-    const {resultEmail, resultLogin} = await this.usersQueryRepository.doesExistByLoginOrEmail(
+    const [isLogin, isEmail] = await this.usersTypeOrmQueryRepository.doesExistByLoginOrEmail(
       login,
       email,
     );
 
 
-    if (resultEmail.length !== 0 || resultLogin.length !== 0) {
+    if (isLogin || isEmail) {
       throw new BadRequestException([
         {
           message: 'The email/login is not unique',
@@ -47,7 +49,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     const id = randomUUID();
     const confirmation = new ConfirmationInfoEmail(id, false);
 
-    return await this.usersTypeORMRepository.create(
+    return await this.usersTypeOrmRepository.create(
       id,
       login,
       email,

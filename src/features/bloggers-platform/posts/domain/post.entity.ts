@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Blog } from '../../blogs/domain/blog.entity';
+import { UserEntity } from '../../../users/domain/user.entity';
 
 @Entity('posts')
 export class Post {
@@ -33,5 +34,4 @@ export class Post {
 
   @Column('uuid')
   blogId: string;
-
 }

@@ -17,6 +17,8 @@ import { OldRefreshTokenEntity } from './features/auth/domain/refreshToken.entit
 import { Blog } from './features/bloggers-platform/blogs/domain/blog.entity';
 import { Post } from './features/bloggers-platform/posts/domain/post.entity';
 import { PostLikeStatus } from './features/likes/domain/like.post.entity';
+import { Comment } from './features/bloggers-platform/comments/domain/comment.entity';
+import { CommentLikeStatus } from './features/likes/domain/like.comment.entity';
 
 // TypeOrmModule.forRoot({
 //   type: 'postgres',
@@ -41,7 +43,7 @@ import { PostLikeStatus } from './features/likes/domain/like.post.entity';
       port: 5432,
       username: 'postgres',
       password: 'sa',
-      entities: [Blog, UserEntity, Post, PostLikeStatus, ConfirmationEmailEntity, DeviceSessionEntity, RecoveryCodeEntity, OldRefreshTokenEntity],
+      entities: [Blog, UserEntity, Post, PostLikeStatus, CommentLikeStatus, ConfirmationEmailEntity, DeviceSessionEntity, RecoveryCodeEntity, OldRefreshTokenEntity, Comment],
       database: 'SocialBD_typeorm',
       synchronize: true,
       

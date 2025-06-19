@@ -8,16 +8,18 @@ import { CommentsQueryRepository } from '../infrastructure/comments.query-reposi
 import { MappingsCommentsService } from './mappings/mapping.comments';
 import { CommentOutputModel } from '../api/models/output/comment.output.model';
 import { CommentQueryDto } from '../api/models/comment-query.dto';
+import { CommentsTypeOrmQueryRepository } from '../infrastructure/comments.typeorm.query-repository';
 
 @Injectable()
 export class CommentsService {
   constructor(
     private readonly commentsQueryRepository: CommentsQueryRepository,
+    private readonly commentsTypeOrmQueryRepository: CommentsTypeOrmQueryRepository,
     private readonly mappingsCommentsService: MappingsCommentsService,
   ) {}
 
   async getOneComment(userId: string, commentId: string): Promise<CommentOutputModel> {
-    const currentComment = await this.commentsQueryRepository.getComment(
+    const currentComment = await this.commentsTypeOrmQueryRepository.getComment(
       commentId,
       userId,
     );

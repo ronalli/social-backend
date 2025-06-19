@@ -124,14 +124,14 @@ export class PostsController {
     @Body() comment: InputCommentModel,
     @User('id') userId: string,
   ) {
-    const result = await this.commandBus.execute(
+    const commentId = await this.commandBus.execute(
       new CreateCommentCommand(comment.content, postId, userId),
     );
 
-    if (!result)
+    if (!commentId)
       throw new BadRequestException([{ message: 'Wrong', field: 'bad' }]);
 
-    return await this.commentsService.getOneComment(userId, result.id);
+    return await this.commentsService.getOneComment(userId, commentId);
   }
 
   @HttpCode(HTTP_STATUSES.Success)

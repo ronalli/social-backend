@@ -39,10 +39,13 @@ import { PostsTypeOrmRepository } from './posts/infrastructure/posts.typeorm.rep
 import { PostsTypeOrmQueryRepository } from './posts/infrastructure/posts.typeorm.query-repository';
 import { LikesTypeOrmQueryRepository } from '../likes/infrastructure/likes.typeorm.query-repository';
 import { LikesModule } from '../likes/likes.module';
+import { Comment } from './comments/domain/comment.entity';
+import { CommentsTypeOrmQueryRepository } from './comments/infrastructure/comments.typeorm.query-repository';
+import { CommentsTypeOrmRepository } from './comments/infrastructure/comments.typeorm.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Blog, Post]),
+    TypeOrmModule.forFeature([Blog, Post, Comment]),
     CqrsModule,
     AuthModule,
     UsersModule,
@@ -63,6 +66,8 @@ import { LikesModule } from '../likes/likes.module';
     CommentsService,
     CommentsRepository,
     CommentsQueryRepository,
+    CommentsTypeOrmQueryRepository,
+    CommentsTypeOrmRepository,
     LikesRepository,
     LikesService,
     LikesQueryRepository,

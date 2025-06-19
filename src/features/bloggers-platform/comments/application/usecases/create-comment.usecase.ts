@@ -8,6 +8,8 @@ import {
 import { randomUUID } from 'node:crypto';
 import { CommentCreateModel } from '../../api/models/input/create-comment.model';
 import { PostsTypeOrmQueryRepository } from '../../../posts/infrastructure/posts.typeorm.query-repository';
+import { CommentsTypeOrmRepository } from '../../infrastructure/comments.typeorm.repository';
+import { CommentsTypeOrmQueryRepository } from '../../infrastructure/comments.typeorm.query-repository';
 
 export class CreateCommentCommand {
   constructor(
@@ -24,12 +26,14 @@ export class CreateCommentHandler
   constructor(
     // private readonly postsQueryRepository: PostsQueryRepository,
     private readonly commentsRepository: CommentsRepository,
+    private readonly commentsTypeOrmRepository: CommentsTypeOrmRepository,
+    private readonly commentsTypeOrmQueryRepository: CommentsTypeOrmQueryRepository,
     private readonly postsQueryTypeOrmRepository: PostsTypeOrmQueryRepository
     // private readonly usersQueryRepository: UsersQueryRepository,
     // private readonly mappingsCommentsService: MappingsCommentsService,
   ) {}
 
-  async execute(command: CreateCommentCommand): Promise<any> {
+  async execute(command: CreateCommentCommand): Promise<string> {
     const { content, postId, userId } = command;
 
     const findPost = await this.postsQueryTypeOrmRepository.findPostById(postId);
@@ -47,45 +51,10 @@ export class CreateCommentHandler
       content,
       postId,
       userId,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
     };
 
-    return await this.commentsRepository.createComment(newComment);
+    return await this.commentsTypeOrmRepository.createComment(newComment);
 
-    // try {
-    //   const newComment = new this.CommentModel({
-    //     _id: new Types.ObjectId(),
-    //     postId: postId,
-    //     content: content,
-    //     createdAt: new Date().toISOString(),
-    //     commentatorInfo: {
-    //       userId: userId,
-    //       userLogin: result.login,
-    //     },
-    //     likesCount: 0,
-    //     dislikesCount: 0,
-    //   });
-    //   const response = await newComment.save();
-    //   const comment = await this.CommentModel.findOne({
-    //     _id: new ObjectId(response._id),
-    //   });
-    //
-    //   const likesInfo: ILikesInfoViewModel = {
-    //     likesCount: 0,
-    //     dislikesCount: 0,
-    //     myStatus: 'None',
-    //   };
-    //
-    //   if (comment) {
-    //     return this.mappingsCommentsService.formatCommentForView(
-    //       comment,
-    //       likesInfo,
-    //     );
-    //   }
-    //
-    //   return false;
-    // } catch (e) {
-    //   throw new InternalServerErrorException(e);
-    // }
   }
 }

@@ -1,41 +1,33 @@
-import { HydratedDocument, Model, Types } from 'mongoose';
-import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Post } from '../../posts/domain/post.entity';
+import { UserEntity } from '../../../users/domain/user.entity';
 
-@Schema()
-export class CommentatorInfo {
-  @Prop()
-  userId: string;
-
-  @Prop()
-  userLogin: string;
-}
-
-@Schema()
+@Entity('commentsPosts')
 export class Comment {
-  @Prop({ type: Types.ObjectId, auto: true })
-  _id: Types.ObjectId;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Prop()
-  content: string;
+  @Column({length: 300})
+  content: string
 
-  @Prop()
-  createdAt: string;
+  @ManyToOne(() => Post, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'postId' })
+  post?: Post;
 
-  @Prop()
+  @Column('uuid')
   postId: string;
 
-  @Prop({ type: CommentatorInfo })
-  commentatorInfo: CommentatorInfo;
+  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user?: UserEntity;
 
-  @Prop()
-  likesCount: number;
+  @Column('uuid')
+  userId: string;
 
-  @Prop()
-  dislikesCount: number;
+  @Column({
+    type: 'timestamp with time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  createdAt: Date;
+
 }
-
-export const CommentSchema = SchemaFactory.createForClass(Comment);
-CommentSchema.loadClass(Comment);
-
-export type CommentDocument = HydratedDocument<Comment>;
-export type CommentModelType = Model<CommentDocument>;

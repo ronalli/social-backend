@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { MappingsCommentsService } from '../application/mappings/mapping.comments';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CommentOutputModelDB } from '../api/models/output/comment.output.model';
 import { CommentQueryDto } from '../api/models/comment-query.dto';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
 import { createOrderByClause } from '../../../../common/utils/orderByClause';
+import { Comment } from '../domain/comment.entity';
 
 @Injectable()
 export class CommentsTypeOrmQueryRepository {
@@ -13,47 +14,48 @@ export class CommentsTypeOrmQueryRepository {
     private readonly mappingsCommentsService: MappingsCommentsService,
     public queryParamsService: QueryParamsService,
     @InjectDataSource() protected dataSource: DataSource,
+    @InjectRepository(Comment)
+    private readonly commentsRepository: Repository<Comment>,
   ) {}
 
   async getComment(commentId: string, userId: string) {
     const hasUserId = userId !== null && userId !== undefined;
 
-    const values = hasUserId ? [commentId, userId] : [commentId];
+    const queryBuilder = this.commentsRepository
+      .createQueryBuilder('c')
+      .select([
+        'c.id AS id',
+        'c.content AS content',
+        'c.userId AS "userId"',
+        'c.createdAt AS "createdAt"',
+        'u.login AS "userLogin"'
+      ])
+      .addSelect((subQuery) => {
+        if(hasUserId) {
+          return subQuery.select(`COALESCE(s."likeStatus", 'None')`, 'myStatus')
+            .from('commentsLikeStatus', 's')
+            .where('s.commentId = c.id')
+            .andWhere('s.userId = :userId', { userId })
+        } else {
+          return subQuery.select(`'None'`, 'myStatus');
+        }
+      }, 'myStatus')
+      .addSelect((subQuery) => {
+        return subQuery.select('COUNT(*)')
+          .from('commentsLikeStatus', 'cls')
+          .where('cls.commentId = c.id')
+          .andWhere(`cls.likeStatus = 'Like'`)
+      }, 'likesCount')
+      .addSelect((subQuery) => {
+        return subQuery.select('COUNT(*)')
+          .from('commentsLikeStatus', 'cls')
+          .where('cls.commentId = c.id')
+          .andWhere(`cls.likeStatus = 'Dislike'`)
+      }, 'dislikesCount')
+      .innerJoin('users', 'u', 'u.id = c.userId')
+      .where('c.id = :commentId', {commentId})
 
-    const query1 = `
-      SELECT 
-        c.id,
-        c.content,
-        c."userId",
-        c."createdAt",
-        u.login AS "userLogin",
-        COALESCE( ${hasUserId ? `s."likeStatus"` : `'None'`},
-          'None'
-          ) AS "myStatus",
-        (SELECT COUNT(*) FROM public."commentsLikeStatus" WHERE "commentId" = c.id AND "likeStatus" = 'Like') AS "likesCount",
-        (SELECT COUNT(*) FROM public."commentsLikeStatus" WHERE "commentId" = c.id AND "likeStatus" = 'Dislike') AS "dislikesCount"
-      FROM public."commentsPosts" c 
-      JOIN public.users u ON u.id = c."userId"
-      LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id ${hasUserId ? `AND s."userId" = $2` : ``}
-      WHERE c.id = $1
-      ;
-    `;
-
-    //   COALESCE(
-    //     CASE
-    //   WHEN $2 IS NULL THEN 'None'
-    //   ELSE s."likeStatus"
-    //   END,
-    //     'None'
-    // ) AS "myStatus",
-
-    // LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id AND (s."userId" = $2 OR $2 IS NULL)
-
-    // LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id AND s."userId" = $1
-
-    const result = await this.dataSource.query(query1, values);
-
-    return result[0];
+    return  await queryBuilder.getRawOne();
   }
 
   async getAllCommentsFormSpecialPost(

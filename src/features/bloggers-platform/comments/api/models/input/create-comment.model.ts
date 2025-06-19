@@ -19,5 +19,5 @@ export class CommentCreateModel {
   userId: string;
 
   @IsString()
-  createdAt: string;
+  createdAt: Date;
 }

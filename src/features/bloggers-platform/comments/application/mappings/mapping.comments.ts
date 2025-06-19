@@ -1,4 +1,3 @@
-import { CommentDocument } from '../../domain/comment.entity';
 import { CommentOutputModel } from '../../api/models/output/comment.output.model';
 import { Injectable } from '@nestjs/common';
 import { LikeInfoOutputModel } from '../../../../likes/api/models/like.info.output.model';
@@ -17,7 +16,7 @@ export class MappingsCommentsService {
       likesInfo: {
         likesCount: +comment.likesCount,
         dislikesCount: +comment.dislikesCount,
-        myStatus: comment.myStatus,
+        myStatus: comment.myStatus ?? 'None'
       },
     };
   }
@@ -42,21 +41,21 @@ export class MappingsCommentsService {
     return result;
   }
 
-  formatCommentForView(
-    comment: CommentDocument,
-    likesInfo: LikeInfoOutputModel,
-  ): CommentOutputModel {
-    return {
-      id: String(comment._id),
-      commentatorInfo: {
-        userId: comment.commentatorInfo.userId,
-        userLogin: comment.commentatorInfo.userLogin,
-      },
-      createdAt: comment.createdAt,
-      content: comment.content,
-      likesInfo,
-    };
-  }
+  // formatCommentForView(
+  //   // comment: CommentDocument,
+  //   // likesInfo: LikeInfoOutputModel,
+  // ): CommentOutputModel {
+  //   return {
+  //     id: String(comment._id),
+  //     commentatorInfo: {
+  //       userId: comment.commentatorInfo.userId,
+  //       userLogin: comment.commentatorInfo.userLogin,
+  //     },
+  //     createdAt: comment.createdAt,
+  //     content: comment.content,
+  //     likesInfo,
+  //   };
+  // }
 }
 
 // export const mappingComments = {

@@ -6,7 +6,6 @@ import {
   Get,
   Param,
   Req,
-  Res,
   Put,
   UseGuards,
   BadRequestException,

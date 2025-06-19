@@ -1,15 +1,6 @@
-import { ObjectId } from 'mongodb';
 import {
-  BadRequestException,
   Injectable,
-  InternalServerErrorException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  Comment,
-  CommentDocument,
-  CommentModelType,
-} from '../domain/comment.entity';
 import { MappingsCommentsService } from '../application/mappings/mapping.comments';
 import { UpdateLikeStatusCommentCommand } from '../application/usecases/update-likeStatus.usecase';
 import { InputCommentModel } from '../api/models/input/update-comment.model';
@@ -129,8 +120,8 @@ export class CommentsRepository {
   // }
 
   async updateStatusLike(
-    like: UpdateLikeStatusCommentCommand,
-    comment: CommentDocument,
+    // like: UpdateLikeStatusCommentCommand,
+    // comment: CommentDocument,
   ) {
     // const currentStatus = await this.LikeModel.findOne({
     //   $and: [{ userId: like.userId }, { parentId: like.parentId }],

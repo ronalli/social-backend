@@ -20,6 +20,9 @@ export class CommentsQueryRepository {
 
     const values = hasUserId ? [commentId, userId] : [commentId];
 
+
+
+
     const query1 = `
       SELECT 
         c.id,

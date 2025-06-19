@@ -8,10 +8,11 @@ import { LikesQueryRepository } from './infrastructure/likes.query-repository';
 import { PostLikeStatus } from './domain/like.post.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LikesTypeOrmQueryRepository } from './infrastructure/likes.typeorm.query-repository';
+import { CommentLikeStatus } from './domain/like.comment.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PostLikeStatus]),
+    TypeOrmModule.forFeature([PostLikeStatus, CommentLikeStatus]),
     // PostsQueryRepository,
     // PostsRepository,
   ],

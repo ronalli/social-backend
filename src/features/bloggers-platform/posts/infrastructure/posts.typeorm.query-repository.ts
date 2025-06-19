@@ -106,15 +106,6 @@ export class PostsTypeOrmQueryRepository {
           .where('s.postId = p.id')
           .andWhere('s.userId = :userId', { userId });
       }, 'myStatus')
-      // .addSelect(
-      //   `COALESCE((
-      //     SELECT s."likeStatus"
-      //     FROM "postsLikeStatus" s
-      //      WHERE s."postId" = p.id AND s."userId" = :userId
-      //      LIMIT 1
-      //         ), 'None')`,
-      //   'myStatus',
-      // )
       .setParameter('userId', userId)
       .addSelect((subQuery) => {
         return subQuery
@@ -131,7 +122,7 @@ export class PostsTypeOrmQueryRepository {
           .andWhere("pls.likeStatus = 'Dislike'");
       }, 'dislikesCount')
       .addSelect((subQuery) => {
-        return subQuery.select(`json_agg(likes)`).from((qb) => {
+        return subQuery.select("COALESCE(json_agg(likes), '[]')").from((qb) => {
           return qb
             .select(['pls."createdAt" as "addedAt"', 'pls."userId"', 'u.login'])
             .from('postsLikeStatus', 'pls')
@@ -159,9 +150,7 @@ export class PostsTypeOrmQueryRepository {
       ]);
     }
 
-    return await this.mappingsPostsService.formatingDataForOutputPost(
-      response[0],
-    );
+    return this.mappingsPostsService.formatingDataForOutputPost(response[0]);
   }
 
   async findPostById(postId: string): Promise<PostOutputModelDB> {
@@ -189,25 +178,3 @@ export class PostsTypeOrmQueryRepository {
     );
   }
 }
-
-// const query1 = `
-//     WITH result AS (
-//       SELECT
-//         posts.id,
-//         posts.title,
-//         posts."shortDescription",
-//         posts.content,
-//         posts."blogId",
-//         blogs.name AS "blogName",
-//         posts."createdAt"
-//      FROM
-//         posts
-//      JOIN
-//         blogs ON posts."blogId" = blogs.id
-//        )
-//      SELECT * FROM result
-//      ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
-//      LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;
-//
-// const query = `SELECT * FROM public.posts ORDER BY "${sortBy}" COLLATE "C" ${sortDirection}
-//         LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)};`;

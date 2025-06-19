@@ -12,7 +12,7 @@ export class UserOutputModel {
   email: string;
 
   @IsString()
-  createdAt: string;
+  createdAt: Date;
 }
 //
 //

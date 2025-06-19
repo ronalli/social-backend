@@ -6,6 +6,7 @@ import { DataSource, Repository } from 'typeorm';
 import { BlogOutputModel } from '../api/models/output/blog.output.model';
 import { Blog } from '../domain/blog.entity';
 import { Post } from '../../posts/domain/post.entity';
+import { MappingsPostsService } from '../../posts/application/mappings/mapping.posts';
 
 @Injectable()
 export class BlogsTypeOrmQueryRepository {
@@ -14,6 +15,7 @@ export class BlogsTypeOrmQueryRepository {
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
     @InjectDataSource() protected dataSource: DataSource,
     public queryParamsService: QueryParamsService,
+    private readonly mappingsPostsService: MappingsPostsService,
   ) {}
 
   async getAndSortPostsSpecialBlog(
@@ -28,12 +30,15 @@ export class BlogsTypeOrmQueryRepository {
 
     const queryBuilder = this.postRepository
       .createQueryBuilder('p')
-      .addSelect('p.id', 'id')
-      .addSelect('p.title', 'title')
-      .addSelect('p.shortDescription', 'shortDescription')
-      .addSelect('p.content', 'content')
-      .addSelect('b.name', 'blogName')
-      .addSelect('p.createdAt', 'createdAt')
+      .select([
+        'p.id AS id',
+        'p.title AS title',
+        'p.shortDescription AS "shortDescription"',
+        'p.content AS content',
+        'p.blogId as "blogId"',
+        'b.name AS "blogName"',
+        'p.createdAt AS "createdAt"',
+      ])
       .addSelect((subQuery) => {
         const qb = subQuery
           .select("COALESCE(s.likeStatus, 'None')", 'myStatus')
@@ -61,11 +66,13 @@ export class BlogsTypeOrmQueryRepository {
           .andWhere("pls.likeStatus = 'Dislike'");
       }, 'dislikesCount')
       .addSelect((subQuery) => {
-        return subQuery.select('json_agg(likes)').from((qb) => {
+        return subQuery.select("COALESCE(json_agg(likes), '[]')").from((qb) => {
           return qb
-            .select('pls.userId', 'userId')
-            .addSelect('u.login', 'login')
-            .addSelect('pls.createdAt', 'addedAt')
+            .select([
+              'pls.userId AS userId',
+              'u.login AS login',
+              'pls.createdAt AS addedAt',
+            ])
             .from('postsLikeStatus', 'pls')
             .innerJoin('users', 'u', 'u.id = pls.userId')
             .where('pls.postId = p.id')
@@ -76,7 +83,7 @@ export class BlogsTypeOrmQueryRepository {
       }, 'newestLikes')
       .innerJoin('blogs', 'b', 'b.id = p.blogId')
       .where('p.blogId = :blogId', { blogId })
-      .orderBy(`"${sortBy}"`, `${sortDirection}`)
+      .orderBy(`p."${sortBy}"`, `${sortDirection}`)
       .limit(pageSize)
       .offset(pageSize * (pageNumber - 1));
 
@@ -84,12 +91,14 @@ export class BlogsTypeOrmQueryRepository {
 
     const totalCount = await queryBuilder.clone().getCount();
 
+    const items = this.mappingsPostsService.formatingAllPostForView(posts);
+
     return {
       pagesCount: +Math.ceil(totalCount / pageSize),
       page: +pageNumber,
       pageSize: +pageSize,
       totalCount: +totalCount,
-      items: posts,
+      items,
     };
   }
 

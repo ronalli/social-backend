@@ -14,16 +14,16 @@ export class MappingsPostsService {
     private readonly blogsQueryRepository: BlogsQueryRepository,
   ) {}
 
-  async formatingAllPostForView(posts: PostDB[]) {
+  formatingAllPostForView(posts: PostDB[]) {
     const result: PostOutputModel[] = [];
     for (const post of posts) {
-      const viewPost = await this.formatingDataForOutputPost(post);
+      const viewPost = this.formatingDataForOutputPost(post);
       result.push(viewPost);
     }
     return result;
   }
 
-  async formatingDataForOutputPost(post: PostDB): Promise<PostOutputModel> {
+  formatingDataForOutputPost(post: PostDB): PostOutputModel {
     const {
       id,
       title,

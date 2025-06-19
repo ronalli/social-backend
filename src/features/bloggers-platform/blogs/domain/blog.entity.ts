@@ -8,7 +8,7 @@ export class Blog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ length: 15})
+  @Column({ length: 15, collation: 'C'})
   name: string;
 
   @Column({ length: 500})

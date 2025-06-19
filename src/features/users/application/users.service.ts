@@ -7,7 +7,7 @@ import { UsersTypeOrmRepository } from '../infrastructure/users.typeorm.reposito
 @Injectable()
 export class UsersService {
   constructor(
-    private usersTypeORMRepository: UsersTypeOrmRepository,
+    private usersTypeOrmRepository: UsersTypeOrmRepository,
     private usersRepository: UsersRepository,) {}
 
   async deleteUser(id: string): Promise<boolean> {
@@ -15,14 +15,14 @@ export class UsersService {
       throw new NotFoundException();
     }
 
-    return await this.usersTypeORMRepository.delete(id);
+    return await this.usersTypeOrmRepository.delete(id);
   }
 
   async findUser(id: string): Promise<UserOutputModel> {
-    return await this.usersRepository.findUserById(id);
+    return await this.usersTypeOrmRepository.findUserById(id);
   }
 
-  async findAllUser(): Promise<void> {
-    return await this.usersRepository.findAllUser();
-  }
+  // async findAllUser(): Promise<void> {
+  //   return await this.usersRepository.findAllUser();
+  // }
 }

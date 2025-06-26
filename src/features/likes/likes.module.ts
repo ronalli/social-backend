@@ -9,6 +9,7 @@ import { PostLikeStatus } from './domain/like.post.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LikesTypeOrmQueryRepository } from './infrastructure/likes.typeorm.query-repository';
 import { CommentLikeStatus } from './domain/like.comment.entity';
+import { LikesTypeOrmRepository } from './infrastructure/likes.typeorm.repository';
 
 @Module({
   imports: [
@@ -22,12 +23,14 @@ import { CommentLikeStatus } from './domain/like.comment.entity';
     LikesQueryRepository,
     LikesService,
     LikesTypeOrmQueryRepository,
+    LikesTypeOrmRepository
   ],
   exports: [
     LikesRepository,
     LikesService,
     LikesQueryRepository,
     LikesTypeOrmQueryRepository,
+    LikesTypeOrmRepository
   ],
 })
 export class LikesModule {}

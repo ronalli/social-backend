@@ -109,11 +109,18 @@ export class CommentsTypeOrmQueryRepository {
   }
 
   async isCommentDoesExist(commentId: string): Promise<boolean> {
-    const query = `SELECT * FROM public."commentsPosts" WHERE id = $1;`;
 
-    const result = await this.dataSource.query(query, [commentId]);
+    const query = await this.commentsRepository.findOne({
+      where: {
+        id: commentId,
+      }
+    })
 
-    return result.length > 0;
+    // const query = `SELECT * FROM public."commentsPosts" WHERE id = $1;`;
+
+    // const result = await this.dataSource.query(query, [commentId]);
+
+    return !!query
   }
 
   async getLike(commentId: string, userId: string): Promise<boolean> {
@@ -125,11 +132,18 @@ export class CommentsTypeOrmQueryRepository {
   }
 
   async getCommentById(id: string): Promise<CommentOutputModelDB> {
-    const query = `SELECT * FROM "commentsPosts" WHERE id = $1;`;
 
-    const result = await this.dataSource.query(query, [id]);
+    return await this.commentsRepository.findOne({
+      where: {
+        id,
+      }
+    })
 
-    return result[0];
+    // const query = `SELECT * FROM "commentsPosts" WHERE id = $1;`;
+
+    // const result = await this.dataSource.query(query, [id]);
+    //
+    // return result[0];
 
     // try {
     //   const findComment = await this.CommentModel.findOne({

@@ -51,7 +51,7 @@ export class CommentOutputModel {
   commentatorInfo: CommentatorInfo;
 
   @IsString()
-  createdAt: string;
+  createdAt: Date;
 
   @ApiProperty({
     type: LikesInfoViewModel,
@@ -64,5 +64,5 @@ export class CommentOutputModelDB {
   content: string;
   postId: string;
   userId: string;
-  createdAt: string;
+  createdAt: Date;
 }

@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { jwtService } from '../../../common/services/jwt.service';
 import { LikesQueryRepository } from '../infrastructure/likes.query-repository';
+import { LikesTypeOrmQueryRepository } from '../infrastructure/likes.typeorm.query-repository';
 
 @Injectable()
 export class LikesService {
-  constructor(private readonly likesQueryRepository: LikesQueryRepository) {}
+  constructor(
+    private readonly likesQueryRepository: LikesQueryRepository,
+    private readonly likesTypeOrmQueryRepository: LikesTypeOrmQueryRepository,
+  ) {}
 
   async getCurrentLikeStatus(token: string, commentId: string) {
     const currentUserId = await jwtService.getUserIdByToken(token);
@@ -13,12 +17,12 @@ export class LikesService {
       return 'None';
     }
     const currentLikeStatus =
-      await this.likesQueryRepository.getCurrentLikeStatusUser(
+      await this.likesTypeOrmQueryRepository.getCurrentLikeStatusUser(
         currentUserId,
         commentId,
       );
 
-    if (currentLikeStatus.length === 0) {
+    if (!!currentLikeStatus) {
       return 'None';
     }
     return currentLikeStatus[0].likeStatus;

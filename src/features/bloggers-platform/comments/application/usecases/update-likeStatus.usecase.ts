@@ -6,6 +6,9 @@ import { NotFoundException } from '@nestjs/common';
 import { LikesRepository } from '../../../../likes/infrastructure/likes.repository';
 import { randomUUID } from 'node:crypto';
 import { LikeStatusModelForComment } from '../../../../likes/api/models/create-like.input.model';
+import { CommentsTypeOrmQueryRepository } from '../../infrastructure/comments.typeorm.query-repository';
+import { LikesTypeOrmQueryRepository } from '../../../../likes/infrastructure/likes.typeorm.query-repository';
+import { LikesTypeOrmRepository } from '../../../../likes/infrastructure/likes.typeorm.repository';
 
 export class UpdateLikeStatusCommentCommand {
   constructor(
@@ -20,29 +23,29 @@ export class UpdateLikeStatusCommentHandler
   implements ICommandHandler<UpdateLikeStatusCommentCommand>
 {
   constructor(
-    private readonly commentsRepository: CommentsRepository,
-    private readonly commentsQueryRepository: CommentsQueryRepository,
-    private readonly likesRepository: LikesRepository,
+    private readonly commentsTypeOrmQueryRepository: CommentsTypeOrmQueryRepository,
+    private readonly likesTypeOrmRepository: LikesTypeOrmRepository,
+    private readonly likesTypeOrmQueryRepository: LikesTypeOrmQueryRepository,
   ) {}
 
   async execute(command: UpdateLikeStatusCommentCommand): Promise<any> {
     const { commentId, userId, status } = command;
 
     const foundedComment =
-      await this.commentsQueryRepository.isCommentDoesExist(commentId);
+      await this.commentsTypeOrmQueryRepository.isCommentDoesExist(commentId);
 
     if (!foundedComment)
       throw new NotFoundException([
         { message: 'Not found comment', field: 'commentId' },
       ]);
 
-    const statusLikeOnComment = await this.commentsQueryRepository.getLike(
+    const statusLikeOnComment = await this.likesTypeOrmQueryRepository.isLikeCommentDoesExist(
       commentId,
       userId,
     );
 
     if (statusLikeOnComment) {
-      return await this.likesRepository.updateStatusLikeInComment(command);
+      return await this.likesTypeOrmRepository.updateStatusLikeInComment(command);
     }
 
     const like: LikeStatusModelForComment = {
@@ -50,9 +53,9 @@ export class UpdateLikeStatusCommentHandler
       likeStatus: status,
       userId,
       commentId,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
     };
 
-    return await this.likesRepository.addStatusLikeOnComment(like);
+    return await this.likesTypeOrmRepository.addStatusLikeOnComment(like);
   }
 }

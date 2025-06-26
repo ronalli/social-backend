@@ -3,6 +3,8 @@ import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { InputCommentModel } from '../../api/models/input/update-comment.model';
 import { CommentsQueryRepository } from '../../infrastructure/comments.query-repository';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { CommentsTypeOrmQueryRepository } from '../../infrastructure/comments.typeorm.query-repository';
+import { CommentsTypeOrmRepository } from '../../infrastructure/comments.typeorm.repository';
 
 export class UpdateCommentCommand {
   constructor(
@@ -18,13 +20,15 @@ export class UpdateCommentHandler
 {
   constructor(
     private readonly commentsRepository: CommentsRepository,
+    private readonly commentsTypeOrmQueryRepository: CommentsTypeOrmQueryRepository,
+    private readonly commentsTypeOrmRepository: CommentsTypeOrmRepository,
     private readonly commentsQueryRepository: CommentsQueryRepository,
   ) {}
 
   async execute(command: UpdateCommentCommand): Promise<any> {
     const { commentId, content, userId } = command;
 
-    const result = await this.commentsQueryRepository.getCommentById(commentId);
+    const result = await this.commentsTypeOrmQueryRepository.getCommentById(commentId);
 
     if (!result)
       throw new NotFoundException([
@@ -40,6 +44,6 @@ export class UpdateCommentHandler
       ]);
     }
 
-    return await this.commentsRepository.updateComment(commentId, content);
+    return await this.commentsTypeOrmRepository.updateComment(commentId, content);
   }
 }

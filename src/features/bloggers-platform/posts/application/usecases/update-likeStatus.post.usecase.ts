@@ -7,6 +7,8 @@ import { PostsQueryRepository } from '../../infrastructure/posts.query-repositor
 import { randomUUID } from 'node:crypto';
 import { LikesRepository } from '../../../../likes/infrastructure/likes.repository';
 import { PostsTypeOrmQueryRepository } from '../../infrastructure/posts.typeorm.query-repository';
+import { LikesTypeOrmQueryRepository } from '../../../../likes/infrastructure/likes.typeorm.query-repository';
+import { LikesTypeOrmRepository } from '../../../../likes/infrastructure/likes.typeorm.repository';
 
 export class UpdateLikeStatusPostCommand {
   constructor(
@@ -24,14 +26,16 @@ export class UpdateLikeStatusPostHandler
   constructor(
     private readonly postsRepository: PostsRepository,
     // private readonly postsQueryRepository: PostsQueryRepository,
-    private readonly likesRepository: LikesRepository,
-    private readonly postsQueryTypeOrmRepository: PostsTypeOrmQueryRepository
+    private readonly likesTypeOrmRepository: LikesTypeOrmRepository,
+    private readonly postsQueryTypeOrmRepository: PostsTypeOrmQueryRepository,
+    private readonly likesTypeOrmQueryRepository: LikesTypeOrmQueryRepository,
   ) {}
 
   async execute(command: UpdateLikeStatusPostCommand): Promise<boolean> {
     const { postId, userId, status, login } = command;
 
-    const foundedPost = await this.postsQueryTypeOrmRepository.isPostDoesExist(postId);
+    const foundedPost =
+      await this.postsQueryTypeOrmRepository.isPostDoesExist(postId);
 
     if (!foundedPost) {
       throw new NotFoundException([
@@ -39,10 +43,13 @@ export class UpdateLikeStatusPostHandler
       ]);
     }
 
-    const statusLikeOnPost = await this.postsQueryTypeOrmRepository.getLike(postId, userId);
+    const statusLikeOnPost = await this.likesTypeOrmQueryRepository.isLikePostDoesExist(
+      postId,
+      userId,
+    );
 
     if (statusLikeOnPost) {
-      return await this.likesRepository.updateStatusLikeInPost(command);
+      return await this.likesTypeOrmRepository.updateStatusLikeInPost(command);
     }
 
     const likeEntity: LikeStatusModelForPost = {
@@ -50,9 +57,9 @@ export class UpdateLikeStatusPostHandler
       likeStatus: status,
       userId,
       postId,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
     };
 
-    return await this.likesRepository.addStatusLikeOnPost(likeEntity);
+    return await this.likesTypeOrmRepository.addStatusLikeOnPost(likeEntity);
   }
 }

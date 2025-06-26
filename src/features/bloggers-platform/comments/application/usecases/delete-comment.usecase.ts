@@ -2,6 +2,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CommentsQueryRepository } from '../../infrastructure/comments.query-repository';
+import { CommentsTypeOrmRepository } from '../../infrastructure/comments.typeorm.repository';
+import { CommentsTypeOrmQueryRepository } from '../../infrastructure/comments.typeorm.query-repository';
 
 export class DeleteCommentCommand {
   constructor(
@@ -15,14 +17,14 @@ export class DeleteCommentHandler
   implements ICommandHandler<DeleteCommentCommand>
 {
   constructor(
-    private readonly commentsRepository: CommentsRepository,
-    private readonly commentsQueryRepository: CommentsQueryRepository,
+    private readonly commentsTypeOrmRepository: CommentsTypeOrmRepository,
+    private readonly commentsTypeOrmQueryRepository: CommentsTypeOrmQueryRepository,
   ) {}
 
   async execute(command: DeleteCommentCommand) {
     const { commentId, userId } = command;
 
-    const result = await this.commentsQueryRepository.getCommentById(commentId);
+    const result = await this.commentsTypeOrmQueryRepository.getCommentById(commentId);
 
     if (!result) {
       throw new NotFoundException([
@@ -37,6 +39,6 @@ export class DeleteCommentHandler
         },
       ]);
     }
-    return await this.commentsRepository.deleteComment(commentId);
+    return await this.commentsTypeOrmRepository.deleteComment(commentId);
   }
 }

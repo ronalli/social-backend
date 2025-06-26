@@ -1,6 +1,4 @@
-import {
-  Injectable,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MappingsCommentsService } from '../application/mappings/mapping.comments';
 import { UpdateLikeStatusCommentCommand } from '../application/usecases/update-likeStatus.usecase';
 import { InputCommentModel } from '../api/models/input/update-comment.model';
@@ -23,65 +21,31 @@ export class CommentsTypeOrmRepository {
     @InjectDataSource() protected dataSource: DataSource,
     private readonly queryParamsService: QueryParamsService,
     private readonly mappingsCommentsService: MappingsCommentsService,
-    @InjectRepository(Comment) private readonly commentsRepository: Repository<Comment>
+    @InjectRepository(Comment)
+    private readonly commentsRepository: Repository<Comment>,
   ) {}
 
   async updateComment(
     id: string,
     contentUpdate: InputCommentModel,
   ): Promise<boolean> {
-    const query = `UPDATE public."commentsPosts" SET content = $1 WHERE id = $2;`;
+    const query = await this.commentsRepository.update(id, contentUpdate);
 
-    const response = await this.dataSource.query(query, [
-      contentUpdate.content,
-      id,
-    ]);
-
-    return response[1] > 0;
-
-    // try {
-    //   const findComment = await this.CommentModel.findOne({
-    //     _id: new ObjectId(id),
-    //   });
-    //   if (findComment) {
-    //     findComment.content = contentUpdate.content;
-    //     await findComment.save();
-    //     return true;
-    //   }
-    //   return false;
-    // } catch (e) {
-    //   throw new InternalServerErrorException(e);
-    // }
+    return query.affected === 1;
   }
 
   async deleteComment(id: string): Promise<boolean> {
-    const query = `DELETE FROM public."commentsPosts" WHERE id = $1`;
+    const query = await this.commentsRepository.delete(id);
 
-    const response = await this.dataSource.query(query, [id]);
-
-    return response[1] > 0;
+    return query.affected === 1;
   }
 
   async createComment(comment: Comment): Promise<string> {
-
-    const commentCreated = this.commentsRepository.create(comment)
+    const commentCreated = this.commentsRepository.create(comment);
 
     const result = await this.commentsRepository.save(commentCreated);
 
     return result.id;
-
-
-    // const query = `INSERT INTO public."commentsPosts" (id, content, "postId", "userId", "createdAt") VALUES($1, $2, $3, $4, $5) RETURNING *`;
-    //
-    // const response = await this.dataSource.query(query, [
-    //   id,
-    //   content,
-    //   postId,
-    //   userId,
-    //   createdAt,
-    // ]);
-    //
-    // return response[0];
   }
 
   // async addComment(data: CommentCreateModel) {
@@ -127,10 +91,8 @@ export class CommentsTypeOrmRepository {
   //   // }
   // }
 
-  async updateStatusLike(
-    // like: UpdateLikeStatusCommentCommand,
-    // comment: CommentDocument,
-  ) {
+  async updateStatusLike() // comment: CommentDocument, // like: UpdateLikeStatusCommentCommand,
+  {
     // const currentStatus = await this.LikeModel.findOne({
     //   $and: [{ userId: like.userId }, { parentId: like.parentId }],
     // });

@@ -22,7 +22,7 @@ export class LikeStatusModelForPost {
   postId: string;
 
   @IsString()
-  createdAt: string;
+  createdAt: Date;
 }
 
 export class LikeStatusModelForComment {
@@ -41,5 +41,5 @@ export class LikeStatusModelForComment {
   commentId: string;
 
   @IsString()
-  createdAt: string;
+  createdAt: Date;
 }

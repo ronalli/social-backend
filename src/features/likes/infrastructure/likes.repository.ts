@@ -17,6 +17,8 @@ export class LikesRepository {
   ): Promise<boolean> {
     const { id, likeStatus, postId, createdAt, userId } = likeStatusPost;
 
+    // const query = await this.
+
     const query = `INSERT INTO "postsLikeStatus" (id, "likeStatus", "postId", "createdAt", "userId") VALUES($1, $2, $3, $4, $5) RETURNING *`;
 
     const result = await this.dataSource.query(query, [

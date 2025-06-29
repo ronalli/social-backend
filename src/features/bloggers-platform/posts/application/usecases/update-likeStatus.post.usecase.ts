@@ -48,6 +48,8 @@ export class UpdateLikeStatusPostHandler
       userId,
     );
 
+    console.log('1', statusLikeOnPost);
+
     if (statusLikeOnPost) {
       return await this.likesTypeOrmRepository.updateStatusLikeInPost(command);
     }

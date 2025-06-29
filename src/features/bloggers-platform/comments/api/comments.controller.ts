@@ -31,6 +31,7 @@ import { UpdateLikeStatusForSpecialCommentApiResponse } from '../../../../common
 import { UpdateCommentApiResponse } from '../../../../common/services/swagger/comments/update-comment.api-response';
 import { DeleteCommentApiResponse } from '../../../../common/services/swagger/comments/delete-comment.api-resposne';
 import { GetCommentApiResponse } from '../../../../common/services/swagger/comments/get-comment.api-response';
+import { CommentsTypeOrmQueryRepository } from '../infrastructure/comments.typeorm.query-repository';
 
 @ApiTags('Comments')
 @Controller('comments')
@@ -39,6 +40,7 @@ export class CommentsController {
     private readonly commandBus: CommandBus,
     private readonly commentsService: CommentsService,
     private readonly commentsQueryRepository: CommentsQueryRepository,
+    private readonly commentsTypeOrmQueryRepository: CommentsTypeOrmQueryRepository,
   ) {}
 
   @HttpCode(HTTP_STATUSES.NotContent)
@@ -106,7 +108,7 @@ export class CommentsController {
     @Headers('authorization') authHeader: string,
   ) {
     const foundComment =
-      await this.commentsQueryRepository.isCommentDoesExist(commentId);
+      await this.commentsTypeOrmQueryRepository.isCommentDoesExist(commentId);
 
     if (!foundComment) {
       throw new NotFoundException([

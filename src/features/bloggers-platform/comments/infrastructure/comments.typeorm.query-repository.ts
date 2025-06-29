@@ -28,34 +28,47 @@ export class CommentsTypeOrmQueryRepository {
         'c.content AS content',
         'c.userId AS "userId"',
         'c.createdAt AS "createdAt"',
-        'u.login AS "userLogin"'
+        'u.login AS "userLogin"',
       ])
+      // .addSelect((subQuery) => {
+      //   if (hasUserId) {
+      //     return subQuery
+      //       .select(`COALESCE(s."likeStatus", 'None')`, 'myStatus')
+      //       .from('commentsLikeStatus', 's')
+      //       .where('s.commentId = c.id')
+      //       .andWhere('s.userId = :userId', { userId });
+      //   } else {
+      //     return subQuery.select(`'None'`, 'myStatus').from((qb) => qb.select('1'), 'dummy');
+      //   }
+      // }, 'myStatus')
+      .addSelect(
+        `COALESCE((
+                 SELECT s."likeStatus"
+                 FROM "commentsLikeStatus" s
+                 WHERE s."commentId" = c.id AND s."userId" = :userId
+                 LIMIT 1
+              ), 'None')`,
+        'myStatus',
+      )
+      .setParameter('userId', userId ?? '00000000-0000-0000-0000-000000000000')
       .addSelect((subQuery) => {
-        if(hasUserId) {
-          return subQuery.select(`COALESCE(s."likeStatus", 'None')`, 'myStatus')
-            .from('commentsLikeStatus', 's')
-            .where('s.commentId = c.id')
-            .andWhere('s.userId = :userId', { userId })
-        } else {
-          return subQuery.select(`'None'`, 'myStatus');
-        }
-      }, 'myStatus')
-      .addSelect((subQuery) => {
-        return subQuery.select('COUNT(*)')
+        return subQuery
+          .select('COUNT(*)')
           .from('commentsLikeStatus', 'cls')
           .where('cls.commentId = c.id')
-          .andWhere(`cls.likeStatus = 'Like'`)
+          .andWhere(`cls.likeStatus = 'Like'`);
       }, 'likesCount')
       .addSelect((subQuery) => {
-        return subQuery.select('COUNT(*)')
+        return subQuery
+          .select('COUNT(*)')
           .from('commentsLikeStatus', 'cls')
           .where('cls.commentId = c.id')
-          .andWhere(`cls.likeStatus = 'Dislike'`)
+          .andWhere(`cls.likeStatus = 'Dislike'`);
       }, 'dislikesCount')
       .innerJoin('users', 'u', 'u.id = c.userId')
-      .where('c.id = :commentId', {commentId})
+      .where('c.id = :commentId', { commentId });
 
-    return  await queryBuilder.getRawOne();
+    return await queryBuilder.getRawOne();
   }
 
   async getAllCommentsFormSpecialPost(
@@ -68,59 +81,62 @@ export class CommentsTypeOrmQueryRepository {
 
     const { sortBy, sortDirection, pageNumber, pageSize } = defaultQueryParams;
 
-    const totalCountQuery = `SELECT * FROM "commentsPosts" WHERE "postId" = $1;`;
+    const queryBuilder = this.commentsRepository
+      .createQueryBuilder('c')
+      .addSelect('c.id', 'id')
+      .addSelect('c.content', 'content')
+      .addSelect('c.userId', 'userId')
+      .addSelect('u.login', 'userLogin')
+      .addSelect('c.createdAt', 'createdAt')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select("COALESCE(s.likeStatus, 'None')", 'myStatus')
+          .from('commentsLikeStatus', 's')
+          .where('s.commentId = c.id')
+          .andWhere('s.userId = :userId', { userId });
+      })
 
-    const totalCount = await this.dataSource.query(totalCountQuery, [postId]);
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(*)')
+          .from('commentsLikeStatus', 'cls')
+          .where('cls.commentId = c.id')
+          .andWhere(`cls.likeStatus = 'Like'`);
+      }, 'likesCount')
 
-    const pagesCount = Math.ceil(totalCount.length / pageSize);
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(*)')
+          .from('commentsLikeStatus', 'cls')
+          .where('cls.commentId = c.id')
+          .andWhere(`cls.likeStatus = 'Dislike'`);
+      }, 'dislikesCount')
+      .where('c.postId = :postId', { postId })
+      .innerJoin('users', 'u', 'u.id = c.userId')
+      .orderBy(`c."${sortBy}"`, `${sortDirection}`)
+      .limit(pageSize)
+      .offset(pageSize * (pageNumber - 1));
 
-    const orderByClause = createOrderByClause(sortBy, sortDirection);
+    const comments = await queryBuilder.getRawMany();
 
-    const query = `
-        WITH result AS (
-          SELECT 
-          c.id,
-          c.content,
-          c."userId",
-          c."createdAt",
-          u.login AS "userLogin",
-          COALESCE(s."likeStatus", 'None') AS "myStatus",
-          (SELECT COUNT(*) FROM public."commentsLikeStatus" WHERE "commentId" = c.id AND "likeStatus" = 'Like') AS "likesCount",
-          (SELECT COUNT(*) FROM public."commentsLikeStatus" WHERE "commentId" = c.id AND "likeStatus" = 'Dislike') AS "dislikesCount"
-          FROM public."commentsPosts" c
-          JOIN public.users u ON u.id = c."userId"
-          LEFT JOIN public."commentsLikeStatus" s ON s."commentId" = c.id AND s."userId" = $1
-          WHERE "postId" = $2 
-          ) 
-        SELECT * FROM result
-        ORDER BY ${orderByClause}
-        LIMIT ${pageSize} OFFSET ${pageSize * (pageNumber - 1)}
-        `;
-
-    const result = await this.dataSource.query(query, [userId, postId]);
+    const totalCount = await queryBuilder.clone().getCount();
 
     return {
-      pagesCount: +pagesCount,
+      pagesCount: +Math.ceil(totalCount / pageSize),
       page: +pageNumber,
       pageSize: +pageSize,
-      totalCount: +totalCount.length,
-      items: result,
+      totalCount: +totalCount,
+      items: comments,
     };
   }
 
   async isCommentDoesExist(commentId: string): Promise<boolean> {
-
     const query = await this.commentsRepository.findOne({
       where: {
         id: commentId,
-      }
-    })
-
-    // const query = `SELECT * FROM public."commentsPosts" WHERE id = $1;`;
-
-    // const result = await this.dataSource.query(query, [commentId]);
-
-    return !!query
+      },
+    });
+    return !!query;
   }
 
   async getLike(commentId: string, userId: string): Promise<boolean> {
@@ -132,40 +148,11 @@ export class CommentsTypeOrmQueryRepository {
   }
 
   async getCommentById(id: string): Promise<CommentOutputModelDB> {
-
     return await this.commentsRepository.findOne({
       where: {
         id,
-      }
-    })
-
-    // const query = `SELECT * FROM "commentsPosts" WHERE id = $1;`;
-
-    // const result = await this.dataSource.query(query, [id]);
-    //
-    // return result[0];
-
-    // try {
-    //   const findComment = await this.CommentModel.findOne({
-    //     _id: new ObjectId(id),
-    //   });
-    //
-    //   if (findComment) {
-    //     return {
-    //       status: ResultCode.Success,
-    //       data: this.mappingsCommentsService.formatDataCommentForView(
-    //         findComment,
-    //       ),
-    //     };
-    //   }
-    //   return {
-    //     errorMessage: 'Not found comment',
-    //     status: ResultCode.NotFound,
-    //     data: null,
-    //   };
-    // } catch (e) {
-    //   throw new InternalServerErrorException(e);
-    // }
+      },
+    });
   }
 
   async getCurrentLike(parentId: string, userId: string) {

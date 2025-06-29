@@ -52,29 +52,29 @@ export class CommentsRepository {
     // }
   }
 
-  async deleteComment(id: string): Promise<boolean> {
-    const query = `DELETE FROM public."commentsPosts" WHERE id = $1`;
-
-    const response = await this.dataSource.query(query, [id]);
-
-    return response[1] > 0;
-  }
-
-  async createComment(comment: CommentCreateModel) {
-    const { id, content, postId, userId, createdAt } = comment;
-
-    const query = `INSERT INTO public."commentsPosts" (id, content, "postId", "userId", "createdAt") VALUES($1, $2, $3, $4, $5) RETURNING *`;
-
-    const response = await this.dataSource.query(query, [
-      id,
-      content,
-      postId,
-      userId,
-      createdAt,
-    ]);
-
-    return response[0];
-  }
+  // async deleteComment(id: string): Promise<boolean> {
+  //   const query = `DELETE FROM public."commentsPosts" WHERE id = $1`;
+  //
+  //   const response = await this.dataSource.query(query, [id]);
+  //
+  //   return response[1] > 0;
+  // }
+  //
+  // async createComment(comment: CommentCreateModel) {
+  //   const { id, content, postId, userId, createdAt } = comment;
+  //
+  //   const query = `INSERT INTO public."commentsPosts" (id, content, "postId", "userId", "createdAt") VALUES($1, $2, $3, $4, $5) RETURNING *`;
+  //
+  //   const response = await this.dataSource.query(query, [
+  //     id,
+  //     content,
+  //     postId,
+  //     userId,
+  //     createdAt,
+  //   ]);
+  //
+  //   return response[0];
+  // }
 
   // async addComment(data: CommentCreateModel) {
   //   // const result = await this.usersQueryRepository.findUserById(data.userId);

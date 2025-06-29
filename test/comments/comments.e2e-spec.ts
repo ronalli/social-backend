@@ -49,18 +49,22 @@ describe('Comments e2e Tests', () => {
   });
 
   it('should be correct return comment by id', async () => {
+    
+    const {comment, accessToken} = await serviceComments.createComment(app, 'john')
+    
     const resp = await customRequest(app)
-      .get(`comments/${commendId}`)
+      .get(`comments/${comment.id}`)
       .expect(200);
 
-    expect(resp.body.id).toEqual(commendId);
+
+    expect(resp.body.id).toEqual(comment.id);
     expect(resp.body).toHaveProperty('commentatorInfo');
     expect(resp.body).toHaveProperty('likesInfo');
     expect(resp.body).toHaveProperty('createdAt');
   });
 
   it('should be correct return all comment for special post', async () => {
-    const { postId } = await serviceComments.createComments(app, 5);
+    const { postId } = await serviceComments.createComments(app, 5, 'kill');
 
     const resp = await customRequest(app)
       .get(`posts/${postId}/comments`)
@@ -70,7 +74,7 @@ describe('Comments e2e Tests', () => {
   });
 
   it('should be correct delete comment by id', async () => {
-    const { comment, accessToken } = await serviceComments.createComment(app);
+    const { comment, accessToken } = await serviceComments.createComment(app, 'nick');
 
     await customRequest(app)
       .delete(`comments/${comment.id}`)
@@ -86,7 +90,7 @@ describe('Comments e2e Tests', () => {
       'bob',
     );
 
-    const { comment, accessToken } = await serviceComments.createComment(app);
+    const { comment, accessToken } = await serviceComments.createComment(app, 'greg');
 
     await customRequest(app)
       .put(`comments/${comment.id}`)
@@ -120,7 +124,7 @@ describe('Comments e2e Tests', () => {
   });
 
   it('should be correct return all comments with using parameters', async () => {
-    const { postId } = await serviceComments.createComments(app, 6);
+    const { postId } = await serviceComments.createComments(app, 6, 'tron');
 
     const resp = await customRequest(app)
       .get(`posts/${postId}/comments`)

@@ -124,7 +124,7 @@ export class PostsTypeOrmQueryRepository {
       .addSelect((subQuery) => {
         return subQuery.select("COALESCE(json_agg(likes), '[]')").from((qb) => {
           return qb
-            .select(['pls."createdAt" as "addedAt"', 'pls."userId"', 'u.login'])
+            .select(['pls."createdAt" as "addedAt"', 'pls."userId"', 'u.login as login'])
             .from('postsLikeStatus', 'pls')
             .innerJoin('users', 'u', 'u.id = pls."userId"')
             .where('pls."postId" = p.id')

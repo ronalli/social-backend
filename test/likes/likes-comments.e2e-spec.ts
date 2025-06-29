@@ -23,7 +23,7 @@ describe('Likes e2e Test by Comments', () => {
   });
 
   it(`shouldn't add like status by current comment, because be out authorization header`, async () => {
-    const { accessToken, comment } = await serviceComments.createComment(app);
+    const { accessToken, comment } = await serviceComments.createComment(app, 'some-1');
     await customRequest(app)
       .put(`comments/${comment.id}/like-status`)
       .expect(401);
@@ -58,7 +58,7 @@ describe('Likes e2e Test by Comments', () => {
   });
 
   it(`shouldn't add like status by current comment, because incorrect body`, async () => {
-    const { accessToken, comment } = await serviceComments.createComment(app);
+    const { accessToken, comment } = await serviceComments.createComment(app, 'linda');
     const { body } = await customRequest(app)
       .put(`comments/${comment.id}/like-status`)
       .set('Authorization', `Bearer ${accessToken}`)
@@ -74,7 +74,7 @@ describe('Likes e2e Test by Comments', () => {
   });
 
   it(`shouldn't add like status by comment, because this comment isn't found`, async () => {
-    const { accessToken, comment } = await serviceComments.createComment(app);
+    const { accessToken, comment } = await serviceComments.createComment(app, 'test-1');
     await customRequest(app)
       .put(`comments/${randomUUID()}/like-status`)
       .set('Authorization', `Bearer ${accessToken}`)
@@ -85,7 +85,7 @@ describe('Likes e2e Test by Comments', () => {
   });
 
   it(`should add like status by current comment`, async () => {
-    const { accessToken, comment } = await serviceComments.createComment(app);
+    const { accessToken, comment } = await serviceComments.createComment(app, 'test-2');
     const { accessToken: at1 } = await serviceUsers.authorizationUser(
       app,
       'bob',
@@ -113,14 +113,14 @@ describe('Likes e2e Test by Comments', () => {
       .expect(200);
 
     expect(respComment.id).toEqual(comment.id);
-    expect(respComment.commentatorInfo.userLogin).toEqual('test-1');
+    expect(respComment.commentatorInfo.userLogin).toEqual('test-2-1');
     expect(respComment.likesInfo.likesCount).toBe(1);
     expect(respComment.likesInfo.dislikesCount).toBe(1);
     expect(respComment.likesInfo.myStatus).toEqual('Dislike');
   });
 
   it('should correct add likeStatus by comment and update this status', async () => {
-    const { accessToken, comment } = await serviceComments.createComment(app);
+    const { accessToken, comment } = await serviceComments.createComment(app, 'marka');
 
     await customRequest(app)
       .put(`comments/${comment.id}/like-status`)
@@ -165,14 +165,14 @@ describe('Likes e2e Test by Comments', () => {
   });
 
   it('should correct return information about comment for different users', async () => {
-    const { accessToken, comment } = await serviceComments.createComment(app);
+    const { accessToken, comment } = await serviceComments.createComment(app, 'test-4');
     const { accessToken: at1 } = await serviceUsers.authorizationUser(
       app,
       'greg',
     );
     const { accessToken: at2 } = await serviceUsers.authorizationUser(
       app,
-      'bob',
+      'aline',
     );
     const { accessToken: at3 } = await serviceUsers.authorizationUser(
       app,

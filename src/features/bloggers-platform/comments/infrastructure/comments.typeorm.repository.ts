@@ -1,26 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { MappingsCommentsService } from '../application/mappings/mapping.comments';
-import { UpdateLikeStatusCommentCommand } from '../application/usecases/update-likeStatus.usecase';
 import { InputCommentModel } from '../api/models/input/update-comment.model';
-import { QueryParamsService } from '../../../../common/utils/create.default.values';
 import { QueryParamsDto } from '../../../../common/models/query-params.dto';
-import { CommentCreateModel } from '../api/models/input/create-comment.model';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Comment } from '../domain/comment.entity';
 
-export interface ILikesInfoViewModel {
-  likesCount: number;
-  dislikesCount: number;
-  myStatus: string;
-}
 
 @Injectable()
 export class CommentsTypeOrmRepository {
   constructor(
     @InjectDataSource() protected dataSource: DataSource,
-    private readonly queryParamsService: QueryParamsService,
-    private readonly mappingsCommentsService: MappingsCommentsService,
     @InjectRepository(Comment)
     private readonly commentsRepository: Repository<Comment>,
   ) {}

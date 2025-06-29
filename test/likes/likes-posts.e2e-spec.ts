@@ -47,7 +47,7 @@ describe('Likes e2e Test by Posts', () => {
 
   it(`shouldn't add like status incorrect input data`, async () => {
     const { postId, blogId } = await servicePost.createPost(app);
-    const { accessToken } = await serviceUsers.authorizationUser(app);
+    const { accessToken } = await serviceUsers.authorizationUser(app, 'olga');
 
     const { body } = await customRequest(app)
       .put(`posts/${postId}/like-status`)
@@ -73,7 +73,7 @@ describe('Likes e2e Test by Posts', () => {
 
   it('should correct add likeStatus by post and update this status', async () => {
     const { postId, blogId } = await servicePost.createPost(app);
-    const { accessToken } = await serviceUsers.authorizationUser(app, 'bob');
+    const { accessToken } = await serviceUsers.authorizationUser(app, 'kirill');
 
     await customRequest(app)
       .put(`posts/${postId}/like-status`)
@@ -87,6 +87,8 @@ describe('Likes e2e Test by Posts', () => {
       .get(`posts/${postId}`)
       .expect(200);
 
+    console.log('22', resp1.extendedLikesInfo.newestLikes);
+
     expect(resp1.blogId).toBe(blogId);
     expect(resp1.id).toBe(postId);
     expect(resp1).toHaveProperty('extendedLikesInfo');
@@ -94,7 +96,7 @@ describe('Likes e2e Test by Posts', () => {
     expect(resp1.extendedLikesInfo.myStatus).toBe('None');
     expect(resp1.extendedLikesInfo).toHaveProperty('newestLikes');
     expect(resp1.extendedLikesInfo.newestLikes).toHaveLength(1);
-    expect(resp1.extendedLikesInfo.newestLikes[0].login).toEqual('bob-1');
+    expect(resp1.extendedLikesInfo.newestLikes[0].login).toEqual('kirill-1');
 
     const { body: resp2 } = await customRequest(app)
       .get(`posts/${postId}`)
@@ -153,6 +155,9 @@ describe('Likes e2e Test by Posts', () => {
       .get(`posts/${postId}`)
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200);
+    
+
+
 
     expect(post1.extendedLikesInfo.likesCount).toBe(0);
     expect(post1.extendedLikesInfo.myStatus).toBe('None');
@@ -284,7 +289,7 @@ describe('Likes e2e Test by Posts', () => {
 
   it('should validate likeStatus input thoroughly', async () => {
     const { postId } = await servicePost.createPost(app);
-    const { accessToken } = await serviceUsers.authorizationUser(app);
+    const { accessToken } = await serviceUsers.authorizationUser(app, 'vertex');
 
     const invalidInputs = [
       { likeStatus: '' },
@@ -342,7 +347,7 @@ describe('Likes e2e Test by Posts', () => {
 
     const users = await Promise.all(
       Array.from({ length: 5 }, (_, i) =>
-        serviceUsers.authorizationUser(app, `user${i}`),
+        serviceUsers.authorizationUser(app, `xerox${i}`),
       ),
     );
 
@@ -359,6 +364,6 @@ describe('Likes e2e Test by Posts', () => {
 
     expect(body.extendedLikesInfo.likesCount).toBe(5);
     expect(body.extendedLikesInfo.newestLikes).toHaveLength(3);
-    expect(body.extendedLikesInfo.newestLikes[0].login).toBe('user4-1');
+    expect(body.extendedLikesInfo.newestLikes[0].login).toBe('xerox4-1');
   });
 });

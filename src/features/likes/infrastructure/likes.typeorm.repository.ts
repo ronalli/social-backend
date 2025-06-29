@@ -15,17 +15,17 @@ export class LikesTypeOrmRepository {
   constructor(
     @InjectDataSource() protected dataSource: DataSource,
     @InjectRepository(CommentLikeStatus)
-    private readonly commentRepository: Repository<CommentLikeStatus>,
+    private readonly commentLikeRepository: Repository<CommentLikeStatus>,
     @InjectRepository(PostLikeStatus)
-    private readonly postRepository: Repository<PostLikeStatus>,
+    private readonly postLikeRepository: Repository<PostLikeStatus>,
   ) {}
 
   async addStatusLikeOnPost(
     likeStatusPost: LikeStatusModelForPost,
   ): Promise<boolean> {
-    const query = this.postRepository.create(likeStatusPost);
+    const query = this.postLikeRepository.create(likeStatusPost);
 
-    const result = await this.postRepository.save(query);
+    const result = await this.postLikeRepository.save(query);
 
     return !!result;
   }
@@ -35,10 +35,12 @@ export class LikesTypeOrmRepository {
   ): Promise<boolean> {
     const { postId, status, userId } = likeStatusPost;
 
-    const query = await this.postRepository.update(postId, {
-      likeStatus: status,
-      userId,
-    });
+    const query = await this.postLikeRepository.update(
+      { postId, userId },
+      {
+        likeStatus: status,
+      },
+    );
 
     return query.affected === 1;
   }
@@ -48,10 +50,12 @@ export class LikesTypeOrmRepository {
   ): Promise<boolean> {
     const { commentId, status, userId } = likeStatusComment;
 
-    const query = await this.commentRepository.update(commentId, {
-      likeStatus: status,
-      userId,
-    });
+    const query = await this.commentLikeRepository.update(
+      { commentId, userId },
+      {
+        likeStatus: status,
+      },
+    );
 
     return query.affected === 1;
   }
@@ -59,9 +63,9 @@ export class LikesTypeOrmRepository {
   async addStatusLikeOnComment(
     likeStatusPost: LikeStatusModelForComment,
   ): Promise<boolean> {
-    const query = this.commentRepository.create(likeStatusPost);
+    const query = this.commentLikeRepository.create(likeStatusPost);
 
-    const result = await this.commentRepository.save(query);
+    const result = await this.commentLikeRepository.save(query);
 
     return !!result;
   }

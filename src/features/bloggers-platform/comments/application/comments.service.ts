@@ -24,7 +24,6 @@ export class CommentsService {
       userId,
     );
 
-
     return  this.mappingsCommentsService.formatingCommentForView(currentComment);
 
   }
@@ -78,7 +77,7 @@ export class CommentsService {
     const currentUserId = await jwtService.getUserIdByToken(token);
 
     const allComments =
-      await this.commentsQueryRepository.getAllCommentsFormSpecialPost(
+      await this.commentsTypeOrmQueryRepository.getAllCommentsFormSpecialPost(
         currentUserId,
         postId,
         queryParams,

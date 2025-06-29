@@ -30,7 +30,7 @@ export async function initAppAndClearDB(): Promise<{
 
 export async function clearDataBase(dataSource: DataSource): Promise<void> {
   await dataSource.query(
-    `TRUNCATE TABLE public."users", public.blogs,  public.posts, public."postsLikeStatus", public."confirmationEmailUsers", public."recoveryCodes", public."oldRefreshTokens", public."deviceSessions" RESTART IDENTITY CASCADE;`,
+    `TRUNCATE TABLE public.users, public.blogs,  public.posts, public."commentsPosts", public."commentsLikeStatus", public."postsLikeStatus", public."oldRefreshTokens", public."recoveryCodes", public."confirmationEmailUsers", public."deviceSessions" RESTART IDENTITY CASCADE;`,
   );
 }
 

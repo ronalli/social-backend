@@ -38,19 +38,20 @@ export class BlogsTypeOrmQueryRepository {
         'p.blogId as "blogId"',
         'b.name AS "blogName"',
         'p.createdAt AS "createdAt"',
-      ])
-      .addSelect((subQuery) => {
-        const qb = subQuery
+      ]);
+
+    if (userId === 'None') {
+      queryBuilder.addSelect(`'None'`, 'myStatus');
+    } else {
+      queryBuilder.addSelect((subQuery) => {
+        return subQuery
           .select("COALESCE(s.likeStatus, 'None')", 'myStatus')
           .from('postsLikeStatus', 's')
-          .where('s.postId = p.id');
-
-        if (userId !== 'None') {
-          qb.andWhere('s.userId = :userId', { userId });
-        }
-
-        return qb;
-      }, 'myStatus')
+          .where('s.postId = p.id')
+          .andWhere('s.userId = :userId', { userId });
+      }, 'myStatus');
+    }
+    queryBuilder
       .addSelect((subQuery) => {
         return subQuery
           .select('COUNT(*)')
@@ -69,9 +70,9 @@ export class BlogsTypeOrmQueryRepository {
         return subQuery.select("COALESCE(json_agg(likes), '[]')").from((qb) => {
           return qb
             .select([
-              'pls.userId AS userId',
+              'pls.userId AS "userId"',
               'u.login AS login',
-              'pls.createdAt AS addedAt',
+              'pls.createdAt AS "addedAt"',
             ])
             .from('postsLikeStatus', 'pls')
             .innerJoin('users', 'u', 'u.id = pls.userId')

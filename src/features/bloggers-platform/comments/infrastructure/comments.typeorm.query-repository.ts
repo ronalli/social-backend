@@ -1,17 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { MappingsCommentsService } from '../application/mappings/mapping.comments';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CommentOutputModelDB } from '../api/models/output/comment.output.model';
 import { CommentQueryDto } from '../api/models/comment-query.dto';
 import { QueryParamsService } from '../../../../common/utils/create.default.values';
-import { createOrderByClause } from '../../../../common/utils/orderByClause';
 import { Comment } from '../domain/comment.entity';
 
 @Injectable()
 export class CommentsTypeOrmQueryRepository {
   constructor(
-    private readonly mappingsCommentsService: MappingsCommentsService,
     public queryParamsService: QueryParamsService,
     @InjectDataSource() protected dataSource: DataSource,
     @InjectRepository(Comment)
@@ -19,8 +16,6 @@ export class CommentsTypeOrmQueryRepository {
   ) {}
 
   async getComment(commentId: string, userId: string) {
-    const hasUserId = userId !== null && userId !== undefined;
-
     const queryBuilder = this.commentsRepository
       .createQueryBuilder('c')
       .select([
@@ -29,28 +24,20 @@ export class CommentsTypeOrmQueryRepository {
         'c.userId AS "userId"',
         'c.createdAt AS "createdAt"',
         'u.login AS "userLogin"',
-      ])
-      // .addSelect((subQuery) => {
-      //   if (hasUserId) {
-      //     return subQuery
-      //       .select(`COALESCE(s."likeStatus", 'None')`, 'myStatus')
-      //       .from('commentsLikeStatus', 's')
-      //       .where('s.commentId = c.id')
-      //       .andWhere('s.userId = :userId', { userId });
-      //   } else {
-      //     return subQuery.select(`'None'`, 'myStatus').from((qb) => qb.select('1'), 'dummy');
-      //   }
-      // }, 'myStatus')
-      .addSelect(
-        `COALESCE((
-                 SELECT s."likeStatus"
-                 FROM "commentsLikeStatus" s
-                 WHERE s."commentId" = c.id AND s."userId" = :userId
-                 LIMIT 1
-              ), 'None')`,
-        'myStatus',
-      )
-      .setParameter('userId', userId ?? '00000000-0000-0000-0000-000000000000')
+      ]);
+    if (userId === 'None') {
+      queryBuilder.addSelect(`'None'`, 'myStatus');
+    } else {
+      queryBuilder.addSelect((subQuery) => {
+        return subQuery
+          .select("COALESCE(s.likeStatus, 'None')", 'myStatus')
+          .from('commentsLikeStatus', 's')
+          .where('s.commentId = c.id')
+          .andWhere('s.userId = :userId', { userId });
+      }, 'myStatus');
+    }
+
+    queryBuilder
       .addSelect((subQuery) => {
         return subQuery
           .select('COUNT(*)')

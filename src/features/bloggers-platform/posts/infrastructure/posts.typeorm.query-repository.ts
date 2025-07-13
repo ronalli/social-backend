@@ -98,15 +98,20 @@ export class PostsTypeOrmQueryRepository {
       .addSelect('p.content', 'content')
       .addSelect('p.blogId', 'blogId')
       .addSelect('b.name', 'blogName')
-      .addSelect('p.createdAt', 'createdAt')
-      .addSelect((subQuery) => {
+      .addSelect('p.createdAt', 'createdAt');
+
+    if (userId === 'None') {
+      queryBuilder.addSelect(`'None'`, 'myStatus');
+    } else {
+      queryBuilder.addSelect((subQuery) => {
         return subQuery
           .select("COALESCE(s.likeStatus, 'None')", 'myStatus')
           .from('postsLikeStatus', 's')
           .where('s.postId = p.id')
           .andWhere('s.userId = :userId', { userId });
-      }, 'myStatus')
-      .setParameter('userId', userId)
+      }, 'myStatus');
+    }
+    queryBuilder
       .addSelect((subQuery) => {
         return subQuery
           .select('COUNT(*)')
@@ -124,7 +129,11 @@ export class PostsTypeOrmQueryRepository {
       .addSelect((subQuery) => {
         return subQuery.select("COALESCE(json_agg(likes), '[]')").from((qb) => {
           return qb
-            .select(['pls."createdAt" as "addedAt"', 'pls."userId"', 'u.login as login'])
+            .select([
+              'pls."createdAt" as "addedAt"',
+              'pls."userId"',
+              'u.login as login',
+            ])
             .from('postsLikeStatus', 'pls')
             .innerJoin('users', 'u', 'u.id = pls."userId"')
             .where('pls."postId" = p.id')

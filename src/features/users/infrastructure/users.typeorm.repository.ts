@@ -49,14 +49,20 @@ export class UsersTypeOrmRepository {
 
     const deletedUser = await this.userRepository.remove(user);
 
-    return !!deletedUser
+    return !!deletedUser;
   }
 
   public async findUserById(id: string) {
-    const user = await this.userRepository.findOne({
-      where: { id },
-      // relations: ['confirmation'],
-    });
+    // const user = await this.userRepository.findOne({
+    //   where: { id },
+    //   // relations: ['confirmation'],
+    // });
+
+    const user = await this.userRepository
+      .createQueryBuilder('u')
+      .select(['u.id', 'u.login', 'u.email', 'u.createdAt'])
+      .where('u.id = :id', { id })
+      .getOne();
 
     if (!user) throw new NotFoundException('User not found');
 

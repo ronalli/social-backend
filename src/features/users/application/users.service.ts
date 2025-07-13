@@ -8,7 +8,8 @@ import { UsersTypeOrmRepository } from '../infrastructure/users.typeorm.reposito
 export class UsersService {
   constructor(
     private usersTypeOrmRepository: UsersTypeOrmRepository,
-    private usersRepository: UsersRepository,) {}
+    private usersRepository: UsersRepository,
+  ) {}
 
   async deleteUser(id: string): Promise<boolean> {
     if (!isValidUUID(id)) {
